@@ -4,8 +4,8 @@ import { PickleballProvider } from '@/context/PickleballContext'
 import './globals.css'
 
 export const metadata: Metadata = {
-  title: 'ROL-EMS × REBAR | Everyday Escape, Active Motion',
-  description: 'Reserve a cottage, book a court, or join the live open play queue at ROL-EMS Resort and Rebar Sports Center.',
+  title: 'ROL-EMS × REBAR | Where Sport, Leisure & Adventure Come Together',
+  description: 'Play by the hour, relax by the water, and explore everything in between at ROL-EMS Resort and Rebar Sports Center — cottages, courts, open play, and more.',
   generator: 'v0.app',
   icons: {
     icon: '/logo.png',

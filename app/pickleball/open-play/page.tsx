@@ -94,7 +94,7 @@ export default function OpenPlayPage() {
               <h1 className="mt-1 font-serif text-4xl sm:text-5xl font-bold">Open Play Sessions</h1>
               <p className="mt-2 text-sm text-white/80 max-w-2xl">
                 Join active open play court sessions with up to <strong className="text-[#E1A728]">12 players per court</strong>.
-                If full (12/12), players automatically enter the queue with live position updates.
+                If full (12/12), players automatically enter the queue with live position updates — the best seat in the house for your next game.
               </p>
             </div>
             <div className="flex items-center gap-3 bg-white/10 p-4 border border-white/20 rounded-xl">

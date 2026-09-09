@@ -19,7 +19,7 @@ export default function PickleballHub() {
   const upcomingTournaments = tournaments.filter((t) => t.published && t.status !== 'completed').length
 
   return (
-    <div className="min-h-screen bg-[#F3F0EC] text-[#222222]">
+    <div className="min-h-screen bg-[#F3F0EC] pt-[64px] text-[#222222]">
       <Navbar />
       {/* ── HERO BANNER ────────────────────────────────────────────────────── */}
       <section className="border-b border-[#222222]/10 bg-[#FDFBF7] px-6 py-12 lg:py-16">
@@ -29,26 +29,26 @@ export default function PickleballHub() {
             Book a court,<br />hit the open line.
           </h1>
           <p className="mt-5 max-w-xl text-sm leading-6 text-[#6B756B]">
-            Reserve a pickleball court by the hour, check live availability, join open play sessions, or enter upcoming tournaments at ROL-EMS Resort.
+            Reserve a pickleball court by the hour, check live availability, join open play sessions, or enter upcoming tournaments — the sport side of ROL-EMS Resort.
           </p>
 
           <div className="mt-8 flex flex-wrap gap-3">
             <Link
-              href="/booking"
+              href="/pickleball/booking"
               className="flex items-center gap-2 bg-[#1E5336] px-6 py-3 text-[10px] uppercase tracking-[0.16em] text-[#FDFBF7] transition hover:bg-[#153d27]"
             >
               <CalendarCheck size={14} />
               Book a Court
             </Link>
             <Link
-              href="/open-play"
+              href="/pickleball/open-play"
               className="flex items-center gap-2 border border-[#222222]/20 bg-transparent px-6 py-3 text-[10px] uppercase tracking-[0.16em] text-[#222222] transition hover:border-[#1E5336] hover:text-[#1E5336]"
             >
               <Users size={14} />
               Join Open Play
             </Link>
             <Link
-              href="/tournaments"
+              href="/pickleball/tournaments"
               className="flex items-center gap-2 border border-[#222222]/20 bg-transparent px-6 py-3 text-[10px] uppercase tracking-[0.16em] text-[#222222] transition hover:border-[#1E5336] hover:text-[#1E5336]"
             >
               <Trophy size={14} />
@@ -87,7 +87,7 @@ export default function PickleballHub() {
               <p className="text-[10px] uppercase tracking-[0.18em] text-[#E1A728]">Facility Status</p>
               <h2 className="font-serif text-3xl text-[#1E5336]">Court Availability</h2>
             </div>
-            <Link href="/booking" className="flex items-center gap-1 text-[10px] uppercase tracking-[0.14em] text-[#1E5336] hover:underline">
+            <Link href="/pickleball/booking" className="flex items-center gap-1 text-[10px] uppercase tracking-[0.14em] text-[#1E5336] hover:underline">
               View All Slots <ChevronRight size={14} />
             </Link>
           </div>
@@ -119,7 +119,7 @@ export default function PickleballHub() {
                   <div className="mt-6 flex items-center justify-between border-t border-[#222222]/10 pt-4">
                     <span className="text-sm font-bold text-[#1E5336]">{court.price}</span>
                     <Link
-                      href="/booking"
+                      href="/pickleball/booking"
                       className="border border-[#1E5336] px-3 py-1.5 text-[9px] uppercase tracking-[0.14em] text-[#1E5336] hover:bg-[#1E5336] hover:text-[#FDFBF7] transition"
                     >
                       Reserve
@@ -138,7 +138,7 @@ export default function PickleballHub() {
               <p className="text-[10px] uppercase tracking-[0.18em] text-[#E1A728]">Shared Playing Sessions</p>
               <h2 className="font-serif text-3xl text-[#1E5336]">Pickleball Open Play</h2>
             </div>
-            <Link href="/open-play" className="flex items-center gap-1 text-[10px] uppercase tracking-[0.14em] text-[#1E5336] hover:underline">
+            <Link href="/pickleball/open-play" className="flex items-center gap-1 text-[10px] uppercase tracking-[0.14em] text-[#1E5336] hover:underline">
               Open Play Queues <ChevronRight size={14} />
             </Link>
           </div>
@@ -175,7 +175,7 @@ export default function PickleballHub() {
                   </div>
 
                   <Link
-                    href="/open-play"
+                    href="/pickleball/open-play"
                     className={`mt-6 flex w-full items-center justify-center gap-2 py-2.5 text-[10px] uppercase tracking-[0.16em] transition ${
                       isFull
                         ? 'border border-[#E1A728] bg-[#E1A728]/10 text-[#222222] hover:bg-[#E1A728] hover:text-[#1E5336]'
@@ -203,13 +203,13 @@ export default function PickleballHub() {
 
             <div className="flex flex-wrap gap-3">
               <Link
-                href="/tournaments"
+                href="/pickleball/tournaments"
                 className="bg-[#1E5336] px-6 py-3 text-[10px] uppercase tracking-[0.16em] text-[#FDFBF7] hover:bg-[#153d27] transition"
               >
                 View Tournament
               </Link>
               <Link
-                href="/tournaments/bracket"
+                href="/pickleball/tournaments/bracket"
                 className="border border-[#1E5336] px-6 py-3 text-[10px] uppercase tracking-[0.16em] text-[#1E5336] hover:bg-[#1E5336] hover:text-[#FDFBF7] transition"
               >
                 View Bracket

@@ -47,7 +47,7 @@ export default function Page() {
   }, [])
 
   return (
-    <main className="min-h-screen overflow-hidden bg-[#FDFBF7] text-[#222222]">
+    <main className="min-h-screen overflow-hidden bg-[#FDFBF7] pt-[72px] text-[#222222]">
       <Header />
       <Hero />
       <Story />

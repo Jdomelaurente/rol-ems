@@ -15,16 +15,16 @@ export default function Facilities() {
   const visible = filter === 'All' ? facilities : facilities.filter((item: Facility) => item.establishment === filter)
 
   return (
-    <section data-reveal id="facilities" className="reveal bg-[#F3F0EC] px-6 py-24 lg:px-10 lg:py-32">
+    <section data-reveal id="facilities" className="reveal bg-[#F3F0EC] px-6 py-16 sm:py-24 lg:px-10 lg:py-32">
       <div className="mx-auto max-w-7xl">
         <div className="flex flex-col justify-between gap-8 lg:flex-row lg:items-end">
           <div>
-            <p className="mb-4 text-xs uppercase tracking-[0.18em] text-[#E1A728]">Stay & play</p>
-            <h2 className="font-serif text-5xl leading-[0.95] tracking-[-0.05em] text-[#1E5336] sm:text-7xl">
-              Choose your<br />kind of good time.
+            <p className="mb-4 text-xs uppercase tracking-[0.18em] text-[#E1A728]">Explore it all</p>
+            <h2 className="font-serif text-4xl leading-[0.95] tracking-[-0.05em] text-[#1E5336] sm:text-5xl md:text-7xl">
+              Three ways<br />to spend your day.
             </h2>
           </div>
-          <p className="max-w-xs text-sm leading-6 text-[#6B756B]">Reserve a stay, a court, or simply join the next open game.</p>
+          <p className="max-w-xs text-sm leading-6 text-[#6B756B]">From court reservations to cottage stays, every option is designed to fit the day you want.</p>
         </div>
         <div className="my-12 flex gap-2 overflow-x-auto pb-2">
           {facilityFilters.map((item) => (
@@ -54,7 +54,7 @@ export default function Facilities() {
               <article key={item.title} className="group">
                 <div className="relative aspect-[4/5] overflow-hidden">
                   <div className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-105" style={{ backgroundImage: `url(${item.image})` }} />
-                  <span className="absolute left-4 top-4 bg-[#FDFBF7] px-3 py-2 text-[10px] uppercase tracking-[0.08em] text-[#1E5336]">{item.status}</span>
+                  <span className="absolute left-4 top-4 bg-[#1E5336] px-3 py-2 text-[10px] uppercase tracking-[0.08em] text-white">{item.status}</span>
                 </div>
                 <div className="pt-5">
                   <div className="flex items-center justify-between">
@@ -63,8 +63,7 @@ export default function Facilities() {
                   </div>
                   <h3 className="mt-2 font-serif text-2xl text-[#1E5336]">{item.title}</h3>
                   <p className="mt-2 text-xs leading-5 text-[#6B756B]">{item.detail}</p>
-                  <div className="mt-5 flex justify-between border-t border-[#222222]/15 pt-4 text-sm">
-                    <span>{item.price}</span>
+                  <div className="mt-5 flex justify-end border-t border-[#222222]/15 pt-4 text-sm">
                     <ArrowUpRight size={16} className="text-[#1E5336]" />
                   </div>
                 </div>

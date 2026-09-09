@@ -10,7 +10,7 @@ export default function BadmintonPage() {
   return (
     <main className="min-h-screen bg-[#F3F0EC] text-[#222222]">
       <header className="border-b border-[#222222]/10 bg-[#FDFBF7]">
-        <div className="mx-auto flex max-w-2xl items-center justify-between px-6 py-5">
+        <div className="mx-auto flex max-w-2xl flex-col gap-3 px-6 py-4 sm:flex-row sm:items-center sm:justify-between sm:py-5">
           <a href="/" className="font-serif text-lg tracking-[-0.05em] text-[#1E5336]">
             ROL-EMS <span className="font-sans text-xs tracking-[0.2em] text-[#E1A728]">×</span> REBAR
           </a>
@@ -28,11 +28,11 @@ export default function BadmintonPage() {
           <ArrowLeft size={14} /> Back to Stay & play
         </button>
         <p className="text-xs uppercase tracking-[0.18em] text-[#E1A728]">Badminton</p>
-        <h1 className="mt-4 font-serif text-5xl leading-[0.95] tracking-[-0.05em] text-[#1E5336] sm:text-6xl">
+        <h1 className="mt-4 font-serif text-4xl leading-[0.95] tracking-[-0.05em] text-[#1E5336] sm:text-5xl md:text-6xl">
           Smash, rally, repeat.
         </h1>
         <p className="mt-5 max-w-xl text-sm leading-6 text-[#6B756B]">
-          Reserve an air-conditioned badminton court by the hour at Rebar Sports Center. Rackets and shuttlecocks available.
+          Reserve an air-conditioned badminton court by the hour at Rebar Sports Center. Rackets and shuttlecocks available — just bring your game.
         </p>
       </section>
 

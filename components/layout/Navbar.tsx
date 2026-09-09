@@ -6,11 +6,11 @@ import { useState } from 'react'
 import { Menu, X, Trophy, CalendarCheck, Users, LayoutDashboard, Volleyball, Disc } from 'lucide-react'
 
 const navLinks = [
-  { href: '/', label: 'Hub', icon: Volleyball },
-  { href: '/booking', label: 'Court Booking', icon: CalendarCheck },
-  { href: '/open-play', label: 'Open Play', icon: Users },
-  { href: '/paddles', label: 'Paddle Rental', icon: Disc },
-  { href: '/tournaments', label: 'Tournaments', icon: Trophy },
+  { href: '/pickleball', label: 'Hub', icon: Volleyball },
+  { href: '/pickleball/booking', label: 'Court Booking', icon: CalendarCheck },
+  { href: '/pickleball/open-play', label: 'Open Play', icon: Users },
+  { href: '/pickleball/paddles', label: 'Paddle Rental', icon: Disc },
+  { href: '/pickleball/tournaments', label: 'Tournaments', icon: Trophy },
 ]
 
 export default function Navbar() {
@@ -18,10 +18,10 @@ export default function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false)
 
   const isActive = (href: string) =>
-    href === '/' ? pathname === '/' : pathname.startsWith(href)
+    href === '/pickleball' ? pathname === '/pickleball' : pathname.startsWith(href)
 
   return (
-    <header className="sticky top-0 z-50 border-b border-[#222222]/10 bg-[#FDFBF7]">
+    <header className="fixed inset-x-0 top-0 z-50 border-b border-[#222222]/10 bg-[#FDFBF7]">
       <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
         {/* Original Brand Logo */}
         <Link href="/" className="font-serif text-lg tracking-[-0.05em] text-[#1E5336]">
@@ -53,9 +53,9 @@ export default function Navbar() {
         {/* Admin Link & Mobile Toggle */}
         <div className="flex items-center gap-3">
           <Link
-            href="/admin"
+            href="/pickleball/admin"
             className={`hidden items-center gap-1.5 border px-3 py-2 text-[10px] uppercase tracking-[0.16em] transition sm:flex ${
-              pathname.startsWith('/admin')
+              pathname.startsWith('/pickleball/admin')
                 ? 'border-[#1E5336] bg-[#1E5336] text-[#FDFBF7]'
                 : 'border-[#222222]/20 text-[#222222] hover:border-[#1E5336] hover:text-[#1E5336]'
             }`}
@@ -92,7 +92,7 @@ export default function Navbar() {
               </Link>
             ))}
             <Link
-              href="/admin"
+              href="/pickleball/admin"
               onClick={() => setMobileOpen(false)}
               className="mt-2 flex items-center justify-center gap-2 border border-[#1E5336] py-2.5 text-xs font-bold uppercase tracking-[0.14em] text-[#1E5336]"
             >

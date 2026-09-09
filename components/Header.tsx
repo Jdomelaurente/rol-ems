@@ -14,7 +14,7 @@ export default function Header() {
   const [menuOpen, setMenuOpen] = useState(false)
 
   return (
-    <header className="sticky top-0 z-50 border-b border-[#222222]/10 bg-[#FDFBF7]/95 backdrop-blur-md">
+    <header className="fixed inset-x-0 top-0 z-50 border-b border-[#222222]/10 bg-[#FDFBF7]/95 backdrop-blur-md">
       <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-5 lg:px-10">
         <a href="#top" className="font-serif text-xl tracking-[-0.05em] text-[#1E5336]">
           ROL-EMS <span className="font-sans text-xs tracking-[0.2em] text-[#E1A728]">×</span> REBAR

@@ -101,7 +101,7 @@ export default function PaddleRentalPage() {
               <h1 className="mt-1 font-serif text-4xl sm:text-5xl font-bold">Paddle Rental Center</h1>
               <p className="mt-2 text-sm text-white/80 max-w-2xl">
                 Elevate your game with top-tier pickleball paddles from Selkirk, Joola, CRBN, and Paddletek.
-                Rent a paddle for your Court Booking, Open Play session, or Tournament.
+                Rent a paddle for your Court Booking, Open Play session, or Tournament — everything you need to make it your best game yet.
               </p>
             </div>
             <div className="flex items-center gap-3 bg-white/10 p-4 border border-white/20 rounded-xl">

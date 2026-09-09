@@ -85,7 +85,7 @@ export default function AdminDashboardPage() {
         <div className="border border-[#222222]/15 bg-[#FDFBF7] p-6 shadow-sm">
           <div className="flex items-center justify-between mb-4 border-b border-[#222222]/10 pb-3">
             <h2 className="font-serif text-2xl text-[#1E5336]">Recent Reservations</h2>
-            <Link href="/admin/reservations" className="text-xs text-[#1E5336] uppercase tracking-[0.12em] font-bold hover:underline">
+            <Link href="/pickleball/admin/reservations" className="text-xs text-[#1E5336] uppercase tracking-[0.12em] font-bold hover:underline">
               View All →
             </Link>
           </div>

@@ -19,7 +19,7 @@ export default function TournamentsPage() {
               <p className="mt-2 text-sm text-[#6B756B]">View official competitive pickleball tournaments and register teams.</p>
             </div>
             <Link
-              href="/tournaments/bracket"
+              href="/pickleball/tournaments/bracket"
               className="inline-flex items-center gap-2 border border-[#1E5336] bg-[#1E5336] px-5 py-3 text-[10px] uppercase tracking-[0.16em] font-bold text-[#FDFBF7] hover:bg-[#153d27] transition shrink-0"
             >
               <TrendingUp size={14} />

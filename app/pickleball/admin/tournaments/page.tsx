@@ -185,7 +185,7 @@ export default function AdminTournamentsPage() {
       <section className="bg-[#FDFBF7] border-b border-[#222222]/10 px-6 py-8">
         <div className="mx-auto max-w-7xl">
           <Link
-            href="/admin"
+            href="/pickleball/admin"
             className="inline-flex items-center gap-1 text-xs font-bold uppercase tracking-wider text-[#1E5336] hover:underline mb-2"
           >
             <ArrowLeft size={14} /> Back to Dashboard
@@ -199,7 +199,7 @@ export default function AdminTournamentsPage() {
             </div>
             <div className="flex items-center gap-2">
               <Link
-                href="/tournaments/bracket"
+                href="/pickleball/tournaments/bracket"
                 className="bg-[#E1A728] text-black font-bold px-4 py-2 text-xs uppercase tracking-wider hover:bg-amber-400 transition"
               >
                 View Live Player Bracket →

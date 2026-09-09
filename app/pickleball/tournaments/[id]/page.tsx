@@ -38,7 +38,7 @@ export default function TournamentDetailPage({ params }: { params: Promise<{ id:
       {/* Header */}
       <div className="bg-[#1E5336] px-4 py-10 sm:px-6">
         <div className="mx-auto max-w-5xl">
-          <Link href="/tournaments" className="inline-flex items-center gap-1 text-xs font-semibold uppercase tracking-wider text-[#E1A728] hover:underline mb-4">
+          <Link href="/pickleball/tournaments" className="inline-flex items-center gap-1 text-xs font-semibold uppercase tracking-wider text-[#E1A728] hover:underline mb-4">
             <ArrowLeft size={14} /> Back to Tournaments
           </Link>
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -81,7 +81,7 @@ export default function TournamentDetailPage({ params }: { params: Promise<{ id:
               <button onClick={() => setSubmitted(false)} className="flex-1 rounded-xl border border-[#1E5336] py-2.5 text-sm font-bold text-[#1E5336]">
                 Register Another Entry
               </button>
-              <Link href="/tournaments/bracket" className="flex-1 rounded-xl bg-[#1E5336] py-2.5 text-center text-sm font-bold text-white">
+              <Link href="/pickleball/tournaments/bracket" className="flex-1 rounded-xl bg-[#1E5336] py-2.5 text-center text-sm font-bold text-white">
                 View Tournament Bracket
               </Link>
             </div>
@@ -226,7 +226,7 @@ export default function TournamentDetailPage({ params }: { params: Promise<{ id:
                 </div>
 
                 <Link
-                  href="/tournaments/bracket"
+                  href="/pickleball/tournaments/bracket"
                   className="w-full flex items-center justify-center gap-2 rounded-xl bg-[#1E5336] py-3 text-sm font-bold text-white hover:bg-[#153d27] transition-all"
                 >
                   View Tournament Bracket

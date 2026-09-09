@@ -1,11 +1,10 @@
-﻿// ─── Facility Types (Existing) ───────────────────────────────────────────────
+// ─── Facility Types (Existing) ───────────────────────────────────────────────
 
 export type Facility = {
   establishment: 'ROL-EMS Resort' | 'Rebar Sports Center'
   category: string
   title: string
   detail: string
-  price: string
   status: string
   image: string
 }
@@ -18,36 +17,32 @@ export const facilities: Facility[] = [
     category: 'Stay',
     title: 'Cottage & Event',
     detail: 'Private cottage stay · whole-area and event reservations',
-    price: '₱2,500 / day',
     status: 'Available now',
-    image: '/sports-events/cottage.jpg',
+    image: '/sports-events/cottage.jpeg',
   },
   {
     establishment: 'ROL-EMS Resort',
     category: 'Play',
     title: 'Pickleball',
     detail: 'Pickleball court · open play queue active',
-    price: '₱350 / hour',
     status: 'Live queue active',
-    image: '/sports-events/pickleball.jpg',
+    image: '/sports-events/pickleball.jpeg',
   },
   {
     establishment: 'Rebar Sports Center',
     category: 'Play',
     title: 'Badminton',
     detail: 'Air-conditioned badminton court · equipment available',
-    price: '₱300 / hour',
     status: 'Available now',
-    image: resortMark('photo-1626224583764-f87db24ac4ea'),
+    image: '/sports-events/badminton.jpeg',
   },
   {
     establishment: 'Rebar Sports Center',
     category: 'Play',
     title: 'Taekwondo',
     detail: 'Training floor for taekwondo sessions',
-    price: '₱250 / hour',
     status: 'Available now',
-    image: '/sports-events/teakwondo.jpg',
+    image: '/sports-events/teakwondo.jpeg',
   },
 ]
 

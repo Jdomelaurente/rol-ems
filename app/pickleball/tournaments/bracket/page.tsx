@@ -23,7 +23,7 @@ export default function TournamentBracketPage() {
       <div className="bg-[#1E5336] px-4 py-10 sm:px-6 text-white">
         <div className="mx-auto max-w-7xl">
           <Link
-            href="/tournaments"
+            href="/pickleball/tournaments"
             className="inline-flex items-center gap-1 text-xs font-semibold uppercase tracking-wider text-[#E1A728] hover:underline mb-4"
           >
             <ArrowLeft size={14} /> Tournaments Overview
