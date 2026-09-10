@@ -1,9 +1,8 @@
 'use client'
 
 import { useState, Suspense } from 'react'
-import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { ArrowLeft, LayoutDashboard, Loader2, ShieldCheck } from 'lucide-react'
+import { LayoutDashboard, Loader2, ShieldCheck } from 'lucide-react'
 
 function LoginForm() {
   const router = useRouter()
@@ -48,12 +47,23 @@ function LoginForm() {
   }
 
   return (
-    <div className="min-h-screen bg-[#F3F0EC] text-[#222222] flex flex-col items-center justify-center px-6 py-16">
-      <Link href="/" className="inline-flex items-center gap-1 text-xs font-semibold uppercase tracking-wider text-[#6B756B] hover:text-[#1E5336] mb-10">
-        <ArrowLeft size={14} /> Back to ROL-EMS
-      </Link>
+    <div className="min-h-screen bg-[#F3F0EC] text-[#222222]">
+      <header className="border-b border-[#222222]/10 bg-[#FDFBF7]">
+        <div className="mx-auto flex max-w-2xl flex-col gap-3 px-6 py-4 sm:flex-row sm:items-center sm:justify-between sm:py-5">
+          <a href="/" className="font-serif text-lg tracking-[-0.05em] text-[#1E5336]">
+            ROL-EMS <span className="font-sans text-xs tracking-[0.2em] text-[#E1A728]">×</span> REBAR
+          </a>
+          <a
+            href="/"
+            className="border-b border-[#1E5336] pb-1 text-[10px] font-bold uppercase tracking-[0.15em] text-[#1E5336]"
+          >
+            Back to home
+          </a>
+        </div>
+      </header>
 
-      <div className="w-full max-w-md border border-[#222222]/15 bg-[#FDFBF7] p-8 shadow-sm">
+      <div className="flex flex-col items-center justify-center px-6 py-16">
+        <div className="w-full max-w-md border border-[#222222]/15 bg-[#FDFBF7] p-8 shadow-sm">
         <div className="flex h-11 w-11 items-center justify-center bg-[#1E5336] text-[#FDFBF7] mb-4">
           <LayoutDashboard size={20} />
         </div>
@@ -110,9 +120,7 @@ function LoginForm() {
           </button>
         </form>
 
-        <p className="mt-6 text-[11px] leading-4 text-[#6B756B]">
-          First run? The default account is <strong>admin</strong> / <strong>admin</strong>. Change it after your first sign-in.
-        </p>
+      </div>
       </div>
     </div>
   )

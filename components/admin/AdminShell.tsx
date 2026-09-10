@@ -1,11 +1,13 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { usePathname } from 'next/navigation'
 import AdminSidebar from '@/components/admin/AdminSidebar'
 
 const STORAGE_KEY = 'rolems-admin-sidebar-collapsed'
 
 export default function AdminShell({ children }: { children: React.ReactNode }) {
+  const pathname = usePathname()
   const [collapsed, setCollapsed] = useState(false)
 
   useEffect(() => {
@@ -19,6 +21,10 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
       window.localStorage.setItem(STORAGE_KEY, next ? '1' : '0')
       return next
     })
+  }
+
+  if (pathname === '/admin/login') {
+    return <div className="min-h-screen bg-[#F3F0EC]">{children}</div>
   }
 
   return (
