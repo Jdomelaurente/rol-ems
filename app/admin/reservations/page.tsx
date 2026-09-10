@@ -36,7 +36,7 @@ export default function AdminReservationsPage() {
       {/* Subheader */}
       <div className="bg-[#111111] px-4 py-8 text-white sm:px-6">
         <div className="mx-auto max-w-7xl">
-          <Link href="/pickleball/admin" className="inline-flex items-center gap-1 text-xs font-semibold uppercase tracking-wider text-[#E1A728] hover:underline mb-2">
+          <Link href="/admin/dashboard" className="inline-flex items-center gap-1 text-xs font-semibold uppercase tracking-wider text-[#E1A728] hover:underline mb-2">
             <ArrowLeft size={14} /> Back to Admin Dashboard
           </Link>
           <h1 className="font-serif text-3xl font-bold">Reservation Management</h1>

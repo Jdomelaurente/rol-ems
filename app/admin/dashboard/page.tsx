@@ -1,27 +1,11 @@
 'use client'
 
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
-import { useState } from 'react'
 import { usePickleball } from '@/context/PickleballContext'
-import { LayoutDashboard, CalendarCheck, Users, Trophy, Volleyball, Disc, ChevronRight, LogOut } from 'lucide-react'
+import { LayoutDashboard, CalendarCheck, Users, Trophy, Volleyball, Disc } from 'lucide-react'
 
 export default function AdminDashboardPage() {
-  const router = useRouter()
-  const [signingOut, setSigningOut] = useState(false)
   const { reservations, openPlaySessions, tournaments, paddles, paddleRentals } = usePickleball()
-
-  const handleLogout = async () => {
-    if (signingOut) return
-    setSigningOut(true)
-    try {
-      await fetch('/api/admin/logout', { method: 'POST' })
-      router.replace('/pickleball/admin/login')
-      router.refresh()
-    } finally {
-      setSigningOut(false)
-    }
-  }
 
   const totalBookings = reservations.length
   const pendingPayments = reservations.filter((r) => r.paymentStatus === 'pending').length
@@ -41,13 +25,6 @@ export default function AdminDashboardPage() {
             <span className="border border-[#1E5336] px-3 py-1 text-[10px] uppercase tracking-[0.14em] font-bold text-[#1E5336]">
               System Online
             </span>
-            <button
-              onClick={handleLogout}
-              disabled={signingOut}
-              className="flex items-center gap-1.5 border border-[#222222]/20 px-3 py-1 text-[10px] uppercase tracking-[0.14em] font-bold text-[#6B756B] transition hover:border-red-400 hover:text-red-700 disabled:opacity-60"
-            >
-              <LogOut size={12} /> {signingOut ? 'Signing out…' : 'Sign out'}
-            </button>
           </div>
         </div>
       </section>
@@ -110,7 +87,7 @@ export default function AdminDashboardPage() {
         <div className="border border-[#222222]/15 bg-[#FDFBF7] p-6 shadow-sm">
           <div className="flex items-center justify-between mb-4 border-b border-[#222222]/10 pb-3">
             <h2 className="font-serif text-2xl text-[#1E5336]">Recent Reservations</h2>
-            <Link href="/pickleball/admin/reservations" className="text-xs text-[#1E5336] uppercase tracking-[0.12em] font-bold hover:underline">
+            <Link href="/admin/reservations" className="text-xs text-[#1E5336] uppercase tracking-[0.12em] font-bold hover:underline">
               View All →
             </Link>
           </div>

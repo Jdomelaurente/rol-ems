@@ -8,7 +8,7 @@ import { ArrowLeft, LayoutDashboard, Loader2, ShieldCheck } from 'lucide-react'
 function LoginForm() {
   const router = useRouter()
   const searchParams = useSearchParams()
-  const next = searchParams.get('next') || '/pickleball/admin'
+  const next = searchParams.get('next') || '/admin/dashboard'
 
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
