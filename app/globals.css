@@ -171,7 +171,6 @@ html { scroll-behavior: smooth; }
 
 .parallax-media {
   transform: translate3d(0, var(--parallax-y, 0px), 0) scale(1.04);
-  transition: transform 120ms linear;
   will-change: transform;
 }
 

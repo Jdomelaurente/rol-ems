@@ -3,10 +3,7 @@ import { ArrowUpRight } from 'lucide-react'
 export default function Hero() {
   return (
     <section id="top" className="relative w-full min-h-[560px] overflow-hidden bg-[#1E5336] text-[#FDFBF7] sm:min-h-[640px] md:min-h-[720px] lg:min-h-[820px]">
-      <div
-        data-parallax
-        className="parallax-media absolute inset-[-4%] bg-[linear-gradient(90deg,rgba(18,44,30,.88),rgba(18,44,30,.28)),linear-gradient(0deg,rgba(18,44,30,.72),transparent_60%),url('/Hero-image.jpg')] bg-cover bg-center"
-      />
+      <div className="absolute inset-[-4%] bg-[linear-gradient(90deg,rgba(18,44,30,.88),rgba(18,44,30,.28)),linear-gradient(0deg,rgba(18,44,30,.72),transparent_60%),url('/Hero-image.jpg')] bg-cover bg-center" />
       <div className="relative mx-auto flex max-w-[1440px] min-h-[560px] flex-col justify-between px-4 py-6 sm:min-h-[640px] sm:px-6 sm:py-8 md:min-h-[720px] md:px-10 md:py-10 lg:min-h-[820px] lg:px-16 lg:py-14">
         <div className="flex justify-between text-[8px] uppercase tracking-[0.22em] text-[#FDFBF7]/70 sm:text-[10px]">
           <span>01 — ROL-EMS &amp; REBAR</span>

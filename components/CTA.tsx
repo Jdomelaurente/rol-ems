@@ -8,7 +8,7 @@ export default function CTA() {
       <h2 className="mx-auto mt-5 max-w-3xl font-serif text-4xl leading-[0.95] tracking-[-0.055em] text-[#1E5336] sm:text-5xl md:text-8xl">
         Your best day<br />starts with one idea.
       </h2>
-        <a href="#facilities" className="mt-10 inline-flex items-center gap-3 border border-[#1E5336] px-6 py-4 text-[10px] uppercase tracking-[0.16em] text-[#1E5336]">
+        <a href="/pickleball/booking" className="mt-10 inline-flex items-center gap-3 border border-[#1E5336] px-6 py-4 text-[10px] uppercase tracking-[0.16em] text-[#1E5336]">
           Plan your visit <ArrowUpRight size={15} />
         </a>
       </div>

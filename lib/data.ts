@@ -31,18 +31,18 @@ export const facilities: Facility[] = [
   {
     establishment: 'Rebar Sports Center',
     category: 'Play',
-    title: 'Badminton',
-    detail: 'Air-conditioned badminton court · equipment available',
-    status: 'Available now',
-    image: '/sports-events/badminton.jpeg',
-  },
-  {
-    establishment: 'Rebar Sports Center',
-    category: 'Play',
     title: 'Taekwondo',
     detail: 'Training floor for taekwondo sessions',
     status: 'Available now',
     image: '/sports-events/teakwondo.jpeg',
+  },
+  {
+    establishment: 'Rebar Sports Center',
+    category: 'Play',
+    title: 'Badminton & Games',
+    detail: 'Badminton courts · dart, chess, UNO & other card and board games',
+    status: 'Available now',
+    image: '/sports-events/badminton.jpeg',
   },
 ]
 
@@ -89,6 +89,14 @@ export const cottageAddOns: EventAddOn[] = [
   { id: 'karaoke', name: 'Karaoke machine', detail: 'Videoke with speakers + mics', price: 500, unit: 'per stay' },
   { id: 'beach-tables', name: 'Table & chairs', detail: 'Outdoor table + 4 chairs', price: 250, unit: 'per stay' },
   { id: 'pocket-wifi', name: 'Pocket Wi-Fi', detail: 'Portable hotspot for the stay', price: 200, unit: 'per stay' },
+]
+
+export const gameRentals: EventAddOn[] = [
+  { id: 'uno', name: 'UNO cards', detail: 'Classic colour-and-number family card game', price: 50, unit: 'per set' },
+  { id: 'playing-cards', name: 'Playing cards', detail: 'Standard deck for poker, pusoy dos & co.', price: 30, unit: 'per deck' },
+  { id: 'chess', name: 'Chess set', detail: 'Folding board + wooden pieces', price: 60, unit: 'per set' },
+  { id: 'dart', name: 'Dart set', detail: 'Dartboard + set of darts', price: 100, unit: 'per set' },
+  { id: 'board-games', name: 'Board games', detail: 'Scrabble, Monopoly, and more', price: 80, unit: 'per game' },
 ]
 
 export const pickleballOptions: CottageType[] = [

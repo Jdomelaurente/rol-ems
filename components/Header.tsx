@@ -4,10 +4,11 @@ import { useState } from 'react'
 import { ArrowUpRight, Menu, X } from 'lucide-react'
 
 const links = [
-  { href: '#escape', label: 'The escape' },
-  { href: '#facilities', label: 'Stay & play' },
-  { href: '#queue', label: 'Open play' },
-  { href: '#footer', label: 'Visit' },
+  { href: '#top', label: 'Home' },
+  { href: '#facilities', label: 'Courts' },
+  { href: '#poolhouse', label: 'About Us' },
+  { href: '#queue', label: 'Live Score' },
+  { href: '#footer', label: 'Contact' },
 ]
 
 export default function Header() {

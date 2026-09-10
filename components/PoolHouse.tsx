@@ -2,7 +2,7 @@ import { ArrowUpRight } from 'lucide-react'
 
 export default function PoolHouse() {
   return (
-    <section data-reveal className="reveal w-full px-6 py-16 sm:py-24 lg:px-10 lg:py-36">
+    <section data-reveal id="poolhouse" className="reveal w-full px-6 py-16 sm:py-24 lg:px-10 lg:py-36">
       <div className="mx-auto grid max-w-7xl gap-10 lg:grid-cols-[1.1fr_.9fr]">
         <div
           data-parallax

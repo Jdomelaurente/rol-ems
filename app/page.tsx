@@ -23,26 +23,38 @@ export default function Page() {
     }, { threshold: 0.14, rootMargin: '0px 0px -8% 0px' })
     elements.forEach((element) => observer.observe(element))
 
+    const parallaxElements = document.querySelectorAll<HTMLElement>('[data-parallax]')
+    const parallaxCenters = new WeakMap<HTMLElement, number>()
+    const measureParallax = () => {
+      parallaxElements.forEach((element) => {
+        const rect = element.getBoundingClientRect()
+        parallaxCenters.set(element, rect.top + rect.height / 2 + window.scrollY)
+      })
+    }
+
     let ticking = false
     const updateScrollMotion = () => {
       if (ticking) return
       ticking = true
       requestAnimationFrame(() => {
         const scrollY = window.scrollY
-        document.documentElement.style.setProperty('--page-scroll', `${scrollY}px`)
-        document.querySelectorAll<HTMLElement>('[data-parallax]').forEach((element) => {
-          const rect = element.getBoundingClientRect()
-          const distance = (window.innerHeight / 2 - (rect.top + rect.height / 2)) * 0.08
+        const viewCenter = window.innerHeight / 2
+        parallaxElements.forEach((element) => {
+          const center = parallaxCenters.get(element) ?? viewCenter
+          const distance = (viewCenter - (center - scrollY)) * 0.08
           element.style.setProperty('--parallax-y', `${distance}px`)
         })
         ticking = false
       })
     }
+    measureParallax()
     updateScrollMotion()
     window.addEventListener('scroll', updateScrollMotion, { passive: true })
+    window.addEventListener('resize', measureParallax)
     return () => {
       observer.disconnect()
       window.removeEventListener('scroll', updateScrollMotion)
+      window.removeEventListener('resize', measureParallax)
     }
   }, [])
 

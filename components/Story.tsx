@@ -1,6 +1,6 @@
 export default function Story() {
   return (
-    <section data-reveal className="reveal w-full px-6 py-16 sm:py-24 lg:px-10 lg:py-36">
+    <section data-reveal id="story" className="reveal w-full px-6 py-16 sm:py-24 lg:px-10 lg:py-36">
       <div className="mx-auto max-w-7xl">
         <div className="grid gap-10 lg:grid-cols-[1fr_1.2fr] lg:items-end">
         <p className="text-xs uppercase tracking-[0.18em] text-[#E1A728]">The experience</p>

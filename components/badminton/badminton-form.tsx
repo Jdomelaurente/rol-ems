@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { ArrowLeft, ArrowRight, CalendarDays, Check, ChevronLeft, ChevronRight, Clock, CircleCheck, Loader2, Wallet } from 'lucide-react'
-import { badmintonOptions } from '@/lib/data'
+import { badmintonOptions, gameRentals } from '@/lib/data'
 import { addBooking, getBookedTimes, isTimeTaken } from '@/lib/bookings'
 
 type Step = 'schedule' | 'details' | 'review' | 'confirm'
@@ -42,6 +42,7 @@ export default function BadmintonBookingForm({ onDone }: { onDone: () => void })
   const facilityKey = `badminton:${court.name}`
   const [bookedTimes, setBookedTimes] = useState<string[]>([])
   const [loadingSlots, setLoadingSlots] = useState(false)
+  const [addOns, setAddOns] = useState<Record<string, number>>({})
 
   useEffect(() => {
     let active = true
@@ -67,7 +68,11 @@ export default function BadmintonBookingForm({ onDone }: { onDone: () => void })
     return m ? parseInt(m[1].replace(/,/g, ''), 10) : 0
   }
   const hourlyRate = rateNumber(court.price)
-  const totalPrice = `₱${(hourlyRate * hours).toLocaleString()} / ${hours} hr${hours > 1 ? 's' : ''}`
+  const gameCost = gameRentals.reduce((sum, g) => sum + g.price * (addOns[g.id] || 0), 0)
+  const courtCost = hourlyRate * hours
+  const grandTotal = courtCost + gameCost
+  const totalPrice = `₱${grandTotal.toLocaleString()} / ${hours} hr${hours > 1 ? 's' : ''}`
+  const selectedGames = gameRentals.filter((g) => (addOns[g.id] || 0) > 0)
 
   const isoDate = (d: Date) => {
     const y = d.getFullYear()
@@ -103,7 +108,8 @@ export default function BadmintonBookingForm({ onDone }: { onDone: () => void })
   }
 
   const persistBooking = async () => {
-    const label = `Badminton · ${court.name} (${hours} hr${hours > 1 ? 's' : ''})`
+    const gamesLabel = selectedGames.length > 0 ? ` + ${selectedGames.map((g) => `${g.name}×${addOns[g.id]}`).join(', ')}` : ''
+    const label = `Badminton · ${court.name} (${hours} hr${hours > 1 ? 's' : ''})${gamesLabel}`
     const record = await addBooking({
       facility: facilityKey,
       itemName: label,
@@ -114,7 +120,7 @@ export default function BadmintonBookingForm({ onDone }: { onDone: () => void })
       name,
       contact,
       email,
-      amount: hourlyRate * hours,
+      amount: grandTotal,
       payment,
     })
     setConfirmedRef(record.reference)
@@ -168,9 +174,9 @@ export default function BadmintonBookingForm({ onDone }: { onDone: () => void })
           name,
           contact,
           email,
-          amount: hourlyRate * hours,
+          amount: grandTotal,
           description: `ROL-EMS · ${bookingLabel} · ${date} at ${time}`,
-          metadata: { reference: record.reference, booking: bookingLabel, date, time, hours, players },
+          metadata: { reference: record.reference, booking: bookingLabel, date, time, hours, players, games: selectedGames.length ? selectedGames.map((g) => `${g.name}:${addOns[g.id]}`).join(', ') : '' },
         }),
       })
       const data = await res.json()
@@ -193,7 +199,7 @@ export default function BadmintonBookingForm({ onDone }: { onDone: () => void })
   const reset = () => {
     setStep('schedule')
     setCourt(badmintonOptions[0])
-    setDate(''); setTime(''); setHours(1); setPlayers(2); setName(''); setContact(''); setEmail(''); setPayment('online'); setPaying(false)
+    setDate(''); setTime(''); setHours(1); setPlayers(2); setName(''); setContact(''); setEmail(''); setPayment('online'); setPaying(false); setAddOns({})
   }
 
   return (
@@ -228,6 +234,7 @@ export default function BadmintonBookingForm({ onDone }: { onDone: () => void })
           <>
             <p className="text-xs uppercase tracking-[0.18em] text-[#E1A728]">Step 1 · Pick your court</p>
             <h2 className="mt-3 font-serif text-3xl tracking-[-0.04em] text-[#1E5336]">Which badminton court?</h2>
+            <p className="mt-2 text-xs text-[#6B756B]">Live the game first, then relax with dart, chess, UNO, and other card and board games in the same hall.</p>
             <div className="mt-4 grid gap-3 sm:grid-cols-2">
               {badmintonOptions.map((c) => (
                 <button
@@ -361,6 +368,29 @@ export default function BadmintonBookingForm({ onDone }: { onDone: () => void })
                 </div>
               </div>
             </div>
+
+            <div className="mt-6">
+              <p className="text-[10px] uppercase tracking-[0.14em] text-[#6B756B]">Add table games (optional)</p>
+              <div className="mt-2 grid gap-2 sm:grid-cols-2">
+                {gameRentals.map((g) => {
+                  const qty = addOns[g.id] || 0
+                  return (
+                    <div key={g.id} className={`flex items-center justify-between gap-3 border px-3 py-2.5 text-sm transition ${qty > 0 ? 'border-[#1E5336] bg-[#F3F0EC]' : 'border-[#222222]/15'}`}>
+                      <span>
+                        <span className="block font-semibold text-[#1E5336]">{g.name}</span>
+                        <span className="block text-[10px] text-[#6B756B]">{g.detail}</span>
+                        <span className="mt-0.5 block text-[10px] text-[#6B756B]">₱{g.price} · {g.unit}</span>
+                      </span>
+                      <span className="flex shrink-0 items-center gap-2">
+                        <button onClick={() => setAddOns((a) => ({ ...a, [g.id]: Math.max(0, qty - 1) }))} className="h-8 w-8 border border-[#222222]/20 text-base">−</button>
+                        <span className="w-6 text-center font-bold text-[#1E5336]">{qty}</span>
+                        <button onClick={() => setAddOns((a) => ({ ...a, [g.id]: Math.min(5, qty + 1) }))} className="h-8 w-8 border border-[#222222]/20 text-base">+</button>
+                      </span>
+                    </div>
+                  )
+                })}
+              </div>
+            </div>
           </>
         )}
 
@@ -447,6 +477,12 @@ export default function BadmintonBookingForm({ onDone }: { onDone: () => void })
                 <span className="text-[#6B756B]">Email</span>
                 <span>{email || '—'}</span>
               </div>
+              {selectedGames.map((g) => (
+                <div key={g.id} className="flex justify-between px-4 py-3 text-sm">
+                  <span className="text-[#6B756B]">Game rental · {g.name} ×{addOns[g.id]}</span>
+                  <span>₱{(g.price * (addOns[g.id] || 0)).toLocaleString()}</span>
+                </div>
+              ))}
               <div className="flex justify-between px-4 py-3 text-sm">
                 <span className="text-[#6B756B]">Total</span>
                 <span className="font-bold text-[#1E5336]">{totalPrice}</span>
@@ -485,13 +521,16 @@ export default function BadmintonBookingForm({ onDone }: { onDone: () => void })
             </span>
             <h2 className="mt-5 font-serif text-3xl tracking-[-0.04em] text-[#1E5336]">Court reserved</h2>
             <p className="mt-3 max-w-sm text-sm leading-6 text-[#6B756B]">
-              {court.name} is on hold for {date} at {time}. A confirmation and receipt have been sent.
+              {court.name} is on hold for {date} at {time}. A confirmation and receipt have been sent — and the dart, chess, UNO, and card and board games are all open for you after the match.
             </p>
             <div className="mt-6 w-full max-w-sm border border-[#222222]/15 p-4 text-left text-sm">
               <div className="flex justify-between py-1"><span className="text-[#6B756B]">Reference</span><span className="font-bold text-[#1E5336]">{confirmedRef}</span></div>
               <div className="flex justify-between py-1"><span className="text-[#6B756B]">Court</span><span>{court.name}</span></div>
               <div className="flex justify-between py-1"><span className="text-[#6B756B]">Date</span><span>{date} · {time}</span></div>
               <div className="flex justify-between py-1"><span className="text-[#6B756B]">Players</span><span>{players}</span></div>
+              {selectedGames.map((g) => (
+                <div key={g.id} className="flex justify-between py-1"><span className="text-[#6B756B]">{g.name} ×{addOns[g.id]}</span><span>₱{(g.price * (addOns[g.id] || 0)).toLocaleString()}</span></div>
+              ))}
               <div className="flex justify-between py-1"><span className="text-[#6B756B]">Payment</span><span>{payment === 'online' ? 'Online (GCash / card)' : 'Pay at the venue'}</span></div>
               <div className="flex justify-between border-t border-[#222222]/15 pt-2 mt-2"><span className="text-[#6B756B]">Total</span><span className="font-bold text-[#1E5336]">{totalPrice}</span></div>
             </div>
