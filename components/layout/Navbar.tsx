@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useState } from 'react'
-import { Menu, X, Trophy, CalendarCheck, Users, LayoutDashboard, Volleyball, Disc } from 'lucide-react'
+import { Menu, X, Trophy, CalendarCheck, Users, Volleyball, Disc } from 'lucide-react'
 
 const navLinks = [
   { href: '/pickleball', label: 'Hub', icon: Volleyball },
@@ -50,20 +50,8 @@ export default function Navbar() {
           })}
         </nav>
 
-        {/* Admin Link & Mobile Toggle */}
+        {/* Mobile Toggle */}
         <div className="flex items-center gap-3">
-          <Link
-            href="/pickleball/admin"
-            className={`hidden items-center gap-1.5 border px-3 py-2 text-[10px] uppercase tracking-[0.16em] transition sm:flex ${
-              pathname.startsWith('/pickleball/admin')
-                ? 'border-[#1E5336] bg-[#1E5336] text-[#FDFBF7]'
-                : 'border-[#222222]/20 text-[#222222] hover:border-[#1E5336] hover:text-[#1E5336]'
-            }`}
-          >
-            <LayoutDashboard size={13} />
-            Admin
-          </Link>
-
           <button
             className="p-1 text-[#222222] md:hidden"
             onClick={() => setMobileOpen((v) => !v)}
@@ -91,14 +79,6 @@ export default function Navbar() {
                 {label}
               </Link>
             ))}
-            <Link
-              href="/pickleball/admin"
-              onClick={() => setMobileOpen(false)}
-              className="mt-2 flex items-center justify-center gap-2 border border-[#1E5336] py-2.5 text-xs font-bold uppercase tracking-[0.14em] text-[#1E5336]"
-            >
-              <LayoutDashboard size={16} />
-              Admin Portal
-            </Link>
           </nav>
         </div>
       )}

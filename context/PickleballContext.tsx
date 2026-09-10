@@ -1,6 +1,6 @@
 'use client'
 
-import React, { createContext, useContext, useState, useEffect } from 'react'
+import React, { createContext, useContext, useState, useEffect, useRef } from 'react'
 import {
   Paddle,
   PaddleRental,
@@ -70,7 +70,7 @@ interface PickleballContextType {
 
 const PickleballContext = createContext<PickleballContextType | undefined>(undefined)
 
-const LOCAL_STORAGE_KEY = 'rol_ems_pickleball_state_v2'
+const SYNC_CHANNEL = 'rol-ems-pickleball'
 
 export const PickleballProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [paddles, setPaddles] = useState<Paddle[]>(initialPaddles)
@@ -81,43 +81,82 @@ export const PickleballProvider: React.FC<{ children: React.ReactNode }> = ({ ch
   const [reservations, setReservations] = useState<Reservation[]>(initialReservations)
   const [isLoaded, setIsLoaded] = useState(false)
 
+  const channelRef = useRef<BroadcastChannel | null>(null)
+  const savingRef = useRef(false)
+  const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
   useEffect(() => {
-    try {
-      const savedState = localStorage.getItem(LOCAL_STORAGE_KEY)
-      if (savedState) {
-        const parsed = JSON.parse(savedState)
+    let cancelled = false
+
+    const load = async () => {
+      try {
+        const res = await fetch('/api/pickleball/state', { cache: 'no-store' })
+        if (!res.ok) throw new Error(`Failed to fetch state: ${res.status}`)
+        const parsed = await res.json()
+        if (cancelled) return
         if (parsed.paddles) setPaddles(parsed.paddles)
         if (parsed.paddleRentals) setPaddleRentals(parsed.paddleRentals)
         if (parsed.openPlaySessions) setOpenPlaySessions(parsed.openPlaySessions)
         if (parsed.tournaments) setTournaments(parsed.tournaments)
         if (parsed.bracketMatches) setBracketMatches(parsed.bracketMatches)
         if (parsed.reservations) setReservations(parsed.reservations)
+      } catch (e) {
+        console.error('Failed to load pickleball state', e)
+      } finally {
+        if (!cancelled) setIsLoaded(true)
       }
-    } catch (e) {
-      console.error('Failed to load state from localStorage', e)
-    } finally {
-      setIsLoaded(true)
+    }
+
+    const channel = typeof BroadcastChannel !== 'undefined' ? new BroadcastChannel(SYNC_CHANNEL) : null
+    channelRef.current = channel
+
+    const onFocus = () => {
+      if (!savingRef.current) load()
+    }
+
+    if (channel) {
+      channel.onmessage = (event: MessageEvent) => {
+        if (event.data === 'refresh' && !savingRef.current) load()
+      }
+    }
+
+    window.addEventListener('focus', onFocus)
+    load()
+
+    return () => {
+      cancelled = true
+      window.removeEventListener('focus', onFocus)
+      channel?.close()
+      if (saveTimerRef.current) clearTimeout(saveTimerRef.current)
     }
   }, [])
 
   useEffect(() => {
     if (!isLoaded) return
-    try {
-      localStorage.setItem(
-        LOCAL_STORAGE_KEY,
-        JSON.stringify({
-          paddles,
-          paddleRentals,
-          openPlaySessions,
-          tournaments,
-          bracketMatches,
-          reservations,
+    if (saveTimerRef.current) clearTimeout(saveTimerRef.current)
+    saveTimerRef.current = setTimeout(async () => {
+      savingRef.current = true
+      try {
+        await fetch('/api/pickleball/state', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            paddles,
+            paddleRentals,
+            openPlaySessions,
+            tournaments,
+            bracketMatches,
+            reservations,
+          }),
         })
-      )
-    } catch (e) {
-      console.error('Failed to save state to localStorage', e)
-    }
-  }, [paddles, paddleRentals, openPlaySessions, tournaments, bracketMatches, reservations, isLoaded])
+        channelRef.current?.postMessage('refresh')
+      } catch (e) {
+        console.error('Failed to save pickleball state', e)
+      } finally {
+        savingRef.current = false
+      }
+    }, 400)
+  }, [isLoaded, paddles, paddleRentals, openPlaySessions, tournaments, bracketMatches, reservations])
 
   const resetToDefault = () => {
     setPaddles(initialPaddles)
@@ -126,7 +165,6 @@ export const PickleballProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     setTournaments(initialTournaments)
     setBracketMatches(initialBracketMatches)
     setReservations(initialReservations)
-    localStorage.removeItem(LOCAL_STORAGE_KEY)
   }
 
   // ─── PADDLE ACTIONS ─────────────────────────────────────────────────────────

@@ -1,11 +1,27 @@
 'use client'
 
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
+import { useState } from 'react'
 import { usePickleball } from '@/context/PickleballContext'
-import { LayoutDashboard, CalendarCheck, Users, Trophy, Volleyball, Disc, ChevronRight } from 'lucide-react'
+import { LayoutDashboard, CalendarCheck, Users, Trophy, Volleyball, Disc, ChevronRight, LogOut } from 'lucide-react'
 
 export default function AdminDashboardPage() {
+  const router = useRouter()
+  const [signingOut, setSigningOut] = useState(false)
   const { reservations, openPlaySessions, tournaments, paddles, paddleRentals } = usePickleball()
+
+  const handleLogout = async () => {
+    if (signingOut) return
+    setSigningOut(true)
+    try {
+      await fetch('/api/admin/logout', { method: 'POST' })
+      router.replace('/pickleball/admin/login')
+      router.refresh()
+    } finally {
+      setSigningOut(false)
+    }
+  }
 
   const totalBookings = reservations.length
   const pendingPayments = reservations.filter((r) => r.paymentStatus === 'pending').length
@@ -21,9 +37,18 @@ export default function AdminDashboardPage() {
             <p className="text-xs uppercase tracking-[0.18em] text-[#E1A728]">ROL-EMS Management</p>
             <h1 className="mt-1 font-serif text-4xl text-[#1E5336]">Admin Pickleball Dashboard</h1>
           </div>
-          <span className="border border-[#1E5336] px-3 py-1 text-[10px] uppercase tracking-[0.14em] font-bold text-[#1E5336]">
-            System Online
-          </span>
+          <div className="flex items-center gap-2">
+            <span className="border border-[#1E5336] px-3 py-1 text-[10px] uppercase tracking-[0.14em] font-bold text-[#1E5336]">
+              System Online
+            </span>
+            <button
+              onClick={handleLogout}
+              disabled={signingOut}
+              className="flex items-center gap-1.5 border border-[#222222]/20 px-3 py-1 text-[10px] uppercase tracking-[0.14em] font-bold text-[#6B756B] transition hover:border-red-400 hover:text-red-700 disabled:opacity-60"
+            >
+              <LogOut size={12} /> {signingOut ? 'Signing out…' : 'Sign out'}
+            </button>
+          </div>
         </div>
       </section>
 

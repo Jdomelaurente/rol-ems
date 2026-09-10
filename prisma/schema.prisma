@@ -28,3 +28,28 @@ model Booking {
 
   @@index([facility, date])
 }
+
+model AdminUser {
+  id           Int            @id @default(autoincrement())
+  username     String         @unique
+  passwordHash String
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+  sessions     AdminSession[]
+}
+
+model AdminSession {
+  tokenHash String    @id
+  userId    Int
+  expiresAt DateTime
+  createdAt DateTime  @default(now())
+  user      AdminUser @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model PickleballState {
+  key       String   @id
+  data      Json
+  updatedAt DateTime @updatedAt
+}
