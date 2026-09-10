@@ -7,7 +7,7 @@ export default function PoolHouse() {
         <div
           data-parallax
           className="parallax-media min-h-[320px] sm:min-h-[440px] lg:min-h-[540px] bg-cover bg-center"
-          style={{ backgroundImage: "url('https://images.unsplash.com/photo-1540541338287-41700207dee6?auto=format&fit=crop&w=1400&q=85')" }}
+          style={{ backgroundImage: "url('/sports-events/poolhouse.jpg')" }}
         />
         <div className="flex flex-col justify-between py-4">
           <div>

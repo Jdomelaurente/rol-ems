@@ -19,7 +19,7 @@ export default function Queue() {
               The next game<br />starts here.
             </h2>
           </div>
-          <div className="flex items-center gap-2 text-xs text-[#FDFBF7]/65">
+          <div className="flex items-center gap-2 text-xs text-[#FDFBF7]/80">
             <span className="h-2 w-2 animate-pulse rounded-full bg-[#E1A728]" /> Updated just now
           </div>
         </div>
@@ -27,7 +27,7 @@ export default function Queue() {
           <div>
             <div className="flex gap-2 border-b border-[#FDFBF7]/20 pb-5">
               {queueOrder.map((tab) => (
-                <button key={tab} onClick={() => setActive(tab)} className={`px-3 py-2 text-xs ${active === tab ? 'bg-[#E1A728] text-[#1E5336]' : 'text-[#FDFBF7]/60'}`}>
+                <button key={tab} onClick={() => setActive(tab)} className={`px-3 py-2 text-xs ${active === tab ? 'bg-[#E1A728] text-[#1E5336]' : 'text-[#FDFBF7]/70'}`}>
                   {tab}
                 </button>
               ))}
@@ -42,7 +42,7 @@ export default function Queue() {
               </div>
               <div className="mt-10 flex items-end justify-between border-t border-[#FDFBF7]/15 pt-6">
                 <p className="text-4xl sm:text-5xl md:text-6xl font-light tracking-[-0.06em] text-[#E1A728]">{current[2]}</p>
-                <span className="text-xs uppercase tracking-[0.14em] text-[#FDFBF7]/55">Live score</span>
+                <span className="text-xs uppercase tracking-[0.14em] text-[#FDFBF7]/70">Live score</span>
               </div>
             </div>
           </div>
@@ -52,7 +52,7 @@ export default function Queue() {
               <Clock3 size={17} />
             </div>
             <p className="mt-8 font-serif text-4xl sm:text-5xl md:text-6xl">{current[3]}</p>
-            <p className="mt-2 text-sm text-[#FDFBF7]/60">estimated wait</p>
+            <p className="mt-2 text-sm text-[#FDFBF7]/75">estimated wait</p>
             <button onClick={() => setJoined(!joined)} className="mt-10 w-full border border-[#E1A728] px-5 py-4 text-[10px] uppercase tracking-[0.16em] text-[#E1A728] hover:bg-[#E1A728] hover:text-[#1E5336]">
               {joined ? 'You are on the list' : 'Join the queue'} <ArrowUpRight size={15} className="ml-2 inline" />
             </button>

@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { usePickleball } from '@/context/PickleballContext'
 import { getPairDisplayName } from '@/lib/data'
+import ConsentCheckbox from '@/components/legal/ConsentCheckbox'
 import { Trophy, Calendar, MapPin, Users, Tag, ArrowLeft, CheckCircle, CircleCheck, AlertCircle } from 'lucide-react'
 
 export default function TournamentDetailPage({ params }: { params: Promise<{ id: string }> }) {
@@ -22,15 +23,17 @@ export default function TournamentDetailPage({ params }: { params: Promise<{ id:
   const [player1, setPlayer1] = useState('')
   const [player2, setPlayer2] = useState('')
   const [submitted, setSubmitted] = useState(false)
+  const [consent, setConsent] = useState(false)
 
   const isRegOpen = tournament.status === 'registration-open' || tournament.status === 'upcoming'
 
   const handleRegister = (e: React.FormEvent) => {
     e.preventDefault()
-    if (!player1 || !player2) return
+    if (!player1 || !player2 || !consent) return
 
     addPairToTournament(tournament.id, player1, player2, pairName)
     setSubmitted(true)
+    setConsent(false)
   }
 
   return (
@@ -140,9 +143,14 @@ export default function TournamentDetailPage({ params }: { params: Promise<{ id:
                 <p>Registration deadline: {tournament.registrationDeadline}</p>
               </div>
 
+              <ConsentCheckbox id="tournament-consent" agreed={consent} onChange={setConsent} />
+
               <button
                 type="submit"
-                className="w-full rounded-xl bg-[#1E5336] py-3 text-sm font-bold text-white hover:bg-[#153d27] transition-all"
+                disabled={!consent}
+                className={`w-full rounded-xl py-3 text-sm font-bold transition-all ${
+                  consent ? 'bg-[#1E5336] text-white hover:bg-[#153d27]' : 'bg-[#222222]/10 text-[#6B756B] cursor-not-allowed'
+                }`}
               >
                 Complete Registration
               </button>

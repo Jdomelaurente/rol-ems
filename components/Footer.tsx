@@ -24,7 +24,12 @@ export default function Footer() {
       </div>
       <div className="mx-auto mt-12 flex max-w-7xl flex-col justify-between gap-4 border-t border-[#222222]/10 pt-5 text-[10px] uppercase tracking-[0.12em] text-[#6B756B] sm:mt-16 sm:flex-row">
         <span>© 2026 ROL-EMS x REBAR</span>
-        <span className="flex items-center gap-4">
+        <span className="flex flex-wrap items-center gap-x-4 gap-y-2">
+          <a href="/privacy-policy" className="hover:text-[#1E5336]">Privacy</a>
+          <a href="/terms-conditions" className="hover:text-[#1E5336]">Terms</a>
+          <a href="/refund-policy" className="hover:text-[#1E5336]">Refunds</a>
+          <a href="/cookies-policy" className="hover:text-[#1E5336]">Cookies</a>
+          <span className="hidden h-3 w-px bg-[#222222]/15 sm:block" />
           <a href="/pickleball/booking/lookup" className="hover:text-[#1E5336]">Check a booking</a>
           <a href="/pickleball/admin" className="hover:text-[#1E5336]">Staff</a>
         </span>

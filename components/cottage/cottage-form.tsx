@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { ArrowLeft, ArrowRight, CalendarDays, Check, ChevronLeft, ChevronRight, Clock, Loader2, Wallet } from 'lucide-react'
 import { cottageAddOns, cottageOptions, eventAddOns, eventVenues } from '@/lib/data'
 import { addBooking, getBlockedDates, getBookedTimes, type BookingRecord } from '@/lib/bookings'
+import ConsentCheckbox from '@/components/legal/ConsentCheckbox'
 
 type Step = 'type' | 'schedule' | 'details' | 'review' | 'confirm'
 
@@ -43,6 +44,7 @@ export default function CottageBookingForm({ onDone }: { onDone: () => void }) {
   const [payment, setPayment] = useState('online')
   const [paying, setPaying] = useState(false)
   const [confirmedRef, setConfirmedRef] = useState('')
+  const [consent, setConsent] = useState(false)
   const [calendarOpen, setCalendarOpen] = useState(false)
   const [timeOpen, setTimeOpen] = useState(false)
   const [viewMonth, setViewMonth] = useState(() => {
@@ -195,7 +197,7 @@ export default function CottageBookingForm({ onDone }: { onDone: () => void }) {
     (step === 'type') ||
     (step === 'schedule' && !!scheduleReady) ||
     (step === 'details' && detailsReady) ||
-    (step === 'review' && (chargeAmount > 0 || payment === 'cash'))
+    (step === 'review' && consent && (chargeAmount > 0 || payment === 'cash'))
 
   const doCheckout = async () => {
     setPaying(true)
@@ -501,31 +503,33 @@ export default function CottageBookingForm({ onDone }: { onDone: () => void }) {
             <div className="mt-6">
               <span className="text-[10px] uppercase tracking-[0.14em] text-[#6B756B]">Guests (up to {capacity})</span>
               <div className="mt-2 flex items-center gap-3">
-                <button onClick={() => setGuests((g) => Math.max(1, g - 1))} className="h-10 w-10 border border-[#222222]/20 text-lg">−</button>
-                <span className="w-10 text-center text-xl font-bold text-[#1E5336]">{guests}</span>
-                <button onClick={() => setGuests((g) => Math.min(capacity, g + 1))} className="h-10 w-10 border border-[#222222]/20 text-lg">+</button>
+                <button aria-label="Decrease guests" onClick={() => setGuests((g) => Math.max(1, g - 1))} className="h-10 w-10 border border-[#222222]/20 text-lg">−</button>
+                <span className="w-10 text-center text-xl font-bold text-[#1E5336]" aria-live="polite">{guests}</span>
+                <button aria-label="Increase guests" onClick={() => setGuests((g) => Math.min(capacity, g + 1))} className="h-10 w-10 border border-[#222222]/20 text-lg">+</button>
               </div>
             </div>
             {bookingType === 'overnight' && (
               <div className="mt-6">
                 <span className="text-[10px] uppercase tracking-[0.14em] text-[#6B756B]">Number of nights</span>
                 <div className="mt-2 flex items-center gap-3">
-                  <button onClick={() => setNights((n) => Math.max(1, n - 1))} className="h-10 w-10 border border-[#222222]/20 text-lg">−</button>
-                  <span className="w-10 text-center text-xl font-bold text-[#1E5336]">{nights}</span>
-                  <button onClick={() => setNights((n) => Math.min(14, n + 1))} className="h-10 w-10 border border-[#222222]/20 text-lg">+</button>
+                  <button aria-label="Decrease nights" onClick={() => setNights((n) => Math.max(1, n - 1))} className="h-10 w-10 border border-[#222222]/20 text-lg">−</button>
+                  <span className="w-10 text-center text-xl font-bold text-[#1E5336]" aria-live="polite">{nights}</span>
+                  <button aria-label="Increase nights" onClick={() => setNights((n) => Math.min(14, n + 1))} className="h-10 w-10 border border-[#222222]/20 text-lg">+</button>
                 </div>
               </div>
             )}
             {kind === 'event' && (
               <div className="mt-6">
-                <span className="text-[10px] uppercase tracking-[0.14em] text-[#6B756B]">Event type</span>
-                <input
-                  type="text"
-                  value={eventDetails}
-                  onChange={(e) => setEventDetails(e.target.value)}
-                  placeholder="e.g. Wedding, birthday, team building"
-                  className="mt-2 w-full border border-[#222222]/20 bg-transparent px-3 py-3 text-sm outline-none placeholder:text-[#6B756B]/50 focus:border-[#1E5336]"
-                />
+                <label className="block">
+                  <span className="text-[10px] uppercase tracking-[0.14em] text-[#6B756B]">Event type</span>
+                  <input
+                    type="text"
+                    value={eventDetails}
+                    onChange={(e) => setEventDetails(e.target.value)}
+                    placeholder="e.g. Wedding, birthday, team building"
+                    className="mt-2 w-full border border-[#222222]/20 bg-transparent px-3 py-3 text-sm outline-none placeholder:text-[#6B756B]/50 focus:border-[#1E5336]"
+                  />
+                </label>
               </div>
             )}
 
@@ -549,9 +553,9 @@ export default function CottageBookingForm({ onDone }: { onDone: () => void }) {
                       </div>
                       <div className="flex items-center gap-3">
                         {qty > 0 && <span className="text-sm font-bold text-[#1E5336]">₱{(a.price * qty).toLocaleString()}</span>}
-                        <button onClick={() => setAddOns((s) => ({ ...s, [a.id]: Math.max(0, qty - 1) }))} className="h-8 w-8 border border-[#222222]/20 text-lg leading-none">−</button>
-                        <span className="w-6 text-center text-sm font-bold text-[#1E5336]">{qty}</span>
-                        <button onClick={() => setAddOns((s) => ({ ...s, [a.id]: qty + 1 }))} className="h-8 w-8 border border-[#222222]/20 text-lg leading-none">+</button>
+                        <button aria-label={`Remove ${a.name}`} onClick={() => setAddOns((s) => ({ ...s, [a.id]: Math.max(0, qty - 1) }))} className="h-8 w-8 border border-[#222222]/20 text-lg leading-none">−</button>
+                        <span className="w-6 text-center text-sm font-bold text-[#1E5336]" aria-live="polite">{qty}</span>
+                        <button aria-label={`Add ${a.name}`} onClick={() => setAddOns((s) => ({ ...s, [a.id]: qty + 1 }))} className="h-8 w-8 border border-[#222222]/20 text-lg leading-none">+</button>
                       </div>
                     </div>
                   )
@@ -699,6 +703,7 @@ export default function CottageBookingForm({ onDone }: { onDone: () => void }) {
                 </p>
               )}
             </div>
+            <ConsentCheckbox id="cottage-consent" agreed={consent} onChange={setConsent} />
           </>
         )}
 

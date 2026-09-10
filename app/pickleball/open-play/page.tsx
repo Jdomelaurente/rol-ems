@@ -4,6 +4,7 @@ import React, { useState } from 'react'
 import Link from 'next/link'
 import { usePickleball } from '@/context/PickleballContext'
 import { OpenPlaySession } from '@/lib/data'
+import ConsentCheckbox from '@/components/legal/ConsentCheckbox'
 import { Users, Disc, CheckCircle2, AlertCircle, Clock, Calendar, ShieldCheck, ChevronRight, UserPlus } from 'lucide-react'
 
 export default function OpenPlayPage() {
@@ -15,6 +16,7 @@ export default function OpenPlayPage() {
   const [wantPaddleRental, setWantPaddleRental] = useState(false)
   const [selectedPaddleId, setSelectedPaddleId] = useState('')
   const [paymentMethod, setPaymentMethod] = useState<'GCash' | 'Maya' | 'Pay at Counter'>('GCash')
+  const [consent, setConsent] = useState(false)
 
   const [feedback, setFeedback] = useState<{
     type: 'success' | 'warning' | 'error'
@@ -29,12 +31,13 @@ export default function OpenPlayPage() {
     setPlayerName('')
     setWantPaddleRental(false)
     setSelectedPaddleId('')
+    setConsent(false)
     setIsJoinModalOpen(true)
   }
 
   const handleConfirmJoin = (e: React.FormEvent) => {
     e.preventDefault()
-    if (!selectedSession || !playerName.trim()) return
+    if (!selectedSession || !playerName.trim() || !consent) return
 
     const result = joinOpenPlaySession(selectedSession.id, playerName)
 
@@ -339,6 +342,8 @@ export default function OpenPlayPage() {
                   )}
                 </div>
 
+                <ConsentCheckbox id="open-play-consent" agreed={consent} onChange={setConsent} />
+
                 <div className="pt-4 border-t border-[#222222]/10 flex justify-end gap-2">
                   <button
                     type="button"
@@ -349,7 +354,10 @@ export default function OpenPlayPage() {
                   </button>
                   <button
                     type="submit"
-                    className="bg-[#1E5336] text-white px-5 py-2 font-bold uppercase tracking-wider hover:bg-[#153b26]"
+                    disabled={!consent}
+                    className={`px-5 py-2 font-bold uppercase tracking-wider ${
+                      consent ? 'bg-[#1E5336] text-white hover:bg-[#153b26]' : 'bg-[#222222]/10 text-[#6B756B] cursor-not-allowed'
+                    }`}
                   >
                     {selectedSession.players.length >= 12 ? 'Enter Queue' : 'Confirm Registration'}
                   </button>

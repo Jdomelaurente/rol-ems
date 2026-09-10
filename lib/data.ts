@@ -9,8 +9,6 @@ export type Facility = {
   image: string
 }
 
-const resortMark = (image: string) => `https://images.unsplash.com/${image}?auto=format&fit=crop&w=1200&q=85`
-
 export const facilities: Facility[] = [
   {
     establishment: 'ROL-EMS Resort',
@@ -55,14 +53,14 @@ export type CottageType = {
 }
 
 export const cottageOptions: CottageType[] = [
-  { name: 'Kubo Cottage', detail: 'Beachside nipa-hut cottage', price: '₱1,800 / day', image: '/sports-events/cottage.jpg', capacity: 6 },
-  { name: 'Beach Cottage', detail: 'Beachside cottage rental · kubo style', price: '₱2,500 / day', image: '/sports-events/cottage.jpg', capacity: 8 },
-  { name: 'Family Cottage', detail: 'Larger cottage for families & groups', price: '₱3,500 / day', image: '/sports-events/cottage.jpg', capacity: 12 },
+  { name: 'Kubo Cottage', detail: 'Beachside nipa-hut cottage', price: '₱1,800 / day', image: '/sports-events/cottage.jpeg', capacity: 6 },
+  { name: 'Beach Cottage', detail: 'Beachside cottage rental · kubo style', price: '₱2,500 / day', image: '/sports-events/cottage.jpeg', capacity: 8 },
+  { name: 'Family Cottage', detail: 'Larger cottage for families & groups', price: '₱3,500 / day', image: '/sports-events/cottage.jpeg', capacity: 12 },
 ]
 
 export const eventVenues: CottageType[] = [
-  { name: 'Half-Area Venue', detail: 'Half of the resort for smaller events', price: '₱12,000 / day', image: '/sports-events/cottage.jpg', capacity: 50 },
-  { name: 'Whole-Area Venue', detail: 'Whole resort / event area', price: '₱20,000 / day', image: '/sports-events/cottage.jpg', capacity: 150 },
+  { name: 'Half-Area Venue', detail: 'Half of the resort for smaller events', price: '₱12,000 / day', image: '/sports-events/cottage.jpeg', capacity: 50 },
+  { name: 'Whole-Area Venue', detail: 'Whole resort / event area', price: '₱20,000 / day', image: '/sports-events/cottage.jpeg', capacity: 150 },
 ]
 
 export type EventAddOn = {
@@ -106,8 +104,8 @@ export const pickleballOptions: CottageType[] = [
 ]
 
 export const badmintonOptions: CottageType[] = [
-  { name: 'Court 01', detail: 'Air-conditioned badminton court', price: '₱300 / hour', image: 'https://images.unsplash.com/photo-1626224583764-f87db24ac4ea?auto=format&fit=crop&w=1200&q=85' },
-  { name: 'Court 02', detail: 'Air-conditioned badminton court', price: '₱300 / hour', image: 'https://images.unsplash.com/photo-1626224583764-f87db24ac4ea?auto=format&fit=crop&w=1200&q=85' },
+  { name: 'Court 01', detail: 'Air-conditioned badminton court', price: '₱300 / hour', image: '/sports-events/badminton.jpeg' },
+  { name: 'Court 02', detail: 'Air-conditioned badminton court', price: '₱300 / hour', image: '/sports-events/badminton.jpeg' },
 ]
 
 export const taekwondoOptions: CottageType[] = [
@@ -604,7 +602,7 @@ export const tournaments: Tournament[] = [
     registrationDeadline: '2026-08-29',
     status: 'in-progress',
     description:
-      'Official pairing tournament (2 players per team). Quarterfinals through Finals with live score tracking and court assignments.',
+      'Pairing tournament (2 players per team). Quarterfinals through Finals with live score tracking and court assignments.',
     bannerColor: '#1E5336',
     published: true,
     pairs: initialPairs,

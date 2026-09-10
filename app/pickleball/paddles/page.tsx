@@ -4,6 +4,7 @@ import React, { useState } from 'react'
 import Link from 'next/link'
 import { usePickleball } from '@/context/PickleballContext'
 import { Paddle, PaddleType, PaymentMethod } from '@/lib/data'
+import ConsentCheckbox from '@/components/legal/ConsentCheckbox'
 import { Disc, ShieldCheck, Zap, Layers, Filter, CheckCircle2, Clock, CalendarCheck, Users, Trophy } from 'lucide-react'
 
 export default function PaddleRentalPage() {
@@ -20,6 +21,7 @@ export default function PaddleRentalPage() {
   const [rentalDuration, setRentalDuration] = useState('2 Hours')
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('GCash')
   const [successMessage, setSuccessMessage] = useState<string | null>(null)
+  const [consent, setConsent] = useState(false)
 
   const paddleTypes = ['All', 'Control', 'Power', 'All-Around', 'Spin', 'Precision']
 
@@ -30,12 +32,13 @@ export default function PaddleRentalPage() {
   const handleOpenRentModal = (paddle: Paddle) => {
     setSelectedPaddle(paddle)
     setSuccessMessage(null)
+    setConsent(false)
     setIsRentModalOpen(true)
   }
 
   const handleConfirmRental = (e: React.FormEvent) => {
     e.preventDefault()
-    if (!selectedPaddle || !renterName.trim()) return
+    if (!selectedPaddle || !renterName.trim() || !consent) return
 
     const selectedSession = openPlaySessions.find((s) => s.id === attachedToId)
     const courtOrSessionStr =
@@ -410,6 +413,8 @@ export default function PaddleRentalPage() {
                   </div>
                 </div>
 
+                <ConsentCheckbox id="paddle-consent" agreed={consent} onChange={setConsent} />
+
                 <div className="pt-4 border-t border-[#222222]/10 flex items-center justify-between">
                   <div>
                     <p className="text-[10px] text-[#6B756B]">Total Rental Amount</p>
@@ -425,7 +430,10 @@ export default function PaddleRentalPage() {
                     </button>
                     <button
                       type="submit"
-                      className="bg-[#1E5336] text-[#FDFBF7] px-5 py-2 text-xs font-bold uppercase tracking-wider hover:bg-[#153b26]"
+                      disabled={!consent}
+                      className={`px-5 py-2 text-xs font-bold uppercase tracking-wider ${
+                        consent ? 'bg-[#1E5336] text-[#FDFBF7] hover:bg-[#153b26]' : 'bg-[#222222]/10 text-[#6B756B] cursor-not-allowed'
+                      }`}
                     >
                       Confirm Rental
                     </button>

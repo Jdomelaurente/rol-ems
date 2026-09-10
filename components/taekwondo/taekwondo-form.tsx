@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { ArrowLeft, ArrowRight, CalendarDays, Check, ChevronLeft, ChevronRight, Clock, CircleCheck, Loader2, Wallet } from 'lucide-react'
 import { taekwondoOptions } from '@/lib/data'
 import { addBooking, getBookedTimes, isTimeTaken } from '@/lib/bookings'
+import ConsentCheckbox from '@/components/legal/ConsentCheckbox'
 
 type Step = 'schedule' | 'details' | 'review' | 'confirm'
 
@@ -33,6 +34,7 @@ export default function TaekwondoBookingForm({ onDone }: { onDone: () => void })
   const [payment, setPayment] = useState('online')
   const [paying, setPaying] = useState(false)
   const [confirmedRef, setConfirmedRef] = useState('')
+  const [consent, setConsent] = useState(false)
   const [calendarOpen, setCalendarOpen] = useState(false)
   const [timeOpen, setTimeOpen] = useState(false)
   const [viewMonth, setViewMonth] = useState(() => {
@@ -134,7 +136,7 @@ export default function TaekwondoBookingForm({ onDone }: { onDone: () => void })
   const canNext =
     (step === 'schedule' && !!scheduleReady) ||
     (step === 'details' && detailsReady) ||
-    step === 'review'
+    (step === 'review' && consent)
 
   const doCheckout = async () => {
     setPaying(true)
@@ -347,17 +349,17 @@ export default function TaekwondoBookingForm({ onDone }: { onDone: () => void })
               <div className="block">
                 <span className="text-[10px] uppercase tracking-[0.14em] text-[#6B756B]">Duration (hours)</span>
                 <div className="mt-2 flex items-center gap-3">
-                  <button onClick={() => setHours((h) => Math.max(1, h - 1))} className="h-10 w-10 border border-[#222222]/20 text-lg">−</button>
-                  <span className="w-10 text-center text-xl font-bold text-[#1E5336]">{hours}</span>
-                  <button onClick={() => setHours((h) => Math.min(4, h + 1))} className="h-10 w-10 border border-[#222222]/20 text-lg">+</button>
+                  <button aria-label="Decrease hours" onClick={() => setHours((h) => Math.max(1, h - 1))} className="h-10 w-10 border border-[#222222]/20 text-lg">−</button>
+                  <span className="w-10 text-center text-xl font-bold text-[#1E5336]" aria-live="polite">{hours}</span>
+                  <button aria-label="Increase hours" onClick={() => setHours((h) => Math.min(4, h + 1))} className="h-10 w-10 border border-[#222222]/20 text-lg">+</button>
                 </div>
               </div>
               <div className="block">
                 <span className="text-[10px] uppercase tracking-[0.14em] text-[#6B756B]">Participants</span>
                 <div className="mt-2 flex items-center gap-3">
-                  <button onClick={() => setParticipants((p) => Math.max(1, p - 1))} className="h-10 w-10 border border-[#222222]/20 text-lg">−</button>
-                  <span className="w-10 text-center text-xl font-bold text-[#1E5336]">{participants}</span>
-                  <button onClick={() => setParticipants((p) => Math.min(30, p + 1))} className="h-10 w-10 border border-[#222222]/20 text-lg">+</button>
+                  <button aria-label="Decrease participants" onClick={() => setParticipants((p) => Math.max(1, p - 1))} className="h-10 w-10 border border-[#222222]/20 text-lg">−</button>
+                  <span className="w-10 text-center text-xl font-bold text-[#1E5336]" aria-live="polite">{participants}</span>
+                  <button aria-label="Increase participants" onClick={() => setParticipants((p) => Math.min(30, p + 1))} className="h-10 w-10 border border-[#222222]/20 text-lg">+</button>
                 </div>
               </div>
             </div>
@@ -475,6 +477,7 @@ export default function TaekwondoBookingForm({ onDone }: { onDone: () => void })
                 </p>
               )}
             </div>
+            <ConsentCheckbox id="taekwondo-consent" agreed={consent} onChange={setConsent} />
           </>
         )}
 

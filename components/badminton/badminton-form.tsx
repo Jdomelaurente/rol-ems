@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { ArrowLeft, ArrowRight, CalendarDays, Check, ChevronLeft, ChevronRight, Clock, CircleCheck, Loader2, Wallet } from 'lucide-react'
 import { badmintonOptions, gameRentals } from '@/lib/data'
 import { addBooking, getBookedTimes, isTimeTaken } from '@/lib/bookings'
+import ConsentCheckbox from '@/components/legal/ConsentCheckbox'
 
 type Step = 'schedule' | 'details' | 'review' | 'confirm'
 
@@ -33,6 +34,7 @@ export default function BadmintonBookingForm({ onDone }: { onDone: () => void })
   const [payment, setPayment] = useState('online')
   const [paying, setPaying] = useState(false)
   const [confirmedRef, setConfirmedRef] = useState('')
+  const [consent, setConsent] = useState(false)
   const [calendarOpen, setCalendarOpen] = useState(false)
   const [timeOpen, setTimeOpen] = useState(false)
   const [viewMonth, setViewMonth] = useState(() => {
@@ -140,7 +142,7 @@ export default function BadmintonBookingForm({ onDone }: { onDone: () => void })
   const canNext =
     (step === 'schedule' && !!scheduleReady) ||
     (step === 'details' && detailsReady) ||
-    step === 'review'
+    (step === 'review' && consent)
 
   const doCheckout = async () => {
     setPaying(true)
@@ -354,17 +356,17 @@ export default function BadmintonBookingForm({ onDone }: { onDone: () => void })
               <div className="block">
                 <span className="text-[10px] uppercase tracking-[0.14em] text-[#6B756B]">Duration (hours)</span>
                 <div className="mt-2 flex items-center gap-3">
-                  <button onClick={() => setHours((h) => Math.max(1, h - 1))} className="h-10 w-10 border border-[#222222]/20 text-lg">−</button>
-                  <span className="w-10 text-center text-xl font-bold text-[#1E5336]">{hours}</span>
-                  <button onClick={() => setHours((h) => Math.min(4, h + 1))} className="h-10 w-10 border border-[#222222]/20 text-lg">+</button>
+                  <button aria-label="Decrease hours" onClick={() => setHours((h) => Math.max(1, h - 1))} className="h-10 w-10 border border-[#222222]/20 text-lg">−</button>
+                  <span className="w-10 text-center text-xl font-bold text-[#1E5336]" aria-live="polite">{hours}</span>
+                  <button aria-label="Increase hours" onClick={() => setHours((h) => Math.min(4, h + 1))} className="h-10 w-10 border border-[#222222]/20 text-lg">+</button>
                 </div>
               </div>
               <div className="block">
                 <span className="text-[10px] uppercase tracking-[0.14em] text-[#6B756B]">Players</span>
                 <div className="mt-2 flex items-center gap-3">
-                  <button onClick={() => setPlayers((p) => Math.max(2, p - 1))} className="h-10 w-10 border border-[#222222]/20 text-lg">−</button>
-                  <span className="w-10 text-center text-xl font-bold text-[#1E5336]">{players}</span>
-                  <button onClick={() => setPlayers((p) => Math.min(8, p + 1))} className="h-10 w-10 border border-[#222222]/20 text-lg">+</button>
+                  <button aria-label="Decrease players" onClick={() => setPlayers((p) => Math.max(2, p - 1))} className="h-10 w-10 border border-[#222222]/20 text-lg">−</button>
+                  <span className="w-10 text-center text-xl font-bold text-[#1E5336]" aria-live="polite">{players}</span>
+                  <button aria-label="Increase players" onClick={() => setPlayers((p) => Math.min(8, p + 1))} className="h-10 w-10 border border-[#222222]/20 text-lg">+</button>
                 </div>
               </div>
             </div>
@@ -382,9 +384,9 @@ export default function BadmintonBookingForm({ onDone }: { onDone: () => void })
                         <span className="mt-0.5 block text-[10px] text-[#6B756B]">₱{g.price} · {g.unit}</span>
                       </span>
                       <span className="flex shrink-0 items-center gap-2">
-                        <button onClick={() => setAddOns((a) => ({ ...a, [g.id]: Math.max(0, qty - 1) }))} className="h-8 w-8 border border-[#222222]/20 text-base">−</button>
-                        <span className="w-6 text-center font-bold text-[#1E5336]">{qty}</span>
-                        <button onClick={() => setAddOns((a) => ({ ...a, [g.id]: Math.min(5, qty + 1) }))} className="h-8 w-8 border border-[#222222]/20 text-base">+</button>
+                        <button aria-label={`Remove ${g.name}`} onClick={() => setAddOns((a) => ({ ...a, [g.id]: Math.max(0, qty - 1) }))} className="h-8 w-8 border border-[#222222]/20 text-base">−</button>
+                        <span className="w-6 text-center font-bold text-[#1E5336]" aria-live="polite">{qty}</span>
+                        <button aria-label={`Add ${g.name}`} onClick={() => setAddOns((a) => ({ ...a, [g.id]: Math.min(5, qty + 1) }))} className="h-8 w-8 border border-[#222222]/20 text-base">+</button>
                       </span>
                     </div>
                   )
@@ -511,6 +513,7 @@ export default function BadmintonBookingForm({ onDone }: { onDone: () => void })
                 </p>
               )}
             </div>
+            <ConsentCheckbox id="badminton-consent" agreed={consent} onChange={setConsent} />
           </>
         )}
 

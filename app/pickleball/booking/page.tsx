@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { courts, courtSchedule } from '@/lib/data'
 import type { Court } from '@/lib/data'
 import { usePickleball } from '@/context/PickleballContext'
+import ConsentCheckbox from '@/components/legal/ConsentCheckbox'
 import {
   CalendarDays, Clock, ChevronLeft, ChevronRight, Check, ArrowRight, ArrowLeft,
   Volleyball, Disc, CreditCard, Banknote, CircleCheck
@@ -47,6 +48,7 @@ export default function BookingPage() {
   const [contact, setContact] = useState('')
   const [payment, setPayment] = useState<PaymentMethod>('Online Payment')
   const [confirmedRef, setConfirmedRef] = useState('')
+  const [consent, setConsent] = useState(false)
 
   // Paddle Rental Option
   const [addPaddle, setAddPaddle] = useState(false)
@@ -444,13 +446,18 @@ export default function BookingPage() {
               </div>
             </div>
 
+            <ConsentCheckbox id="book-court-consent" agreed={consent} onChange={setConsent} />
+
             <div className="mt-6 flex justify-between border-t border-[#222222]/10 pt-6">
               <button onClick={() => go('details')} className="flex items-center gap-2 text-[10px] uppercase tracking-[0.14em] text-[#6B756B]">
                 <ArrowLeft size={14} /> Back
               </button>
               <button
+                disabled={!consent}
                 onClick={confirm}
-                className="flex items-center gap-2 bg-[#E1A728] px-6 py-3 text-[10px] uppercase tracking-[0.16em] font-bold text-[#1E5336] hover:bg-[#c48e1a]"
+                className={`flex items-center gap-2 px-6 py-3 text-[10px] uppercase tracking-[0.16em] font-bold transition ${
+                  consent ? 'bg-[#E1A728] text-[#1E5336] hover:bg-[#c48e1a]' : 'bg-[#222222]/10 text-[#6B756B] cursor-not-allowed'
+                }`}
               >
                 Confirm & Book Court <ArrowRight size={14} />
               </button>
