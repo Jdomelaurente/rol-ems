@@ -5,7 +5,10 @@ import { PrismaPg } from '@prisma/adapter-pg'
 const globalForPrisma = globalThis as unknown as { prisma?: PrismaClient }
 
 function createClient(): PrismaClient {
-  const pool = new Pool({ connectionString: process.env.DATABASE_URL })
+  const pool = new Pool({
+    connectionString: process.env.DATABASE_URL,
+    ssl: { rejectUnauthorized: false },
+  })
   const adapter = new PrismaPg(pool, { statementCacheSize: 0 })
   return new PrismaClient({ adapter })
 }
