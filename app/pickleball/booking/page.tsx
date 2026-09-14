@@ -6,6 +6,7 @@ import { courts, courtSchedule } from '@/lib/data'
 import type { Court } from '@/lib/data'
 import { usePickleball } from '@/context/PickleballContext'
 import ConsentCheckbox from '@/components/legal/ConsentCheckbox'
+import Navbar from '@/components/layout/Navbar'
 import {
   CalendarDays, Clock, ChevronLeft, ChevronRight, Check, ArrowRight, ArrowLeft,
   Volleyball, Disc, CreditCard, Banknote, CircleCheck
@@ -143,7 +144,8 @@ export default function BookingPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#F3F0EC] text-[#222222] pb-16">
+    <div className="min-h-screen bg-[#F3F0EC] text-[#222222] pt-[64px] pb-16">
+      <Navbar />
       {/* Header */}
       <section className="bg-[#FDFBF7] border-b border-[#222222]/10 px-6 py-10">
         <div className="mx-auto max-w-4xl">

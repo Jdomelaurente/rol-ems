@@ -34,7 +34,7 @@ function ReceiptContent() {
   if (state === 'notfound' || state === 'error' || !booking) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-[#F3F0EC]">
-        <div className="bg-[#FDFBF7] p-10 text-center shadow-xl">
+        <div className="border border-[#222222]/15 bg-[#FDFBF7] p-10 text-center">
           <p className="text-sm font-semibold text-[#222222]">Receipt not found</p>
           <p className="mt-2 text-xs text-[#6B756B]">Check the reference and try again.</p>
           <a href="/" className="mt-6 inline-block text-xs uppercase tracking-[0.14em] text-[#1E5336] underline">
@@ -74,7 +74,7 @@ function ReceiptContent() {
       </div>
 
       {/* Receipt card */}
-      <div className="mx-auto max-w-lg bg-[#FDFBF7] shadow-2xl print:shadow-none">
+      <div className="mx-auto max-w-lg border border-[#222222]/15 bg-[#FDFBF7] print:border-none print:shadow-none">
         {/* Header */}
         <div className="bg-[#1E5336] px-8 py-7 text-center">
           <div className="font-serif text-xl tracking-[-0.5px] text-[#FDFBF7]">
@@ -88,7 +88,7 @@ function ReceiptContent() {
         {/* Body */}
         <div className="px-8 py-8">
           <div className="mb-6 flex items-center gap-3">
-            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#1E5336] text-[#FDFBF7]">
+            <span className="flex h-10 w-10 shrink-0 items-center justify-center bg-[#1E5336] text-[#FDFBF7]">
               <Check size={18} />
             </span>
             <div>

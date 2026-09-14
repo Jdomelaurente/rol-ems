@@ -937,6 +937,7 @@ export type AIQueuePlayer = {
   sport: SportType
   wins: number
   losses: number
+  points?: number
   gamesPlayed: number
   waitTimeMinutes: number
   sitOutCount: number
@@ -964,6 +965,24 @@ export type MiniMatch = {
 
 export const initialAIQueuePlayers: AIQueuePlayer[] = []
 export const initialMiniMatches: MiniMatch[] = []
+
+// ─── Open Play Stats & Leaderboard Types ───────────────────────────────────────
+
+export type PlayerStat = {
+  id: string
+  name: string
+  sport: SportType
+  wins: number
+  losses: number
+  winRate: number
+  pointDiff: number
+  streak: number
+  rating: number
+  rank: number
+  recentMatches: { opponent: string; score: string; result: 'W' | 'L' }[]
+}
+
+export const initialPlayerStats: PlayerStat[] = []
 
 // ─── Club & Registered Teams ─────────────────────────────────────────────────
 

@@ -6,7 +6,8 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import { usePickleball } from '@/context/PickleballContext'
 import { getPairDisplayName } from '@/lib/data'
 import ConsentCheckbox from '@/components/legal/ConsentCheckbox'
-import { Trophy, Calendar, MapPin, Users, Tag, ArrowLeft, CheckCircle, CircleCheck, AlertCircle } from 'lucide-react'
+import Navbar from '@/components/layout/Navbar'
+import { ArrowLeft, CircleCheck, AlertCircle } from 'lucide-react'
 
 export default function TournamentDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const resolvedParams = use(params)
@@ -37,110 +38,111 @@ export default function TournamentDetailPage({ params }: { params: Promise<{ id:
   }
 
   return (
-    <div className="min-h-screen bg-[#F3F0EC]">
-      {/* Header */}
-      <div className="bg-[#1E5336] px-4 py-10 sm:px-6">
+    <div className="min-h-screen bg-[#F3F0EC] text-[#222222] pt-[64px] pb-16">
+      <Navbar />
+
+      <section className="bg-[#FDFBF7] border-b border-[#222222]/10 px-6 py-10">
         <div className="mx-auto max-w-5xl">
-          <Link href="/pickleball/tournaments" className="inline-flex items-center gap-1 text-xs font-semibold uppercase tracking-wider text-[#E1A728] hover:underline mb-4">
-            <ArrowLeft size={14} /> Back to Tournaments
+          <Link
+            href="/pickleball/tournaments"
+            className="inline-flex items-center gap-1 text-[10px] uppercase tracking-[0.14em] font-bold text-[#E1A728] hover:text-[#1E5336] mb-4"
+          >
+            <ArrowLeft size={12} /> Back to Tournaments
           </Link>
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
             <div>
-              <div className="flex items-center gap-2">
-                <span className="inline-block rounded-full bg-[#E1A728]/20 px-3 py-1 text-xs font-bold uppercase tracking-wider text-[#E1A728]">
-                  {tournament.type}
-                </span>
-                <span className="bg-white/20 text-white text-[10px] font-bold px-2 py-0.5 uppercase rounded">
-                  {isTeamEvent ? 'Team Event (Club)' : 'Pairing Tournament'}
-                </span>
-              </div>
-              <h1 className="mt-2 font-serif text-3xl font-bold text-white sm:text-4xl lg:text-5xl">{tournament.name}</h1>
+              <p className="text-xs uppercase tracking-[0.18em] text-[#E1A728]">{tournament.type}</p>
+              <h1 className="mt-2 font-serif text-4xl text-[#1E5336] sm:text-5xl">{tournament.name}</h1>
+              <span className="mt-2 inline-block border border-[#222222]/15 bg-[#FDFBF7] px-2.5 py-1 text-[9px] uppercase tracking-[0.12em] font-bold text-[#6B756B]">
+                {isTeamEvent ? 'Team Event (Club)' : 'Pairing Tournament'}
+              </span>
             </div>
             {isRegOpen && !isRegistering && (
               <button
                 onClick={() => setIsRegistering(true)}
-                className="rounded-xl bg-[#E1A728] px-6 py-3 text-sm font-bold text-[#111] hover:bg-[#c9901f] transition-all shrink-0"
+                className="bg-[#E1A728] px-6 py-3 text-[10px] uppercase tracking-[0.16em] font-bold text-[#1E5336] hover:bg-[#c48e1a] shrink-0"
               >
                 {isTeamEvent ? 'Register Club Team' : 'Register Pair'}
               </button>
             )}
           </div>
         </div>
-      </div>
+      </section>
 
-      <div className="mx-auto max-w-5xl px-4 py-8 sm:px-6">
+      <div className="mx-auto max-w-5xl px-6 py-8">
         {submitted ? (
-          <div className="rounded-2xl bg-white p-8 text-center shadow-sm max-w-lg mx-auto">
-            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-green-100 text-green-600">
-              <CircleCheck size={36} />
+          <div className="mx-auto max-w-lg border border-[#222222]/15 bg-[#FDFBF7] p-8 text-center">
+            <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center border-2 border-[#1E5336] text-[#1E5336]">
+              <CircleCheck size={28} />
             </div>
-            <h2 className="font-serif text-2xl font-bold text-[#1E5336]">
+            <h2 className="font-serif text-2xl text-[#1E5336]">
               {isTeamEvent ? 'Team Squad Registered!' : 'Pair Registered Successfully!'}
             </h2>
             <p className="mt-2 text-sm text-[#6B756B]">
               <strong>{pairName || `${player1} & ${player2}`}</strong> has been registered for {tournament.name}. Please pay the registration fee of ₱{tournament.registrationFee} at the venue prior to match start.
             </p>
             <div className="mt-6 flex gap-3">
-              <button onClick={() => setSubmitted(false)} className="flex-1 rounded-xl border border-[#1E5336] py-2.5 text-sm font-bold text-[#1E5336]">
+              <button onClick={() => setSubmitted(false)} className="flex-1 border border-[#1E5336] py-2.5 text-[10px] uppercase tracking-[0.14em] font-bold text-[#1E5336]">
                 Register Another Entry
               </button>
-              <Link href="/pickleball/tournaments/bracket" className="flex-1 rounded-xl bg-[#1E5336] py-2.5 text-center text-sm font-bold text-white">
+              <Link href="/pickleball/tournaments/bracket" className="flex-1 bg-[#1E5336] py-2.5 text-center text-[10px] uppercase tracking-[0.14em] font-bold text-[#FDFBF7]">
                 View Tournament Bracket
               </Link>
             </div>
           </div>
         ) : isRegistering ? (
-          <div className="rounded-2xl bg-white p-6 shadow-sm max-w-xl mx-auto sm:p-8">
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-xl font-bold text-[#111]">
+          <div className="mx-auto max-w-xl border border-[#222222]/15 bg-[#FDFBF7] p-6 sm:p-8">
+            <div className="mb-6 flex items-center justify-between border-b border-[#222222]/10 pb-4">
+              <h2 className="font-serif text-2xl text-[#1E5336]">
                 {isTeamEvent ? 'Club Team Squad Registration' : 'Doubles Pair Registration Form'}
               </h2>
-              <button onClick={() => setIsRegistering(false)} className="text-xs font-semibold text-[#6B756B] hover:underline">
+              <button onClick={() => setIsRegistering(false)} className="text-[10px] uppercase tracking-[0.14em] font-bold text-[#6B756B] hover:text-[#222222]">
                 Cancel
               </button>
             </div>
 
             <form onSubmit={handleRegister} className="space-y-4">
               <div>
-                <label className="block text-[11px] font-semibold uppercase text-[#6B756B]">
-                  Team / Pair Name <span className="font-normal text-gray-400 lowercase">(optional - defaults to Player 1 & 2)</span>
+                <label className="block text-[10px] uppercase tracking-[0.14em] font-bold text-[#6B756B]">
+                  Team / Pair Name <span className="font-normal normal-case tracking-normal text-[#6B756B]">(optional - defaults to Player 1 & 2)</span>
                 </label>
                 <input
                   type="text"
                   value={pairName}
                   onChange={(e) => setPairName(e.target.value)}
                   placeholder="Optional e.g. Smash Duo"
-                  className="mt-1 w-full rounded-xl border border-[rgba(17,17,17,0.15)] bg-[#F3F0EC] px-4 py-3 text-sm outline-none focus:border-[#1E5336]"
+                  className="mt-2 w-full border border-[#222222]/20 bg-[#F3F0EC] px-4 py-3 text-sm outline-none focus:border-[#1E5336]"
                 />
               </div>
 
               <div>
-                <label className="block text-[11px] font-semibold uppercase text-[#6B756B]">Player 1 Name *</label>
+                <label className="block text-[10px] uppercase tracking-[0.14em] font-bold text-[#6B756B]">Player 1 Name *</label>
                 <input
                   type="text"
                   required
                   value={player1}
                   onChange={(e) => setPlayer1(e.target.value)}
                   placeholder="e.g. Maria Santos"
-                  className="mt-1 w-full rounded-xl border border-[rgba(17,17,17,0.15)] bg-[#F3F0EC] px-4 py-3 text-sm outline-none focus:border-[#1E5336]"
+                  className="mt-2 w-full border border-[#222222]/20 bg-[#F3F0EC] px-4 py-3 text-sm outline-none focus:border-[#1E5336]"
                 />
               </div>
 
               <div>
-                <label className="block text-[11px] font-semibold uppercase text-[#6B756B]">Player 2 Name *</label>
+                <label className="block text-[10px] uppercase tracking-[0.14em] font-bold text-[#6B756B]">Player 2 Name *</label>
                 <input
                   type="text"
                   required
                   value={player2}
                   onChange={(e) => setPlayer2(e.target.value)}
                   placeholder="e.g. Juan Rivera"
-                  className="mt-1 w-full rounded-xl border border-[rgba(17,17,17,0.15)] bg-[#F3F0EC] px-4 py-3 text-sm outline-none focus:border-[#1E5336]"
+                  className="mt-2 w-full border border-[#222222]/20 bg-[#F3F0EC] px-4 py-3 text-sm outline-none focus:border-[#1E5336]"
                 />
               </div>
 
-              <div className="rounded-xl bg-amber-50 p-4 text-xs text-amber-800 space-y-1">
-                <p className="font-bold">Entry Fee: ₱{tournament.registrationFee} per entry</p>
-                <p>Registration deadline: {tournament.registrationDeadline}</p>
+              <div className="border border-[#E1A728]/40 bg-[#FDFBF7] p-4 text-xs text-[#222222] space-y-1">
+                <p className="font-bold text-[#1E5336]">Entry Fee: ₱{tournament.registrationFee} per entry</p>
+                <p className="text-[#6B756B]">Registration deadline: {tournament.registrationDeadline}</p>
               </div>
 
               <ConsentCheckbox id="tournament-consent" agreed={consent} onChange={setConsent} />
@@ -148,8 +150,8 @@ export default function TournamentDetailPage({ params }: { params: Promise<{ id:
               <button
                 type="submit"
                 disabled={!consent}
-                className={`w-full rounded-xl py-3 text-sm font-bold transition-all ${
-                  consent ? 'bg-[#1E5336] text-white hover:bg-[#153d27]' : 'bg-[#222222]/10 text-[#6B756B] cursor-not-allowed'
+                className={`w-full py-3 text-[10px] uppercase tracking-[0.16em] font-bold transition ${
+                  consent ? 'bg-[#1E5336] text-[#FDFBF7] hover:bg-[#153d27]' : 'bg-[#222222]/10 text-[#6B756B] cursor-not-allowed'
                 }`}
               >
                 Complete Registration
@@ -158,35 +160,33 @@ export default function TournamentDetailPage({ params }: { params: Promise<{ id:
           </div>
         ) : (
           <div className="grid gap-8 lg:grid-cols-3">
-            {/* Info Column */}
             <div className="lg:col-span-2 space-y-6">
-              <div className="rounded-2xl bg-white p-6 shadow-sm sm:p-8">
-                <h2 className="text-xl font-bold text-[#111]">About the Tournament</h2>
-                <p className="mt-3 text-sm leading-7 text-[#444]">{tournament.description}</p>
+              <div className="border border-[#222222]/15 bg-[#FDFBF7] p-6 sm:p-8">
+                <h2 className="font-serif text-2xl text-[#1E5336]">About the Tournament</h2>
+                <p className="mt-3 text-sm leading-7 text-[#6B756B]">{tournament.description}</p>
 
-                <div className="mt-6 grid grid-cols-2 gap-4 border-t border-[rgba(17,17,17,0.08)] pt-6 text-sm">
+                <div className="mt-6 grid grid-cols-2 gap-4 border-t border-[#222222]/10 pt-6 text-sm">
                   <div>
-                    <span className="text-xs text-[#6B756B]">Date & Time</span>
-                    <p className="font-semibold text-[#111]">{tournament.date} at {tournament.time}</p>
+                    <span className="text-[10px] uppercase tracking-[0.14em] text-[#6B756B] font-bold">Date & Time</span>
+                    <p className="font-semibold text-[#222222]">{tournament.date} at {tournament.time}</p>
                   </div>
                   <div>
-                    <span className="text-xs text-[#6B756B]">Location</span>
-                    <p className="font-semibold text-[#111]">{tournament.location}</p>
+                    <span className="text-[10px] uppercase tracking-[0.14em] text-[#6B756B] font-bold">Location</span>
+                    <p className="font-semibold text-[#222222]">{tournament.location}</p>
                   </div>
                   <div>
-                    <span className="text-xs text-[#6B756B]">Registration Fee</span>
+                    <span className="text-[10px] uppercase tracking-[0.14em] text-[#6B756B] font-bold">Registration Fee</span>
                     <p className="font-semibold text-[#1E5336]">₱{tournament.registrationFee} / entry</p>
                   </div>
                   <div>
-                    <span className="text-xs text-[#6B756B]">Registration Deadline</span>
-                    <p className="font-semibold text-[#111]">{tournament.registrationDeadline}</p>
+                    <span className="text-[10px] uppercase tracking-[0.14em] text-[#6B756B] font-bold">Registration Deadline</span>
+                    <p className="font-semibold text-[#222222]">{tournament.registrationDeadline}</p>
                   </div>
                 </div>
               </div>
 
-              {/* Registered Entries */}
-              <div className="rounded-2xl bg-white p-6 shadow-sm">
-                <h3 className="text-lg font-bold text-[#111] mb-4">
+              <div className="border border-[#222222]/15 bg-[#FDFBF7] p-6">
+                <h3 className="font-serif text-xl text-[#1E5336] mb-4">
                   Registered {isTeamEvent ? 'Teams' : 'Pairs'} ({pairs.length}/{tournament.maxTeams})
                 </h3>
                 <div className="grid gap-2 sm:grid-cols-2">
@@ -194,16 +194,16 @@ export default function TournamentDetailPage({ params }: { params: Promise<{ id:
                     const label = getPairDisplayName(p)
 
                     return (
-                      <div key={p.id} className="flex items-center justify-between rounded-xl bg-[#F3F0EC]/60 p-3 text-xs">
+                      <div key={p.id} className="flex items-center justify-between border border-[#222222]/10 bg-[#F3F0EC] p-3 text-xs">
                         <div className="flex items-center gap-2">
                           <span className="font-bold text-[#1E5336]">#{idx + 1}</span>
                           <div>
-                            <p className="font-bold text-[#111]">{label}</p>
+                            <p className="font-bold text-[#222222]">{label}</p>
                             <p className="text-[#6B756B]">{p.player1} & {p.player2}</p>
                           </div>
                         </div>
-                        <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold uppercase ${
-                          p.status === 'active' ? 'bg-green-100 text-green-700' : 'bg-rose-100 text-rose-700'
+                        <span className={`border px-2 py-0.5 text-[9px] uppercase tracking-[0.12em] font-bold ${
+                          p.status === 'active' ? 'border-[#1E5336]/20 text-[#1E5336]' : 'border-[#E1A728]/40 text-[#E1A728]'
                         }`}>
                           {p.status}
                         </span>
@@ -214,28 +214,27 @@ export default function TournamentDetailPage({ params }: { params: Promise<{ id:
               </div>
             </div>
 
-            {/* Side Card */}
             <div>
-              <div className="rounded-2xl bg-white p-6 shadow-sm space-y-4 sticky top-20">
-                <h3 className="font-bold text-[#111]">Event Overview</h3>
+              <div className="sticky top-20 border border-[#222222]/15 bg-[#FDFBF7] p-6 space-y-4">
+                <h3 className="font-serif text-xl text-[#1E5336]">Event Overview</h3>
                 <div className="space-y-3 text-xs">
-                  <div className="flex justify-between py-2 border-b border-[rgba(17,17,17,0.06)]">
+                  <div className="flex justify-between py-2 border-b border-[#222222]/10">
                     <span className="text-[#6B756B]">Format</span>
-                    <span className="font-bold text-[#111]">{isTeamEvent ? 'Team Event Tournament' : 'Pairing Tournament'}</span>
+                    <span className="font-bold text-[#222222]">{isTeamEvent ? 'Team Event Tournament' : 'Pairing Tournament'}</span>
                   </div>
-                  <div className="flex justify-between py-2 border-b border-[rgba(17,17,17,0.06)]">
+                  <div className="flex justify-between py-2 border-b border-[#222222]/10">
                     <span className="text-[#6B756B]">Courts Assigned</span>
-                    <span className="font-bold text-[#111]">Court 1, 2, 3</span>
+                    <span className="font-bold text-[#222222]">Court 1, 2, 3</span>
                   </div>
-                  <div className="flex justify-between py-2 border-b border-[rgba(17,17,17,0.06)]">
+                  <div className="flex justify-between py-2 border-b border-[#222222]/10">
                     <span className="text-[#6B756B]">Max Capacity</span>
-                    <span className="font-bold text-[#111]">{tournament.maxTeams} Entries</span>
+                    <span className="font-bold text-[#222222]">{tournament.maxTeams} Entries</span>
                   </div>
                 </div>
 
                 <Link
                   href="/pickleball/tournaments/bracket"
-                  className="w-full flex items-center justify-center gap-2 rounded-xl bg-[#1E5336] py-3 text-sm font-bold text-white hover:bg-[#153d27] transition-all"
+                  className="w-full flex items-center justify-center bg-[#1E5336] py-3 text-[10px] uppercase tracking-[0.16em] font-bold text-[#FDFBF7] hover:bg-[#153d27]"
                 >
                   View Tournament Bracket
                 </Link>

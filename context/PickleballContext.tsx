@@ -16,6 +16,8 @@ import {
   PlayerProgress,
   ShopItem,
   AIQueuePlayer,
+  MiniMatch,
+  PlayerStat,
   RouletteSpinResult,
   LiveMatchScore,
   ClubTeam,
@@ -31,6 +33,8 @@ import {
   initialPlayerProgress,
   initialShopItems,
   initialAIQueuePlayers,
+  initialMiniMatches,
+  initialPlayerStats,
   initialRouletteResults,
   initialLiveMatches,
   initialClubTeams,
@@ -60,9 +64,44 @@ interface PickleballContextType {
   cancelOpenPlaySession: (id: string) => void
   toggleRegistration: (sessionId: string) => void
   toggleQueue: (sessionId: string) => void
-  joinOpenPlaySession: (sessionId: string, playerName: string) => { joined: boolean; inQueue: boolean; queuePosition?: number; message: string }
+  joinOpenPlaySession: (
+    sessionId: string,
+    playerName: string,
+    paymentMethod?: 'Pay at Counter' | 'GCash' | 'Maya',
+    photo?: string
+  ) => { joined: boolean; inQueue: boolean; queuePosition?: number; message: string }
   leaveOpenPlaySession: (sessionId: string, playerName: string) => void
   removeFromQueue: (sessionId: string, playerName: string) => void
+
+  // AI Open Play Queue & Rotation
+  aiQueuePlayers: AIQueuePlayer[]
+  generateAIQueue: (sport: SportType) => void
+  rotateAIQueue: (sport: SportType) => void
+  addPlayerToAIQueue: (
+    name: string,
+    sport: SportType,
+    wins: number,
+    losses: number,
+    points?: number,
+    fixedPartner?: string,
+    photo?: string,
+    paymentMethod?: 'Pay at Counter' | 'GCash' | 'Maya'
+  ) => void
+  updatePlayerWinsLosses: (playerId: string, wins: number, losses: number) => void
+  adjustPlayerWins: (playerId: string, delta: number) => void
+  adjustPlayerLosses: (playerId: string, delta: number) => void
+  generateRandomPairs: (sport: SportType) => void
+  removePlayerFromAIQueue: (playerId: string) => void
+
+  // Open Play Mini Matches & Leaderboard
+  miniMatches: MiniMatch[]
+  playerStats: PlayerStat[]
+  recordMatchResult: (
+    winnerName: string,
+    loserName: string,
+    score: string,
+    sport: SportType
+  ) => void
 
   // Tournaments & Brackets
   tournaments: Tournament[]
@@ -95,25 +134,6 @@ interface PickleballContextType {
   // Rebar Sports Shop
   shopItems: ShopItem[]
   buyShopItem: (itemId: string, qty: number) => { success: boolean; message: string }
-
-  // AI Open Play Queue & Rotation
-  aiQueuePlayers: AIQueuePlayer[]
-  generateAIQueue: (sport: SportType) => void
-  rotateAIQueue: (sport: SportType) => void
-  addPlayerToAIQueue: (
-    name: string,
-    sport: SportType,
-    wins: number,
-    losses: number,
-    fixedPartner?: string,
-    photo?: string,
-    paymentMethod?: 'Pay at Counter' | 'GCash' | 'Maya'
-  ) => void
-  updatePlayerWinsLosses: (playerId: string, wins: number, losses: number) => void
-  adjustPlayerWins: (playerId: string, delta: number) => void
-  adjustPlayerLosses: (playerId: string, delta: number) => void
-  generateRandomPairs: (sport: SportType) => void
-  removePlayerFromAIQueue: (playerId: string) => void
 
   // Roulette Random Pairing
   rouletteResults: RouletteSpinResult[]
@@ -149,6 +169,8 @@ export const PickleballProvider: React.FC<{ children: React.ReactNode }> = ({ ch
   const [playerProgress, setPlayerProgress] = useState<PlayerProgress[]>(initialPlayerProgress)
   const [shopItems, setShopItems] = useState<ShopItem[]>(initialShopItems)
   const [aiQueuePlayers, setAiQueuePlayers] = useState<AIQueuePlayer[]>(initialAIQueuePlayers)
+  const [miniMatches, setMiniMatches] = useState<MiniMatch[]>(initialMiniMatches)
+  const [playerStats, setPlayerStats] = useState<PlayerStat[]>(initialPlayerStats)
   const [rouletteResults, setRouletteResults] = useState<RouletteSpinResult[]>(initialRouletteResults)
   const [liveMatches, setLiveMatches] = useState<LiveMatchScore[]>(initialLiveMatches)
   const [clubTeams, setClubTeams] = useState<ClubTeam[]>(initialClubTeams)
@@ -177,6 +199,8 @@ export const PickleballProvider: React.FC<{ children: React.ReactNode }> = ({ ch
         if (parsed.playerProgress) setPlayerProgress(parsed.playerProgress)
         if (parsed.shopItems) setShopItems(parsed.shopItems)
         if (parsed.aiQueuePlayers) setAiQueuePlayers(parsed.aiQueuePlayers)
+        if (parsed.miniMatches) setMiniMatches(parsed.miniMatches)
+        if (parsed.playerStats) setPlayerStats(parsed.playerStats)
         if (parsed.rouletteResults) setRouletteResults(parsed.rouletteResults)
         if (parsed.liveMatches) setLiveMatches(parsed.liveMatches)
         if (parsed.clubTeams) setClubTeams(parsed.clubTeams)
@@ -232,6 +256,8 @@ export const PickleballProvider: React.FC<{ children: React.ReactNode }> = ({ ch
             playerProgress,
             shopItems,
             aiQueuePlayers,
+            miniMatches,
+            playerStats,
             rouletteResults,
             liveMatches,
             clubTeams,
@@ -244,7 +270,7 @@ export const PickleballProvider: React.FC<{ children: React.ReactNode }> = ({ ch
         savingRef.current = false
       }
     }, 400)
-  }, [isLoaded, paddles, paddleRentals, openPlaySessions, tournaments, bracketMatches, reservations, coaches, coachingBookings, playerProgress, shopItems, aiQueuePlayers, rouletteResults, liveMatches, clubTeams])
+  }, [isLoaded, paddles, paddleRentals, openPlaySessions, tournaments, bracketMatches, reservations, coaches, coachingBookings, playerProgress, shopItems, aiQueuePlayers, rouletteResults, liveMatches, clubTeams, miniMatches, playerStats])
 
   const resetToDefault = () => {
     setPaddles(initialPaddles)
@@ -258,6 +284,8 @@ export const PickleballProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     setPlayerProgress(initialPlayerProgress)
     setShopItems(initialShopItems)
     setAiQueuePlayers(initialAIQueuePlayers)
+    setMiniMatches(initialMiniMatches)
+    setPlayerStats(initialPlayerStats)
     setRouletteResults(initialRouletteResults)
     setLiveMatches(initialLiveMatches)
     setClubTeams(initialClubTeams)
@@ -394,7 +422,12 @@ export const PickleballProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     )
   }
 
-  const joinOpenPlaySession = (sessionId: string, playerName: string) => {
+  const joinOpenPlaySession = (
+    sessionId: string,
+    playerName: string,
+    paymentMethod?: 'Pay at Counter' | 'GCash' | 'Maya',
+    photo?: string
+  ) => {
     let result = { joined: false, inQueue: false, queuePosition: undefined as number | undefined, message: '' }
 
     setOpenPlaySessions((prev) =>
@@ -916,6 +949,7 @@ export const PickleballProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     sport,
     wins,
     losses,
+    points,
     fixedPartner,
     photo,
     paymentMethod
@@ -926,6 +960,7 @@ export const PickleballProvider: React.FC<{ children: React.ReactNode }> = ({ ch
       sport,
       wins,
       losses,
+      points,
       gamesPlayed: 0,
       waitTimeMinutes: 0,
       sitOutCount: 0,
@@ -1005,6 +1040,43 @@ export const PickleballProvider: React.FC<{ children: React.ReactNode }> = ({ ch
 
   const removePlayerFromAIQueue = (playerId: string) => {
     setAiQueuePlayers((prev) => prev.filter((p) => p.id !== playerId))
+  }
+
+  // ─── OPEN PLAY STATS & LEADERBOARD ACTIONS ──────────────────────────────────
+
+  const recordMatchResult = (
+    winnerName: string,
+    loserName: string,
+    score: string,
+    sport: SportType
+  ) => {
+    setPlayerStats((prev) =>
+      prev.map((p) => {
+        if (p.name === winnerName && p.sport === sport) {
+          const newWins = p.wins + 1
+          const total = newWins + p.losses
+          return {
+            ...p,
+            wins: newWins,
+            winRate: Number(((newWins / total) * 100).toFixed(1)),
+            streak: p.streak + 1,
+            recentMatches: [{ opponent: loserName, score, result: 'W' }, ...p.recentMatches.slice(0, 4)],
+          }
+        }
+        if (p.name === loserName && p.sport === sport) {
+          const newLosses = p.losses + 1
+          const total = p.wins + newLosses
+          return {
+            ...p,
+            losses: newLosses,
+            winRate: Number(((p.wins / total) * 100).toFixed(1)),
+            streak: 0,
+            recentMatches: [{ opponent: winnerName, score, result: 'L' }, ...p.recentMatches.slice(0, 4)],
+          }
+        }
+        return p
+      })
+    )
   }
 
   // ─── ROULETTE RANDOM PAIRING ACTIONS ────────────────────────────────────────
@@ -1157,6 +1229,9 @@ export const PickleballProvider: React.FC<{ children: React.ReactNode }> = ({ ch
         adjustPlayerLosses,
         generateRandomPairs,
         removePlayerFromAIQueue,
+        miniMatches,
+        playerStats,
+        recordMatchResult,
         rouletteResults,
         spinRoulettePairing,
         deleteRouletteResult,

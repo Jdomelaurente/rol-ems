@@ -550,6 +550,7 @@ export default function AdminOpenPlayPage() {
                       'Pickleball',
                       queuePlayerWins,
                       queuePlayerLosses,
+                      undefined,
                       queueFixedPartner.trim() || undefined
                     )
                     setQueuePlayerName('')

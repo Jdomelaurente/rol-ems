@@ -151,7 +151,9 @@ export default function PickleballHub() {
               return (
                 <div key={session.id} className="border border-[#222222]/15 bg-[#FDFBF7] p-6">
                   <div className="flex items-center justify-between">
-                    <span className={`px-2.5 py-0.5 text-[9px] uppercase tracking-[0.14em] font-bold ${isFull ? 'bg-red-100 text-red-700' : 'bg-emerald-100 text-emerald-800'}`}>
+                    <span className={`border px-2.5 py-0.5 text-[9px] uppercase tracking-[0.14em] font-bold ${
+                      isFull ? 'border-[#E1A728]/40 bg-[#FDFBF7] text-[#E1A728]' : 'border-[#1E5336]/20 bg-[#FDFBF7] text-[#1E5336]'
+                    }`}>
                       {isFull ? 'SESSION FULL — JOIN QUEUE' : 'OPEN FOR PLAYERS'}
                     </span>
                   </div>

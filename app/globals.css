@@ -222,27 +222,27 @@ header {
 /* ─── Pickleball Status Badges ──────────────────────────────────────────────── */
 
 .badge-available {
-  background-color: #e8f3ed;
+  background-color: #FDFBF7;
   color: #1E5336;
-  border: 1px solid rgba(30, 83, 54, 0.2);
+  border: 1px solid rgba(30, 83, 54, 0.25);
 }
 
 .badge-reserved {
-  background-color: #fdf6e7;
-  color: #b8850f;
-  border: 1px solid rgba(225, 167, 40, 0.3);
+  background-color: #FDFBF7;
+  color: #a97c12;
+  border: 1px solid rgba(225, 167, 40, 0.4);
 }
 
 .badge-occupied {
-  background-color: #fde8e8;
+  background-color: #FDFBF7;
   color: #c53030;
-  border: 1px solid rgba(197, 48, 48, 0.2);
+  border: 1px solid rgba(197, 48, 48, 0.25);
 }
 
 .badge-open-play {
-  background-color: #ebf8ff;
+  background-color: #FDFBF7;
   color: #2b6cb0;
-  border: 1px solid rgba(43, 108, 176, 0.2);
+  border: 1px solid rgba(43, 108, 176, 0.25);
 }
 
 @keyframes dot-pulse {

@@ -195,7 +195,7 @@ export default function AdminRoulettePage() {
             </div>
             <div className="flex items-center gap-3">
               <Link
-                href="/roulette"
+                href="/pickleball/roulette"
                 className="rounded-lg border border-[#1E5336] bg-white px-4 py-2 text-xs font-bold text-[#1E5336] shadow-sm hover:bg-[#1E5336] hover:text-white transition"
               >
                 View Public Page

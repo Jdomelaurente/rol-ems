@@ -3,18 +3,16 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useState } from 'react'
-import { Menu, X, Trophy, CalendarCheck, Users, Volleyball, Disc, ShoppingBag, GraduationCap, Dices, Activity } from 'lucide-react'
+import { Menu, X, Trophy, CalendarCheck, Users, ShoppingBag, GraduationCap, Dices, Volleyball } from 'lucide-react'
 
 const navLinks = [
-  { href: '/pickleball', label: 'Hub', icon: Volleyball },
-  { href: '/pickleball/booking', label: 'Court Booking', icon: CalendarCheck },
+  { href: '/pickleball/booking', label: 'Courts', icon: CalendarCheck },
   { href: '/pickleball/open-play', label: 'Open Play', icon: Users },
-  { href: '/pickleball/paddles', label: 'Paddle Rental', icon: Disc },
   { href: '/pickleball/tournaments', label: 'Tournaments', icon: Trophy },
-  { href: '/shop', label: 'Shop', icon: ShoppingBag },
-  { href: '/coaching', label: 'Coaching', icon: GraduationCap },
-  { href: '/roulette', label: 'Roulette', icon: Dices },
-  { href: '/score/live-1', label: 'Live Score', icon: Activity },
+  { href: '/pickleball/roulette', label: 'Roulette', icon: Dices },
+  { href: '/pickleball/coaching', label: 'Coaching', icon: GraduationCap },
+  { href: '/pickleball', label: 'Pickleball', icon: Volleyball },
+  { href: '/pickleball/shop', label: 'Shop', icon: ShoppingBag },
 ]
 
 export default function Navbar() {
@@ -22,7 +20,7 @@ export default function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false)
 
   const isActive = (href: string) =>
-    href === '/pickleball' ? pathname === '/pickleball' : pathname.startsWith(href)
+    href === '/' ? pathname === '/' : href === '/pickleball' ? pathname === '/pickleball' : pathname.startsWith(href)
 
   return (
     <header className="fixed inset-x-0 top-0 z-50 border-b border-[#222222]/10 bg-[#FDFBF7]">
@@ -52,6 +50,17 @@ export default function Navbar() {
               </Link>
             )
           })}
+
+          <span className="mx-3 h-6 w-px bg-[#222222]/15" aria-hidden="true" />
+
+          <Link
+            href="/"
+            className={`border-b border-[#1E5336] px-3 py-2 text-[11px] font-bold uppercase tracking-[0.14em] transition ${
+              isActive('/') ? 'text-[#1E5336]' : 'text-[#222222] hover:text-[#1E5336]'
+            }`}
+          >
+            Back to home
+          </Link>
         </nav>
 
         {/* Mobile Toggle */}
@@ -83,6 +92,18 @@ export default function Navbar() {
                 {label}
               </Link>
             ))}
+
+            <span className="my-2 h-px bg-[#222222]/10" aria-hidden="true" />
+
+            <Link
+              href="/"
+              onClick={() => setMobileOpen(false)}
+              className={`border-b border-[#1E5336] py-2 text-xs font-bold uppercase tracking-[0.14em] ${
+                isActive('/') ? 'text-[#1E5336]' : 'text-[#222222]'
+              }`}
+            >
+              Back to home
+            </Link>
           </nav>
         </div>
       )}
