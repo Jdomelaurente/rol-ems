@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useState } from 'react'
-import { Menu, X, Trophy, CalendarCheck, Users, Volleyball, Disc } from 'lucide-react'
+import { Menu, X, Trophy, CalendarCheck, Users, Volleyball, Disc, ShoppingBag, GraduationCap, Dices, Activity } from 'lucide-react'
 
 const navLinks = [
   { href: '/pickleball', label: 'Hub', icon: Volleyball },
@@ -11,6 +11,10 @@ const navLinks = [
   { href: '/pickleball/open-play', label: 'Open Play', icon: Users },
   { href: '/pickleball/paddles', label: 'Paddle Rental', icon: Disc },
   { href: '/pickleball/tournaments', label: 'Tournaments', icon: Trophy },
+  { href: '/shop', label: 'Shop', icon: ShoppingBag },
+  { href: '/coaching', label: 'Coaching', icon: GraduationCap },
+  { href: '/roulette', label: 'Roulette', icon: Dices },
+  { href: '/score/live-1', label: 'Live Score', icon: Activity },
 ]
 
 export default function Navbar() {

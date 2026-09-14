@@ -2,6 +2,7 @@
 
 import React, { createContext, useContext, useState, useEffect, useRef } from 'react'
 import {
+  SportType,
   Paddle,
   PaddleRental,
   OpenPlaySession,
@@ -10,6 +11,14 @@ import {
   TournamentFormat,
   BracketMatch,
   Reservation,
+  Coach,
+  CoachingBooking,
+  PlayerProgress,
+  ShopItem,
+  AIQueuePlayer,
+  RouletteSpinResult,
+  LiveMatchScore,
+  ClubTeam,
   getPairDisplayName,
   initialPaddles,
   initialPaddleRentals,
@@ -17,6 +26,14 @@ import {
   tournaments as initialTournaments,
   bracketMatches as initialBracketMatches,
   reservations as initialReservations,
+  initialCoaches,
+  initialCoachingBookings,
+  initialPlayerProgress,
+  initialShopItems,
+  initialAIQueuePlayers,
+  initialRouletteResults,
+  initialLiveMatches,
+  initialClubTeams,
 } from '@/lib/data'
 
 interface PickleballContextType {
@@ -60,9 +77,54 @@ interface PickleballContextType {
   generateBracketFromPairs: (tournamentId: string) => void
   declareChampion: (tournamentId: string, pairName: string, players: string[]) => void
 
+  // Club & Registered Teams
+  clubTeams: ClubTeam[]
+  registerClubTeam: (team: Omit<ClubTeam, 'id' | 'wins' | 'losses' | 'status'>) => ClubTeam
+
   // Court Reservations
   reservations: Reservation[]
   addReservation: (reservation: Omit<Reservation, 'id' | 'bookingId'>) => Reservation
+
+  // Coaching Sessions
+  coaches: Coach[]
+  coachingBookings: CoachingBooking[]
+  playerProgress: PlayerProgress[]
+  bookCoachingSession: (booking: Omit<CoachingBooking, 'id' | 'status'>) => CoachingBooking
+  cancelCoachingBooking: (id: string) => void
+
+  // Rebar Sports Shop
+  shopItems: ShopItem[]
+  buyShopItem: (itemId: string, qty: number) => { success: boolean; message: string }
+
+  // AI Open Play Queue & Rotation
+  aiQueuePlayers: AIQueuePlayer[]
+  generateAIQueue: (sport: SportType) => void
+  rotateAIQueue: (sport: SportType) => void
+  addPlayerToAIQueue: (
+    name: string,
+    sport: SportType,
+    wins: number,
+    losses: number,
+    fixedPartner?: string,
+    photo?: string,
+    paymentMethod?: 'Pay at Counter' | 'GCash' | 'Maya'
+  ) => void
+  updatePlayerWinsLosses: (playerId: string, wins: number, losses: number) => void
+  adjustPlayerWins: (playerId: string, delta: number) => void
+  adjustPlayerLosses: (playerId: string, delta: number) => void
+  generateRandomPairs: (sport: SportType) => void
+  removePlayerFromAIQueue: (playerId: string) => void
+
+  // Roulette Random Pairing
+  rouletteResults: RouletteSpinResult[]
+  spinRoulettePairing: (playerA: string, playerB: string, bracketPlacement: string, sport: SportType, courtAssigned: string) => RouletteSpinResult
+  deleteRouletteResult: (id: string) => void
+
+  // Live Match & Scoring Links
+  liveMatches: LiveMatchScore[]
+  updateLiveScore: (matchId: string, team: 1 | 2, delta: number) => void
+  switchLiveServer: (matchId: string) => void
+  addPointHistory: (matchId: string, team: 1 | 2, text: string) => void
 
   // Reset / Sync
   resetToDefault: () => void
@@ -80,6 +142,16 @@ export const PickleballProvider: React.FC<{ children: React.ReactNode }> = ({ ch
   const [bracketMatches, setBracketMatches] = useState<BracketMatch[]>(initialBracketMatches)
   const [reservations, setReservations] = useState<Reservation[]>(initialReservations)
   const [isLoaded, setIsLoaded] = useState(false)
+
+  // New Features State
+  const [coaches, setCoaches] = useState<Coach[]>(initialCoaches)
+  const [coachingBookings, setCoachingBookings] = useState<CoachingBooking[]>(initialCoachingBookings)
+  const [playerProgress, setPlayerProgress] = useState<PlayerProgress[]>(initialPlayerProgress)
+  const [shopItems, setShopItems] = useState<ShopItem[]>(initialShopItems)
+  const [aiQueuePlayers, setAiQueuePlayers] = useState<AIQueuePlayer[]>(initialAIQueuePlayers)
+  const [rouletteResults, setRouletteResults] = useState<RouletteSpinResult[]>(initialRouletteResults)
+  const [liveMatches, setLiveMatches] = useState<LiveMatchScore[]>(initialLiveMatches)
+  const [clubTeams, setClubTeams] = useState<ClubTeam[]>(initialClubTeams)
 
   const channelRef = useRef<BroadcastChannel | null>(null)
   const savingRef = useRef(false)
@@ -100,6 +172,14 @@ export const PickleballProvider: React.FC<{ children: React.ReactNode }> = ({ ch
         if (parsed.tournaments) setTournaments(parsed.tournaments)
         if (parsed.bracketMatches) setBracketMatches(parsed.bracketMatches)
         if (parsed.reservations) setReservations(parsed.reservations)
+        if (parsed.coaches) setCoaches(parsed.coaches)
+        if (parsed.coachingBookings) setCoachingBookings(parsed.coachingBookings)
+        if (parsed.playerProgress) setPlayerProgress(parsed.playerProgress)
+        if (parsed.shopItems) setShopItems(parsed.shopItems)
+        if (parsed.aiQueuePlayers) setAiQueuePlayers(parsed.aiQueuePlayers)
+        if (parsed.rouletteResults) setRouletteResults(parsed.rouletteResults)
+        if (parsed.liveMatches) setLiveMatches(parsed.liveMatches)
+        if (parsed.clubTeams) setClubTeams(parsed.clubTeams)
       } catch (e) {
         console.error('Failed to load pickleball state', e)
       } finally {
@@ -147,6 +227,14 @@ export const PickleballProvider: React.FC<{ children: React.ReactNode }> = ({ ch
             tournaments,
             bracketMatches,
             reservations,
+            coaches,
+            coachingBookings,
+            playerProgress,
+            shopItems,
+            aiQueuePlayers,
+            rouletteResults,
+            liveMatches,
+            clubTeams,
           }),
         })
         channelRef.current?.postMessage('refresh')
@@ -156,7 +244,7 @@ export const PickleballProvider: React.FC<{ children: React.ReactNode }> = ({ ch
         savingRef.current = false
       }
     }, 400)
-  }, [isLoaded, paddles, paddleRentals, openPlaySessions, tournaments, bracketMatches, reservations])
+  }, [isLoaded, paddles, paddleRentals, openPlaySessions, tournaments, bracketMatches, reservations, coaches, coachingBookings, playerProgress, shopItems, aiQueuePlayers, rouletteResults, liveMatches, clubTeams])
 
   const resetToDefault = () => {
     setPaddles(initialPaddles)
@@ -165,6 +253,14 @@ export const PickleballProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     setTournaments(initialTournaments)
     setBracketMatches(initialBracketMatches)
     setReservations(initialReservations)
+    setCoaches(initialCoaches)
+    setCoachingBookings(initialCoachingBookings)
+    setPlayerProgress(initialPlayerProgress)
+    setShopItems(initialShopItems)
+    setAiQueuePlayers(initialAIQueuePlayers)
+    setRouletteResults(initialRouletteResults)
+    setLiveMatches(initialLiveMatches)
+    setClubTeams(initialClubTeams)
   }
 
   // ─── PADDLE ACTIONS ─────────────────────────────────────────────────────────
@@ -741,6 +837,277 @@ export const PickleballProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     return newReservation
   }
 
+  // ─── COACHING ACTIONS ───────────────────────────────────────────────────────
+
+  const bookCoachingSession = (booking: Omit<CoachingBooking, 'id' | 'status'>) => {
+    const newBooking: CoachingBooking = {
+      ...booking,
+      id: `cb-${Date.now().toString().slice(-6)}`,
+      status: 'confirmed',
+    }
+    setCoachingBookings((prev) => [newBooking, ...prev])
+    return newBooking
+  }
+
+  const cancelCoachingBooking = (id: string) => {
+    setCoachingBookings((prev) =>
+      prev.map((b) => (b.id === id ? { ...b, status: 'cancelled' as const } : b))
+    )
+  }
+
+  // ─── REBAR SPORTS SHOP ACTIONS ──────────────────────────────────────────────
+
+  const buyShopItem = (itemId: string, qty: number) => {
+    const item = shopItems.find((i) => i.id === itemId)
+    if (!item) return { success: false, message: 'Item not found' }
+    if (item.stock < qty) {
+      return { success: false, message: `Only ${item.stock} left in stock for ${item.name}` }
+    }
+    setShopItems((prev) =>
+      prev.map((i) => (i.id === itemId ? { ...i, stock: i.stock - qty } : i))
+    )
+    return { success: true, message: `Purchased ${qty} × ${item.name}` }
+  }
+
+  // ─── AI OPEN PLAY QUEUE & ROTATION ACTIONS ─────────────────────────────────
+
+  const generateAIQueue = (sport: SportType) => {
+    const reserved = aiQueuePlayers.filter((p) => p.sport === sport).map((p) => p.name)
+    const allNames = [
+      'Maria Santos', 'Juan Rivera', 'Pedro Cruz', 'Ana Lopez', 'Michael Tan',
+      'Lisa Mendoza', 'Carlo Delos Santos', 'Jenny Aquino', 'Remy Bautista',
+      'Chris Garcia', 'Dina Lim', 'Ed Pascual',
+    ]
+    const namesForSport =
+      sport === 'Pickleball'
+        ? allNames
+        : sport === 'Badminton'
+          ? allNames.slice(0, 8)
+          : allNames.slice(0, 6)
+    const fresh = namesForSport
+      .filter((name) => !reserved.includes(name))
+      .map((name, i) => ({
+        id: `q-${Date.now().toString().slice(-6)}-${i}`,
+        name,
+        sport,
+        wins: 0,
+        losses: 0,
+        gamesPlayed: 0,
+        waitTimeMinutes: 0,
+        sitOutCount: 2 - (i % 3),
+        status: 'waiting' as const,
+      }))
+    if (fresh.length === 0) return
+    setAiQueuePlayers((prev) => [...prev, ...fresh])
+  }
+
+  const rotateAIQueue = (sport: SportType) => {
+    setAiQueuePlayers((prev) => {
+      const group = prev.filter((p) => p.sport === sport)
+      const others = prev.filter((p) => p.sport !== sport)
+      if (group.length < 4) return prev
+      const rotation = [...group.slice(1), group[0]]
+      return [...others, ...rotation]
+    })
+  }
+
+  const addPlayerToAIQueue: PickleballContextType['addPlayerToAIQueue'] = (
+    name,
+    sport,
+    wins,
+    losses,
+    fixedPartner,
+    photo,
+    paymentMethod
+  ) => {
+    const newPlayer: AIQueuePlayer = {
+      id: `q-${sport.toLowerCase().replace(/[^a-z]/g, '')}-${Date.now().toString().slice(-5)}`,
+      name,
+      sport,
+      wins,
+      losses,
+      gamesPlayed: 0,
+      waitTimeMinutes: 0,
+      sitOutCount: 0,
+      fixedPartner,
+      photo,
+      paymentMethod,
+      status: 'waiting',
+    }
+    setAiQueuePlayers((prev) => [...prev, newPlayer])
+  }
+
+  const updatePlayerWinsLosses = (playerId: string, wins: number, losses: number) => {
+    setAiQueuePlayers((prev) =>
+      prev.map((p) =>
+        p.id === playerId ? { ...p, wins, losses, gamesPlayed: p.gamesPlayed + 1 } : p
+      )
+    )
+  }
+
+  const adjustPlayerWins = (playerId: string, delta: number) => {
+    setAiQueuePlayers((prev) =>
+      prev.map((p) => (p.id === playerId ? { ...p, wins: Math.max(0, p.wins + delta) } : p))
+    )
+  }
+
+  const adjustPlayerLosses = (playerId: string, delta: number) => {
+    setAiQueuePlayers((prev) =>
+      prev.map((p) => (p.id === playerId ? { ...p, losses: Math.max(0, p.losses + delta) } : p))
+    )
+  }
+
+  const generateRandomPairs = (sport: SportType) => {
+    setAiQueuePlayers((prev) => {
+      const group = prev.filter((p) => p.sport === sport)
+      const others = prev.filter((p) => p.sport !== sport)
+      if (group.length < 2) return prev
+
+      const pool = [...group]
+      const pairList: [AIQueuePlayer, AIQueuePlayer][] = []
+      const used = new Set<string>()
+
+      for (const player of pool) {
+        if (used.has(player.id)) continue
+        if (!player.fixedPartner) continue
+        const partner = pool.find(
+          (q) => q.name === player.fixedPartner && !used.has(q.id) && q.id !== player.id
+        )
+        if (partner) {
+          pairList.push([player, partner])
+          used.add(player.id)
+          used.add(partner.id)
+        } else {
+          used.add(player.id)
+        }
+      }
+
+      const flexible = pool.filter((p) => !used.has(p.id)).sort(() => Math.random() - 0.5)
+      for (let i = 0; i + 1 < flexible.length; i += 2) {
+        pairList.push([flexible[i], flexible[i + 1]])
+      }
+
+      const pairByPlayer = new Map<string, { pairNumber: number; partnerName?: string }>()
+      pairList.forEach((pair, idx) => {
+        const pairNumber = idx + 1
+        pairByPlayer.set(pair[0].id, { pairNumber, partnerName: pair[1].name })
+        pairByPlayer.set(pair[1].id, { pairNumber, partnerName: pair[0].name })
+      })
+
+      const updated = group.map((p) => {
+        const assignment = pairByPlayer.get(p.id)
+        if (!assignment) return { ...p, pairNumber: undefined, partnerName: undefined }
+        return { ...p, pairNumber: assignment.pairNumber, partnerName: assignment.partnerName }
+      })
+      return [...others, ...updated]
+    })
+  }
+
+  const removePlayerFromAIQueue = (playerId: string) => {
+    setAiQueuePlayers((prev) => prev.filter((p) => p.id !== playerId))
+  }
+
+  // ─── ROULETTE RANDOM PAIRING ACTIONS ────────────────────────────────────────
+
+  const spinRoulettePairing = (
+    playerA: string,
+    playerB: string,
+    bracketPlacement: string,
+    sport: SportType,
+    courtAssigned: string
+  ): RouletteSpinResult => {
+    const result: RouletteSpinResult = {
+      id: `roulette-${Date.now().toString().slice(-6)}`,
+      timestamp: new Date().toLocaleString('en-US', {
+        month: 'short',
+        day: '2-digit',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: true,
+      }),
+      playerA,
+      playerB,
+      bracketPlacement,
+      sport,
+      courtAssigned,
+    }
+    setRouletteResults((prev) => [result, ...prev])
+    return result
+  }
+
+  const deleteRouletteResult = (id: string) => {
+    setRouletteResults((prev) => prev.filter((r) => r.id !== id))
+  }
+
+  // ─── LIVE MATCH & SCORING LINK ACTIONS ──────────────────────────────────────
+
+  const updateLiveScore = (matchId: string, team: 1 | 2, delta: number) => {
+    setLiveMatches((prev) =>
+      prev.map((m) =>
+        m.id === matchId
+          ? {
+              ...m,
+              score1: team === 1 ? Math.max(0, m.score1 + delta) : m.score1,
+              score2: team === 2 ? Math.max(0, m.score2 + delta) : m.score2,
+            }
+          : m
+      )
+    )
+  }
+
+  const switchLiveServer = (matchId: string) => {
+    setLiveMatches((prev) =>
+      prev.map((m) => {
+        if (m.id !== matchId) return m
+        const nextServer = m.currentServer === 1 ? 2 : 1
+        return {
+          ...m,
+          currentServer: nextServer,
+          serverName:
+            nextServer === 1 ? m.team1Players[0] || m.team1Name : m.team2Players[0] || m.team2Name,
+        }
+      })
+    )
+  }
+
+  const addPointHistory = (matchId: string, team: 1 | 2, text: string) => {
+    setLiveMatches((prev) =>
+      prev.map((m) =>
+        m.id === matchId
+          ? {
+              ...m,
+              pointHistory: [
+                {
+                  team,
+                  text,
+                  time: new Date().toLocaleTimeString('en-US', {
+                    hour: '2-digit',
+                    minute: '2-digit',
+                  }),
+                },
+                ...(m.pointHistory || []),
+              ],
+            }
+          : m
+      )
+    )
+  }
+
+  // ─── CLUB & REGISTERED TEAM ACTIONS ────────────────────────────────────────
+
+  const registerClubTeam = (teamData: Omit<ClubTeam, 'id' | 'wins' | 'losses' | 'status'>) => {
+    const newTeam: ClubTeam = {
+      ...teamData,
+      id: `club-${Date.now().toString().slice(-6)}`,
+      wins: 0,
+      losses: 0,
+      status: 'registered',
+    }
+    setClubTeams((prev) => [newTeam, ...prev])
+    return newTeam
+  }
+
   return (
     <PickleballContext.Provider
       value={{
@@ -774,6 +1141,31 @@ export const PickleballProvider: React.FC<{ children: React.ReactNode }> = ({ ch
         declareChampion,
         reservations,
         addReservation,
+        coaches,
+        coachingBookings,
+        playerProgress,
+        bookCoachingSession,
+        cancelCoachingBooking,
+        shopItems,
+        buyShopItem,
+        aiQueuePlayers,
+        generateAIQueue,
+        rotateAIQueue,
+        addPlayerToAIQueue,
+        updatePlayerWinsLosses,
+        adjustPlayerWins,
+        adjustPlayerLosses,
+        generateRandomPairs,
+        removePlayerFromAIQueue,
+        rouletteResults,
+        spinRoulettePairing,
+        deleteRouletteResult,
+        liveMatches,
+        updateLiveScore,
+        switchLiveServer,
+        addPointHistory,
+        clubTeams,
+        registerClubTeam,
         resetToDefault,
       }}
     >

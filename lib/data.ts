@@ -228,6 +228,8 @@ export type TournamentStatus =
 
 export type TournamentFormat = 'pairing' | 'team-event'
 
+export type TournamentBracketFormat = 'single-elimination' | 'double-elimination' | 'round-robin' | 'group-stage'
+
 export type TournamentPair = {
   id: string
   tournamentId: string
@@ -244,6 +246,7 @@ export type Tournament = {
   name: string
   type: string
   format: TournamentFormat
+  bracketFormat?: TournamentBracketFormat
   date: string
   time: string
   location: string
@@ -757,4 +760,325 @@ export const reservations: Reservation[] = [
   { id: '4', bookingId: 'PB-241804', customerName: 'Ana Lopez', court: 'Court 3', date: '2026-08-30', time: '7:00 AM', duration: 1, players: 2, paymentMethod: 'Cash', paymentStatus: 'paid', bookingStatus: 'confirmed', total: 350 },
   { id: '5', bookingId: 'PB-241805', customerName: 'Michael Tan', court: 'Court 1', date: '2026-08-30', time: '2:00 PM', duration: 3, players: 6, paymentMethod: 'Online Gateway', paymentStatus: 'pending', bookingStatus: 'pending', total: 1050 },
   { id: '6', bookingId: 'PB-241806', customerName: 'Lisa Mendoza', court: 'Court 3', date: '2026-08-31', time: '9:00 AM', duration: 2, players: 4, paymentMethod: 'GCash', paymentStatus: 'paid', bookingStatus: 'confirmed', total: 700 },
+]
+
+// ─── New Feature Types (from Rol-ems-pickleball) ──────────────────────────────
+
+export type SportType = 'Pickleball' | 'Badminton' | 'Ping-Pong'
+
+// ─── Coaching Types ───────────────────────────────────────────────────────────
+
+export type TrainingPackage = {
+  id: string
+  name: string
+  sessionsCount: number
+  price: number
+  description: string
+  badge?: string
+}
+
+export type Coach = {
+  id: string
+  name: string
+  sport: SportType
+  title: string
+  avatar: string
+  bio: string
+  rating: number
+  hourlyRate: number
+  experienceYears: number
+  availableDays: string[]
+  timeSlots: string[]
+  packages: TrainingPackage[]
+}
+
+export type CoachingBooking = {
+  id: string
+  coachId: string
+  coachName: string
+  playerName: string
+  playerContact: string
+  sport: SportType
+  date: string
+  time: string
+  packageName: string
+  totalPrice: number
+  status: 'confirmed' | 'completed' | 'cancelled'
+  notes?: string
+}
+
+export type PlayerProgress = {
+  playerName: string
+  sport: SportType
+  skillScores: {
+    serve: number
+    dinkVolley: number
+    smashPower: number
+    footworkAgility: number
+    tactics: number
+  }
+  feedbackHistory: {
+    date: string
+    coachName: string
+    notes: string
+    focusArea: string
+  }[]
+}
+
+export const initialCoaches: Coach[] = [
+  {
+    id: 'coach-01',
+    name: 'Coach Mark Rivera',
+    sport: 'Pickleball',
+    title: 'Head Coach · IPTPA Certified',
+    avatar: 'MR',
+    bio: 'Former national-level paddle athlete with 10+ years of coaching. Specializes in 3rd shot drops, kitchen-line dinking, and aggressive speed-up counters.',
+    rating: 4.9,
+    hourlyRate: 500,
+    experienceYears: 10,
+    availableDays: ['Monday', 'Wednesday', 'Friday', 'Saturday'],
+    timeSlots: ['7:00 AM', '9:00 AM', '11:00 AM', '2:00 PM', '4:00 PM'],
+    packages: [
+      { id: 'pkg-01-1', name: 'Beginner Foundation', sessionsCount: 4, price: 1800, description: 'Grip, stance, serving, and basic rally skills.' },
+      { id: 'pkg-01-2', name: 'Intermediate Control', sessionsCount: 6, price: 2800, description: 'Dinking, resets, and 3rd shot strategies.' },
+      { id: 'pkg-01-3', name: 'Advanced Match Play', sessionsCount: 8, price: 4000, description: 'Tournament tactics, stacking, and speed-ups.' },
+    ],
+  },
+  {
+    id: 'coach-02',
+    name: 'Coach Elena Vance',
+    sport: 'Pickleball',
+    title: 'Specialist Coach · PPR Certified',
+    avatar: 'EV',
+    bio: 'Former tennis pro turned pickleball specialist. Known for razor-sharp volley technique, serve placement, and footwork fundamentals.',
+    rating: 4.8,
+    hourlyRate: 450,
+    experienceYears: 8,
+    availableDays: ['Tuesday', 'Thursday', 'Saturday', 'Sunday'],
+    timeSlots: ['6:00 AM', '8:00 AM', '10:00 AM', '1:00 PM', '3:00 PM', '5:00 PM'],
+    packages: [
+      { id: 'pkg-02-1', name: 'Quick Start', sessionsCount: 3, price: 1200, description: 'Fast-track fundamentals for new players.' },
+      { id: 'pkg-02-2', name: 'Doubles Dynamics', sessionsCount: 5, price: 2200, description: 'Communication, positioning, and poaching.' },
+    ],
+  },
+  {
+    id: 'coach-03',
+    name: 'Coach Diego Ramos',
+    sport: 'Pickleball',
+    title: 'Fitness & Agility Coach',
+    avatar: 'DR',
+    bio: 'Certified sports-conditioning coach focusing on court movement, recovery, and injury prevention for pickleball athletes.',
+    rating: 4.7,
+    hourlyRate: 400,
+    experienceYears: 6,
+    availableDays: ['Monday', 'Tuesday', 'Friday'],
+    timeSlots: ['7:00 AM', '8:00 AM', '6:00 PM', '7:00 PM'],
+    packages: [
+      { id: 'pkg-03-1', name: 'Movement Masterclass', sessionsCount: 4, price: 1500, description: 'Agility drills, split-steps, and recovery.' },
+    ],
+  },
+]
+
+export const initialCoachingBookings: CoachingBooking[] = []
+
+export const initialPlayerProgress: PlayerProgress[] = [
+  {
+    playerName: 'Maria Santos',
+    sport: 'Pickleball',
+    skillScores: { serve: 4.2, dinkVolley: 4.5, smashPower: 3.8, footworkAgility: 4.0, tactics: 3.6 },
+    feedbackHistory: [
+      { date: '2026-08-25', coachName: 'Coach Mark Rivera', notes: 'Great improvement on 3rd shot drop depth. Keep the paddle up at the kitchen line.', focusArea: 'Dinking & Reset Control' },
+      { date: '2026-08-10', coachName: 'Coach Elena Vance', notes: 'Serve placement much better. Work on split-step timing on returns.', focusArea: 'Serve & Return' },
+    ],
+  },
+  {
+    playerName: 'Juan Rivera',
+    sport: 'Pickleball',
+    skillScores: { serve: 3.9, dinkVolley: 3.5, smashPower: 4.3, footworkAgility: 3.6, tactics: 3.2 },
+    feedbackHistory: [
+      { date: '2026-08-22', coachName: 'Coach Diego Ramos', notes: 'Footwork improved after agility drills. Focus on controlled speed-ups.', focusArea: 'Movement & Agility' },
+    ],
+  },
+]
+
+// ─── Rebar Sports Shop Types ──────────────────────────────────────────────────
+
+export type ShopCategory = 'rental' | 'grip' | 'shuttlecock' | 'balls' | 'accessory'
+
+export type ShopItem = {
+  id: string
+  name: string
+  sport: SportType | 'All'
+  category: ShopCategory
+  price: number
+  stock: number
+  brand: string
+  description: string
+  badge?: string
+  isRental?: boolean
+}
+
+export const initialShopItems: ShopItem[] = [
+  { id: 'shp-001', name: 'Selkirk Vanguard Control', sport: 'Pickleball', category: 'rental', price: 150, stock: 5, brand: 'Selkirk', description: 'Premium carbon face rental paddle built for touch & dinking control.', badge: 'Rental', isRental: true },
+  { id: 'shp-002', name: 'Joola Perseus 3S', sport: 'Pickleball', category: 'rental', price: 200, stock: 4, brand: 'Joola', description: 'Ben Johns Edition · explosive pop for drives & smashes.', badge: 'Pro', isRental: true },
+  { id: 'shp-003', name: 'CRBN 1X 16mm Hybrid', sport: 'Pickleball', category: 'rental', price: 200, stock: 3, brand: 'CRBN', description: 'Raw carbon fiber surface for maximum topspin & slice.', isRental: true },
+  { id: 'shp-004', name: 'Franklin X-40 Outdoor Balls', sport: 'Pickleball', category: 'balls', price: 120, stock: 48, brand: 'Franklin', description: 'Official tournament ball · USA Pickleball approved. Sold per piece.' },
+  { id: 'shp-005', name: 'Dura Fast 40 Outdoor Balls', sport: 'Pickleball', category: 'balls', price: 130, stock: 30, brand: 'Dura', description: 'Crack-proof outdoor ball with 40-drilled holes for consistent flight.' },
+  { id: 'shp-006', name: 'Tourna Mega Tac Overgrip', sport: 'Pickleball', category: 'grip', price: 250, stock: 20, brand: 'Tourna', description: 'Ultra-tacky overgrip for maximum sweat absorption. 3-pack.' },
+  { id: 'shp-007', name: 'Edge Guard Tape Roll', sport: 'Pickleball', category: 'grip', price: 180, stock: 15, brand: 'Gearbox', description: 'Protects paddle edges from pops and cracks during play.' },
+  { id: 'shp-008', name: 'Lead Tape Kit', sport: 'Pickleball', category: 'accessory', price: 150, stock: 12, brand: 'Carbon', description: 'Customize paddle weight & balance. 1/4" lead tape roll.' },
+]
+
+// ─── AI Open Play Queue Types ─────────────────────────────────────────────────
+
+export type AIQueuePlayer = {
+  id: string
+  name: string
+  sport: SportType
+  wins: number
+  losses: number
+  gamesPlayed: number
+  waitTimeMinutes: number
+  sitOutCount: number
+  fixedPartner?: string
+  photo?: string
+  paymentMethod?: 'Pay at Counter' | 'GCash' | 'Maya'
+  pairNumber?: number
+  partnerName?: string
+  status: 'waiting' | 'in-match' | 'resting'
+}
+
+export type MiniMatch = {
+  id: string
+  sport: SportType
+  court: string
+  player1: string
+  player2: string
+  player3?: string
+  player4?: string
+  score1: number
+  score2: number
+  status: 'upcoming' | 'live' | 'completed'
+  time: string
+}
+
+export const initialAIQueuePlayers: AIQueuePlayer[] = []
+export const initialMiniMatches: MiniMatch[] = []
+
+// ─── Club & Registered Teams ─────────────────────────────────────────────────
+
+export type ClubTeam = {
+  id: string
+  name: string
+  sport: SportType
+  captain: string
+  contact: string
+  logoBadge: string
+  squadMembers: string[]
+  maxSlots: number
+  wins: number
+  losses: number
+  status: 'registered' | 'pending' | 'full'
+}
+
+export const initialClubTeams: ClubTeam[] = []
+
+// ─── Roulette Random Pairing Types ────────────────────────────────────────────
+
+export type RouletteSpinResult = {
+  id: string
+  timestamp: string
+  playerA: string
+  playerB: string
+  bracketPlacement: string
+  sport: SportType
+  courtAssigned: string
+}
+
+export const initialRouletteResults: RouletteSpinResult[] = []
+
+// ─── Live Match & Scoring Link Types ──────────────────────────────────────────
+
+export type LiveMatchScore = {
+  id: string
+  sport: SportType
+  tournamentId?: string
+  matchTitle: string
+  court: string
+  team1Name: string
+  team2Name: string
+  team1Players: string[]
+  team2Players: string[]
+  score1: number
+  score2: number
+  set1Score1: number
+  set1Score2: number
+  set2Score1: number
+  set2Score2: number
+  currentSet: number
+  currentServer: 1 | 2
+  serverName: string
+  status: 'warmup' | 'live' | 'completed' | 'paused'
+  umpireName: string
+  shareablePlayerLink: string
+  shareableUmpireLink: string
+  pointHistory: { team: 1 | 2; text: string; time: string }[]
+}
+
+export const initialLiveMatches: LiveMatchScore[] = [
+  {
+    id: 'live-1',
+    sport: 'Pickleball',
+    matchTitle: 'Summer Smash 2026 — Semifinal 1',
+    court: 'Court 1 (Before)',
+    team1Name: 'Santos & Rivera',
+    team2Name: 'Delos Santos & Aquino',
+    team1Players: ['Maria Santos', 'Juan Rivera'],
+    team2Players: ['Carlo Delos Santos', 'Jenny Aquino'],
+    score1: 4,
+    score2: 2,
+    set1Score1: 11,
+    set1Score2: 9,
+    set2Score1: 4,
+    set2Score2: 2,
+    currentSet: 2,
+    currentServer: 1,
+    serverName: 'Maria Santos',
+    status: 'live',
+    umpireName: 'Coach Mark Rivera',
+    shareablePlayerLink: '/score/live-1',
+    shareableUmpireLink: '/umpire/live-1',
+    pointHistory: [
+      { team: 1, text: 'Santos & Rivera score update (4 - 2)', time: '10:41 AM' },
+      { team: 2, text: 'Delos Santos & Aquino score update (3 - 2)', time: '10:38 AM' },
+      { team: 1, text: 'Santos & Rivera score update (3 - 1)', time: '10:35 AM' },
+    ],
+  },
+  {
+    id: 'live-2',
+    sport: 'Pickleball',
+    matchTitle: 'Summer Smash 2026 — Semifinal 2',
+    court: 'Court 2 (Patience)',
+    team1Name: 'Bautista & Garcia',
+    team2Name: 'Lim & Pascual',
+    team1Players: ['Remy Bautista', 'Chris Garcia'],
+    team2Players: ['Dina Lim', 'Ed Pascual'],
+    score1: 1,
+    score2: 7,
+    set1Score1: 2,
+    set1Score2: 11,
+    set2Score1: 1,
+    set2Score2: 7,
+    currentSet: 2,
+    currentServer: 2,
+    serverName: 'Dina Lim',
+    status: 'live',
+    umpireName: 'Coach Elena Vance',
+    shareablePlayerLink: '/score/live-2',
+    shareableUmpireLink: '/umpire/live-2',
+    pointHistory: [
+      { team: 2, text: 'Lim & Pascual score update (1 - 7)', time: '10:40 AM' },
+      { team: 1, text: 'Bautista & Garcia score update (1 - 5)', time: '10:37 AM' },
+    ],
+  },
 ]

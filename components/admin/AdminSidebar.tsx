@@ -10,6 +10,7 @@ import {
   Users,
   Disc,
   Trophy,
+  Dices,
   LogOut,
   Menu,
   X,
@@ -22,6 +23,7 @@ const navItems = [
   { href: '/admin/courts', label: 'Court Schedule', icon: Volleyball },
   { href: '/admin/reservations', label: 'Reservations', icon: CalendarCheck },
   { href: '/admin/open-play', label: 'Open Play', icon: Users },
+  { href: '/admin/roulette', label: 'Roulette Pairing', icon: Dices },
   { href: '/admin/paddles', label: 'Paddle Rental', icon: Disc },
   { href: '/admin/tournaments', label: 'Tournaments', icon: Trophy },
 ]

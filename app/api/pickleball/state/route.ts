@@ -7,6 +7,14 @@ import {
   tournaments as defaultTournaments,
   bracketMatches as defaultBracketMatches,
   reservations as defaultReservations,
+  initialCoaches,
+  initialCoachingBookings,
+  initialPlayerProgress,
+  initialShopItems,
+  initialAIQueuePlayers,
+  initialRouletteResults,
+  initialLiveMatches,
+  initialClubTeams,
 } from '@/lib/data'
 
 const STATE_KEY = 'main'
@@ -18,6 +26,14 @@ export type PickleballStateDocument = {
   tournaments: unknown[]
   bracketMatches: unknown[]
   reservations: unknown[]
+  coaches: unknown[]
+  coachingBookings: unknown[]
+  playerProgress: unknown[]
+  shopItems: unknown[]
+  aiQueuePlayers: unknown[]
+  rouletteResults: unknown[]
+  liveMatches: unknown[]
+  clubTeams: unknown[]
 }
 
 function defaultState(): PickleballStateDocument {
@@ -28,6 +44,14 @@ function defaultState(): PickleballStateDocument {
     tournaments: defaultTournaments,
     bracketMatches: defaultBracketMatches,
     reservations: defaultReservations,
+    coaches: initialCoaches,
+    coachingBookings: initialCoachingBookings,
+    playerProgress: initialPlayerProgress,
+    shopItems: initialShopItems,
+    aiQueuePlayers: initialAIQueuePlayers,
+    rouletteResults: initialRouletteResults,
+    liveMatches: initialLiveMatches,
+    clubTeams: initialClubTeams,
   }
 }
 
