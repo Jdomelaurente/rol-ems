@@ -2,36 +2,52 @@
 
 Court and training-floor booking with pickleball modules (booking, open play, tournaments, roulette, coaching, shop), powered by Next.js 16 + Tailwind CSS v4.
 
-## ⚠️ DO NOT PUSH THESE FILES
+## Setup
 
-These files contain secrets or local debug noise and must never be committed. Keep this repository private until they are cleaned up.
+1. Clone the repo and install dependencies:
 
-| File | Reason |
+   ```bash
+   git clone https://github.com/strajec-dev/Rol-ems.git
+   cd rol-ems
+   pnpm install
+   ```
+
+2. Create a file named `.env.local` in the project root and paste the following inside:
+
+   ```env
+   PAYMONGO_SECRET_KEY=sk_test_your_paymongo_secret_key
+   PAYMONGO_WEBHOOK_SECRET=whsk_your_paymongo_webhook_secret
+
+   # Email (receipts) - SMTP
+   SMTP_HOST=smtp.gmail.com
+   SMTP_PORT=587
+   SMTP_USER=your_email@gmail.com
+   SMTP_PASS=your_gmail_app_password
+   SMTP_FROM=ROL-EMS Resort <your_email@gmail.com>
+
+   NEXT_PUBLIC_SITE_URL=https://rol-ems.vercel.app
+
+   # Database (Prisma) - Supabase
+   DATABASE_URL="postgresql://postgres.your_supabase_ref:your_password@aws-0-ap-northeast-1.pooler.supabase.com:5432/postgres?sslmode=no-verify"
+   SESSION_SECRET="any_random_secret_string_here"
+   ```
+
+3. Run the dev server:
+
+   ```bash
+   pnpm dev
+   ```
+
+## ⚠️ Secrets
+
+These files contain live credentials and must never be committed. Keep this repo private.
+
+| Variable | What it is |
 | --- | --- |
-| `.env.local` | Contains real secrets (Supabase DB URL / API keys). Already gitignored — treat as untracked forever. |
-| `check-user.js` | Temp debug script that connects to the database with credentials. Delete or keep local only. |
-| `devlog2.txt` | Local dev log. Not application code; do not commit. |
+| `PAYMONGO_SECRET_KEY` | PayMongo API key (test mode: `sk_test_…`) |
+| `PAYMONGO_WEBHOOK_SECRET` | PayMongo webhook signing secret |
+| `SMTP_PASS` | Gmail app password for sending receipts |
+| `DATABASE_URL` | Supabase PostgreSQL connection string |
+| `SESSION_SECRET` | Any random string used for session signing |
 
-They are listed in `.gitignore`. If you ever see them in `git status`, exclude them from staging.
-
-### `.env.local` structure (values redacted — repo is private)
-
-```
-PAYMONGO_SECRET_KEY=sk_test_***REDACTED — GitHub blocks pushing this***
-PAYMONGO_WEBHOOK_SECRET=whsk_***REDACTED***
-
-# Email (receipts) - SMTP
-SMTP_HOST=smtp.gmail.com
-SMTP_PORT=587
-SMTP_USER=***REDACTED***
-SMTP_PASS=***REDACTED***
-SMTP_FROM=ROL-EMS Resort <***REDACTED***>
-
-NEXT_PUBLIC_SITE_URL=https://rol-ems.vercel.app
-
-# Database (Prisma) - Supabase
-DATABASE_URL="postgresql://postgres.***REDACTED***@aws-0-ap-northeast-1.pooler.supabase.com:5432/postgres?sslmode=no-verify"
-SESSION_SECRET="***REDACTED***"
-```
-
-> The real values live only in `.env.local` (gitignored). GitHub's push protection rejects commits containing the `sk_test_…` PayMongo key, so never paste those raw values into any committed file — even in a private repo.
+> The real values live only in `.env.local` (gitignored). Never paste live secrets into any committed file — GitHub will block the push.
