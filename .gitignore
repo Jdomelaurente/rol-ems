@@ -18,3 +18,7 @@ node_modules
 .next/
 .DS_Store
 tsconfig.tsbuildinfo
+
+# Local debug / temp files — do not push (see README)
+check-user.js
+devlog2.txt

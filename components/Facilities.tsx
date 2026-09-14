@@ -43,7 +43,7 @@ export default function Facilities() {
               item.title === 'Cottage & Event'
                 ? '/cottage'
                 : item.title === 'Pickleball'
-                  ? '/pickleball'
+                  ? '/pickleball/booking'
                   : item.title === 'Badminton & Games'
                     ? '/badminton'
                     : item.title === 'Taekwondo'
