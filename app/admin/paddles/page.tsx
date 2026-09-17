@@ -139,7 +139,7 @@ export default function AdminPaddleManagementPage() {
 
       <div className="mx-auto max-w-7xl px-6 py-8">
         {/* Navigation Tabs */}
-        <div className="mb-6 flex gap-2 border-b border-[#222222]/10 pb-3">
+        <div className="mb-6 flex flex-wrap gap-2">
           {[
             { key: 'inventory', label: `Paddle Inventory (${paddles.length})` },
             { key: 'rentals', label: `Active Rentals (${paddleRentals.filter((r) => r.status === 'Active' || r.status === 'Reserved').length})` },
@@ -148,10 +148,10 @@ export default function AdminPaddleManagementPage() {
             <button
               key={tab.key}
               onClick={() => setActiveTab(tab.key as any)}
-              className={`px-4 py-2 text-xs font-bold uppercase tracking-wider transition ${
+              className={`flex items-center gap-2 px-4 py-2 text-xs font-bold uppercase tracking-wider border transition ${
                 activeTab === tab.key
-                  ? 'border-b-2 border-[#1E5336] text-[#1E5336]'
-                  : 'text-[#6B756B] hover:text-[#1E5336]'
+                  ? 'bg-[#1E5336] text-white border-[#1E5336]'
+                  : 'bg-white text-[#1E5336] border-[#1E5336]/30 hover:border-[#1E5336]'
               }`}
             >
               {tab.label}

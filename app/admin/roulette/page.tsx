@@ -181,26 +181,24 @@ export default function AdminRoulettePage() {
           <div className="flex flex-wrap items-center justify-between gap-4">
             <div>
               <Link
-                href="/admin"
-                className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-[#1E5336] hover:underline mb-2"
+                href="/admin/dashboard"
+                className="inline-flex items-center gap-1 text-xs font-bold uppercase tracking-wider text-[#1E5336] hover:underline mb-2"
               >
-                <ArrowLeft size={14} /> Back to Admin Hub
+                <ArrowLeft size={14} /> Back to Dashboard
               </Link>
-              <h1 className="font-serif text-3xl font-extrabold text-[#1E5336] sm:text-4xl">
-                Roulette Pairing Admin
+              <p className="text-xs uppercase tracking-[0.18em] text-[#E1A728]">Roulette Pairing</p>
+              <h1 className="mt-1 font-serif text-4xl text-[#1E5336]">
+                Admin Roulette Pairing
               </h1>
-              <p className="mt-1 text-xs text-[#6B756B]">
-                Configure alphabetical brackets, manage player pools, and generate official blind pairings.
-              </p>
             </div>
-            <div className="flex items-center gap-3">
+            <div className="flex flex-wrap items-center gap-3">
               <Link
                 href="/pickleball/roulette"
-                className="rounded-lg border border-[#1E5336] bg-white px-4 py-2 text-xs font-bold text-[#1E5336] shadow-sm hover:bg-[#1E5336] hover:text-white transition"
+                className="flex items-center border border-[#1E5336] bg-white px-4 py-2.5 text-[10px] uppercase tracking-[0.14em] font-bold text-[#1E5336] shadow-sm hover:bg-[#1E5336] hover:text-white transition"
               >
                 View Public Page
               </Link>
-              <span className="rounded-full bg-[#E1A728]/20 border border-[#E1A728] px-3.5 py-1 text-[11px] font-extrabold uppercase tracking-wider text-[#111827]">
+              <span className="rounded border border-[#E1A728] bg-[#E1A728]/20 px-2.5 py-1 text-[10px] font-extrabold uppercase tracking-wider text-[#111827]">
                 Admin Only Access
               </span>
             </div>
@@ -212,7 +210,7 @@ export default function AdminRoulettePage() {
         {/* TOP CONFIGURATION ROW */}
         <div className="grid gap-6 md:grid-cols-3 mb-8">
           {/* 1. BRACKET COUNT SETTER */}
-          <div className="rounded-xl border border-[#222222]/15 bg-[#FDFBF7] p-6 shadow-sm">
+          <div className="border border-[#222222]/15 bg-[#FDFBF7] p-6 shadow-sm">
             <div className="flex items-center gap-2 mb-3">
               <Layers size={18} className="text-[#1E5336]" />
               <h3 className="font-serif text-base font-bold text-[#1E5336]">
@@ -224,19 +222,19 @@ export default function AdminRoulettePage() {
             </p>
 
             <div className="flex items-center gap-3">
-              <label className="text-xs font-bold text-gray-700">Open Brackets:</label>
+              <label className="text-xs font-bold text-[#6B756B]">Open Brackets:</label>
               <input
                 type="number"
                 min="1"
                 max="26"
                 value={bracketCount}
                 onChange={(e) => setBracketCount(Math.max(1, Math.min(26, parseInt(e.target.value) || 1)))}
-                className="w-24 rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm font-bold text-center text-[#1E5336] focus:border-[#1E5336] focus:outline-none"
+                className="w-24 border border-[#222222]/20 bg-white px-3 py-2 text-sm font-bold text-center text-[#1E5336] focus:border-[#1E5336] focus:outline-none"
               />
             </div>
 
             {/* Rendered Bracket Badges */}
-            <div className="mt-4 flex flex-wrap gap-1.5 border-t border-gray-100 pt-3">
+            <div className="mt-4 flex flex-wrap gap-1.5 border-t border-[#222222]/10 pt-3">
               {openBrackets.map((brk) => (
                 <span
                   key={brk}
@@ -249,7 +247,7 @@ export default function AdminRoulettePage() {
           </div>
 
           {/* 2. COURT SETTING */}
-          <div className="rounded-xl border border-[#222222]/15 bg-[#FDFBF7] p-6 shadow-sm">
+          <div className="border border-[#222222]/15 bg-[#FDFBF7] p-6 shadow-sm">
             <div className="flex items-center gap-2 mb-3">
               <Volleyball size={18} className="text-[#1E5336]" />
               <h3 className="font-serif text-base font-bold text-[#1E5336]">
@@ -263,7 +261,7 @@ export default function AdminRoulettePage() {
             <select
               value={selectedCourt}
               onChange={(e) => setSelectedCourt(e.target.value)}
-              className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-xs font-medium text-gray-800 focus:border-[#1E5336] focus:outline-none"
+              className="w-full border border-[#222222]/20 bg-white px-3 py-2 text-xs font-medium text-[#222222] focus:border-[#1E5336] focus:outline-none"
             >
               <option value="random">Randomize (Courts 1, 2, or 3)</option>
               {DEFAULT_COURTS.map((court) => (
@@ -273,15 +271,15 @@ export default function AdminRoulettePage() {
               ))}
             </select>
 
-            <div className="mt-4 flex items-center gap-2 border-t border-gray-100 pt-3">
+            <div className="mt-4 flex items-center gap-2 border-t border-[#222222]/10 pt-3">
               <input
                 type="checkbox"
                 id="autoRemove"
                 checked={autoRemoveFromPool}
                 onChange={(e) => setAutoRemoveFromPool(e.target.checked)}
-                className="h-4 w-4 rounded border-gray-300 text-[#1E5336] focus:ring-[#1E5336]"
+                className="h-4 w-4 rounded border border-[#222222]/40 text-[#1E5336] focus:ring-[#1E5336]"
               />
-              <label htmlFor="autoRemove" className="text-xs text-gray-700 select-none">
+              <label htmlFor="autoRemove" className="text-xs text-[#6B756B] select-none">
                 Remove players from pool after spinning
               </label>
             </div>
@@ -367,8 +365,8 @@ export default function AdminRoulettePage() {
         {/* POOL MANAGEMENT SECTION */}
         <div className="mb-8 grid gap-6 md:grid-cols-2">
           {/* POOL A */}
-          <div className="rounded-xl border border-[#222222]/15 bg-[#FDFBF7] p-6 shadow-sm">
-            <div className="flex items-center justify-between border-b border-gray-200 pb-3 mb-4">
+          <div className="border border-[#222222]/15 bg-[#FDFBF7] p-6 shadow-sm">
+            <div className="flex items-center justify-between border-b border-[#222222]/10 pb-3 mb-4">
               <div>
                 <h3 className="font-serif text-lg font-bold text-[#1E5336]">
                   Pool A ({poolA.length} Players)
@@ -393,11 +391,11 @@ export default function AdminRoulettePage() {
                 placeholder="Add player name to Pool A..."
                 value={newPlayerA}
                 onChange={(e) => setNewPlayerA(e.target.value)}
-                className="flex-1 rounded-lg border border-gray-300 bg-white px-3 py-2 text-xs focus:border-[#1E5336] focus:outline-none"
+                className="flex-1 border border-[#222222]/20 bg-white px-3 py-2.5 text-xs focus:border-[#1E5336] focus:outline-none"
               />
               <button
                 type="submit"
-                className="flex items-center gap-1 rounded-lg bg-[#1E5336] px-3 py-2 text-xs font-bold text-white hover:bg-[#163e28] transition"
+                className="flex items-center gap-1 rounded bg-[#1E5336] px-3 py-2 text-xs font-bold uppercase tracking-wider text-[#FDFBF7] hover:bg-[#153b26] transition"
               >
                 <Plus size={14} /> Add
               </button>
@@ -405,18 +403,18 @@ export default function AdminRoulettePage() {
 
             {/* Player List */}
             {poolA.length === 0 ? (
-              <p className="text-xs text-gray-400 py-4 text-center">Pool A is empty. Add players above.</p>
+              <p className="text-xs text-[#6B756B] py-4 text-center">Pool A is empty. Add players above.</p>
             ) : (
               <div className="max-h-56 overflow-y-auto space-y-1.5 pr-1">
                 {poolA.map((player) => (
                   <div
                     key={player}
-                    className="flex items-center justify-between rounded-lg border border-gray-200 bg-white px-3 py-2 text-xs shadow-xs"
+                    className="flex items-center justify-between rounded border border-[#222222]/15 bg-white px-3 py-2 text-xs"
                   >
-                    <span className="font-semibold text-gray-800">{player}</span>
+                    <span className="font-semibold text-[#222222]">{player}</span>
                     <button
                       onClick={() => handleRemoveFromPoolA(player)}
-                      className="text-gray-400 hover:text-red-600 transition"
+                      className="text-[#6B756B]/70 hover:text-red-600 transition"
                       title="Remove from pool"
                     >
                       <Trash2 size={13} />
@@ -428,8 +426,8 @@ export default function AdminRoulettePage() {
           </div>
 
           {/* POOL B */}
-          <div className="rounded-xl border border-[#222222]/15 bg-[#FDFBF7] p-6 shadow-sm">
-            <div className="flex items-center justify-between border-b border-gray-200 pb-3 mb-4">
+          <div className="border border-[#222222]/15 bg-[#FDFBF7] p-6 shadow-sm">
+            <div className="flex items-center justify-between border-b border-[#222222]/10 pb-3 mb-4">
               <div>
                 <h3 className="font-serif text-lg font-bold text-[#1E5336]">
                   Pool B ({poolB.length} Players)
@@ -454,11 +452,11 @@ export default function AdminRoulettePage() {
                 placeholder="Add player name to Pool B..."
                 value={newPlayerB}
                 onChange={(e) => setNewPlayerB(e.target.value)}
-                className="flex-1 rounded-lg border border-gray-300 bg-white px-3 py-2 text-xs focus:border-[#1E5336] focus:outline-none"
+                className="flex-1 border border-[#222222]/20 bg-white px-3 py-2.5 text-xs focus:border-[#1E5336] focus:outline-none"
               />
               <button
                 type="submit"
-                className="flex items-center gap-1 rounded-lg bg-[#E1A728] px-3 py-2 text-xs font-bold text-[#111827] hover:bg-[#c48e1a] transition"
+                className="flex items-center gap-1 rounded bg-[#E1A728] px-3 py-2 text-xs font-bold uppercase tracking-wider text-[#111827] hover:bg-[#c48e1a] transition"
               >
                 <Plus size={14} /> Add
               </button>
@@ -466,18 +464,18 @@ export default function AdminRoulettePage() {
 
             {/* Player List */}
             {poolB.length === 0 ? (
-              <p className="text-xs text-gray-400 py-4 text-center">Pool B is empty. Add players above.</p>
+              <p className="text-xs text-[#6B756B] py-4 text-center">Pool B is empty. Add players above.</p>
             ) : (
               <div className="max-h-56 overflow-y-auto space-y-1.5 pr-1">
                 {poolB.map((player) => (
                   <div
                     key={player}
-                    className="flex items-center justify-between rounded-lg border border-gray-200 bg-white px-3 py-2 text-xs shadow-xs"
+                    className="flex items-center justify-between rounded border border-[#222222]/15 bg-white px-3 py-2 text-xs"
                   >
-                    <span className="font-semibold text-gray-800">{player}</span>
+                    <span className="font-semibold text-[#222222]">{player}</span>
                     <button
                       onClick={() => handleRemoveFromPoolB(player)}
-                      className="text-gray-400 hover:text-red-600 transition"
+                      className="text-[#6B756B]/70 hover:text-red-600 transition"
                       title="Remove from pool"
                     >
                       <Trash2 size={13} />
@@ -490,8 +488,8 @@ export default function AdminRoulettePage() {
         </div>
 
         {/* GENERATED ROULETTE LOG TABLE WITH DELETE ACTIONS */}
-        <div className="rounded-xl border border-[#222222]/15 bg-[#FDFBF7] p-6 shadow-sm">
-          <div className="flex flex-wrap items-center justify-between gap-4 border-b border-gray-200 pb-4 mb-4">
+        <div className="border border-[#222222]/15 bg-[#FDFBF7] p-6 shadow-sm">
+          <div className="flex flex-wrap items-center justify-between gap-4 border-b border-[#222222]/10 pb-4 mb-4">
             <div>
               <h3 className="font-serif text-xl font-bold text-[#1E5336]">
                 Roulette Pairings History ({rouletteResults.length})
@@ -500,16 +498,16 @@ export default function AdminRoulettePage() {
                 Review all blind pairs generated. Admins can delete or remove any pairing entry.
               </p>
             </div>
-            <span className="rounded bg-emerald-100 px-2.5 py-1 text-[11px] font-bold text-emerald-800">
+            <span className="rounded bg-emerald-100 px-2 py-0.5 text-[9px] font-bold uppercase text-emerald-800">
               Synced with Public Page
             </span>
           </div>
 
           {rouletteResults.length === 0 ? (
             <div className="py-12 text-center">
-              <Dices size={36} className="mx-auto text-gray-300 mb-2" />
-              <p className="text-sm font-semibold text-gray-500">No roulette pairings generated yet.</p>
-              <p className="text-xs text-gray-400 mt-1">
+              <Dices size={36} className="mx-auto text-[#6B756B]/40 mb-2" />
+              <p className="text-sm font-semibold text-[#6B756B]">No roulette pairings generated yet.</p>
+              <p className="text-xs text-[#6B756B]/70 mt-1">
                 Add players to Pool A and B and click "Generate / Spin Pair" above to create official blind matchups.
               </p>
             </div>
@@ -517,16 +515,16 @@ export default function AdminRoulettePage() {
             <div className="overflow-x-auto">
               <table className="w-full text-left text-xs">
                 <thead>
-                  <tr className="border-b border-gray-200 text-[10px] font-extrabold uppercase tracking-wider text-gray-500">
-                    <th className="py-2.5">Pairing / Matchup</th>
-                    <th className="py-2.5">Bracket & Court Allocation</th>
-                    <th className="py-2.5">Date & Time</th>
-                    <th className="py-2.5 text-right">Admin Action</th>
+                  <tr className="border-b border-[#222222]/10 bg-[#F3F0EC] text-[#6B756B] uppercase font-bold tracking-wider">
+                    <th className="p-3">Pairing / Matchup</th>
+                    <th className="p-3">Bracket & Court Allocation</th>
+                    <th className="p-3">Date & Time</th>
+                    <th className="p-3 text-right">Admin Action</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-100">
+                <tbody className="divide-y divide-[#222222]/10">
                   {rouletteResults.map((res) => (
-                    <tr key={res.id} className="hover:bg-gray-50/60 transition">
+                    <tr key={res.id} className="hover:bg-[#F3F0EC]/40 transition">
                       <td className="py-3 font-semibold text-[#111827]">
                         <span className="text-[#1E5336]">{res.playerA}</span>
                         <span className="mx-1 text-[#E1A728] font-bold">&</span>
@@ -537,13 +535,13 @@ export default function AdminRoulettePage() {
                           {res.bracketPlacement}
                         </span>
                       </td>
-                      <td className="py-3 text-gray-500 font-mono text-[11px]">
+                      <td className="py-3 text-[#6B756B] font-mono text-[11px]">
                         {res.timestamp}
                       </td>
                       <td className="py-3 text-right">
                         <button
                           onClick={() => deleteRouletteResult(res.id)}
-                          className="inline-flex items-center gap-1 rounded bg-red-50 px-2.5 py-1 text-[11px] font-bold text-red-600 hover:bg-red-100 transition"
+                          className="inline-flex items-center gap-1 rounded bg-red-50 px-2 py-1 text-[10px] font-bold uppercase text-red-600 hover:bg-red-100 transition"
                           title="Delete this pairing"
                         >
                           <Trash2 size={12} /> Remove

@@ -79,8 +79,8 @@ export default function AdminCottageCatalogPage() {
     <div className="min-h-screen bg-[#F3F0EC] text-[#222222] pb-16">
       <section className="bg-[#FDFBF7] border-b border-[#222222]/10 px-6 py-8">
         <div className="mx-auto max-w-7xl">
-          <Link href="/admin/dashboard" className="inline-flex items-center gap-1.5 text-[10px] uppercase tracking-[0.16em] text-[#6B756B] hover:text-[#1E5336]">
-            <ArrowLeft size={13} /> Dashboard
+          <Link href="/admin/dashboard" className="inline-flex items-center gap-1 text-xs font-bold uppercase tracking-wider text-[#1E5336] hover:underline mb-2">
+            <ArrowLeft size={14} /> Back to Dashboard
           </Link>
           <p className="mt-4 text-xs uppercase tracking-[0.18em] text-[#E1A728]">Cottage & Event</p>
           <h1 className="mt-1 font-serif text-4xl text-[#1E5336]">Booking Catalog</h1>
@@ -287,7 +287,7 @@ function ItemModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-[#222222]/50" onClick={onClose} />
+      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
       <div className="relative w-full max-w-md bg-[#FDFBF7] p-6 shadow-2xl">
         <div className="flex items-center justify-between">
           <h2 className="font-serif text-2xl text-[#1E5336]">

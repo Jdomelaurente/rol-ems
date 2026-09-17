@@ -247,24 +247,24 @@ export default function AdminTournamentsPage() {
             </button>
             <button
               onClick={() => setActiveTab('bracket')}
-              className={`px-4 py-2 text-xs font-bold uppercase tracking-wider ${
-                activeTab === 'bracket' ? 'bg-[#1E5336] text-white' : 'bg-stone-200 text-[#222222]'
+              className={`px-4 py-2 text-xs font-bold uppercase tracking-wider border transition ${
+                activeTab === 'bracket' ? 'bg-[#1E5336] text-white border-[#1E5336]' : 'bg-white text-[#1E5336] border-[#1E5336]/30 hover:border-[#1E5336]'
               }`}
             >
               Bracket & Scores
             </button>
             <button
               onClick={() => setActiveTab('pairs')}
-              className={`px-4 py-2 text-xs font-bold uppercase tracking-wider ${
-                activeTab === 'pairs' ? 'bg-[#1E5336] text-white' : 'bg-stone-200 text-[#222222]'
+              className={`px-4 py-2 text-xs font-bold uppercase tracking-wider border transition ${
+                activeTab === 'pairs' ? 'bg-[#1E5336] text-white border-[#1E5336]' : 'bg-white text-[#1E5336] border-[#1E5336]/30 hover:border-[#1E5336]'
               }`}
             >
               {isTeamEvent ? 'Team / Squad Management' : 'Pair & Player Management'}
             </button>
             <button
               onClick={() => setActiveTab('create')}
-              className={`px-4 py-2 text-xs font-bold uppercase tracking-wider ${
-                activeTab === 'create' ? 'bg-[#1E5336] text-white' : 'bg-stone-200 text-[#222222]'
+              className={`px-4 py-2 text-xs font-bold uppercase tracking-wider border transition ${
+                activeTab === 'create' ? 'bg-[#1E5336] text-white border-[#1E5336]' : 'bg-white text-[#1E5336] border-[#1E5336]/30 hover:border-[#1E5336]'
               }`}
             >
               + Create Tournament
