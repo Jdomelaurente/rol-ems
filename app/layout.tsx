@@ -2,6 +2,7 @@ import { Analytics } from '@vercel/analytics/next'
 import type { Metadata, Viewport } from 'next'
 import { Inter, Playfair_Display } from 'next/font/google'
 import { PickleballProvider } from '@/context/PickleballContext'
+import { CottageProvider } from '@/context/CottageContext'
 import CookieConsent from '@/components/CookieConsent'
 import './globals.css'
 
@@ -44,7 +45,9 @@ export default function RootLayout({
     <html lang="en" className={`${inter.variable} ${playfair.variable} bg-[#FDFBF7]`}>
       <body className="antialiased">
         <PickleballProvider>
-          {children}
+          <CottageProvider>
+            {children}
+          </CottageProvider>
         </PickleballProvider>
         <CookieConsent />
         {process.env.NODE_ENV === 'production' && <Analytics />}

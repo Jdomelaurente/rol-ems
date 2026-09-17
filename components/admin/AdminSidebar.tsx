@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import {
   LayoutDashboard,
   Volleyball,
@@ -11,22 +11,78 @@ import {
   Disc,
   Trophy,
   Dices,
+  Home,
+  Feather,
+  LayoutGrid,
   LogOut,
   Menu,
   X,
   ChevronLeft,
   ChevronRight,
+  ChevronDown,
 } from 'lucide-react'
 
-const navItems = [
-  { href: '/admin/dashboard', label: 'Dashboard', icon: LayoutDashboard },
-  { href: '/admin/courts', label: 'Court Schedule', icon: Volleyball },
-  { href: '/admin/reservations', label: 'Reservations', icon: CalendarCheck },
-  { href: '/admin/open-play', label: 'Open Play', icon: Users },
-  { href: '/admin/roulette', label: 'Roulette Pairing', icon: Dices },
-  { href: '/admin/paddles', label: 'Paddle Rental', icon: Disc },
-  { href: '/admin/tournaments', label: 'Tournaments', icon: Trophy },
+interface NavItem {
+  href: string
+  label: string
+  comingSoon?: boolean
+}
+
+interface NavGroup {
+  key: string
+  label: string
+  icon: typeof Home
+  items: NavItem[]
+}
+
+const navGroups: NavGroup[] = [
+  {
+    key: 'cottage',
+    label: 'Cottage & Event',
+    icon: Home,
+    items: [
+      { href: '/admin/catalog', label: 'Booking Catalog' },
+      { href: '/admin/catalog?tab=cottages', label: 'Cottage Options' },
+      { href: '/admin/catalog?tab=venues', label: 'Event Venues' },
+      { href: '/admin/catalog?tab=cottageAddOns', label: 'Cottage Add-ons' },
+      { href: '/admin/catalog?tab=eventAddOns', label: 'Event Add-ons' },
+    ],
+  },
+  {
+    key: 'pickleball',
+    label: 'Pickleball',
+    icon: Volleyball,
+    items: [
+      { href: '/admin/courts', label: 'Court Schedule' },
+      { href: '/admin/reservations', label: 'Reservations' },
+      { href: '/admin/open-play', label: 'Open Play' },
+      { href: '/admin/roulette', label: 'Roulette Pairing' },
+      { href: '/admin/paddles', label: 'Paddle Rental' },
+      { href: '/admin/tournaments', label: 'Tournaments' },
+    ],
+  },
+  {
+    key: 'badminton',
+    label: 'Badminton',
+    icon: Feather,
+    items: [
+      { href: '/admin/catalog', label: 'Court & Game Catalog', comingSoon: true },
+      { href: '/admin/catalog', label: 'Reservations', comingSoon: true },
+    ],
+  },
+  {
+    key: 'other',
+    label: 'Other',
+    icon: LayoutGrid,
+    items: [{ href: '/', label: 'View Public Site' }],
+  },
 ]
+
+function isItemActive(pathname: string, href: string) {
+  if (href === '/admin/dashboard' || href === '/') return pathname === href
+  if (href.includes('?')) return false
+  return pathname.startsWith(href)
+}
 
 function BrandMark({ compact, onNavigate }: { compact?: boolean; onNavigate?: () => void }) {
   if (compact) {
@@ -63,9 +119,28 @@ export default function AdminSidebar({
   const router = useRouter()
   const [mobileOpen, setMobileOpen] = useState(false)
   const [signingOut, setSigningOut] = useState(false)
+  const [openGroups, setOpenGroups] = useState<Record<string, boolean>>({})
 
-  const isActive = (href: string) =>
-    href === '/admin/dashboard' ? pathname === '/admin/dashboard' : pathname.startsWith(href)
+  const activeGroupKey = navGroups.find((g) =>
+    g.items.some((item) => !item.comingSoon && isItemActive(pathname, item.href))
+  )?.key
+
+  useEffect(() => {
+    if (!activeGroupKey) return
+    setOpenGroups((prev) => ({ ...prev, [activeGroupKey]: true }))
+  }, [activeGroupKey])
+
+  const toggleGroup = (key: string) =>
+    setOpenGroups((prev) => ({ ...prev, [key]: !prev[key] }))
+
+  const handleGroupClick = (key: string) => {
+    if (collapsed) {
+      onToggle()
+      setOpenGroups((prev) => ({ ...prev, [key]: true }))
+      return
+    }
+    toggleGroup(key)
+  }
 
   const handleLogout = async () => {
     if (signingOut) return
@@ -78,6 +153,8 @@ export default function AdminSidebar({
       setSigningOut(false)
     }
   }
+
+  const dashboardActive = pathname === '/admin/dashboard'
 
   const navBody = (
     <>
@@ -113,28 +190,90 @@ export default function AdminSidebar({
         )}
       </div>
 
-      <nav className="flex-1 space-y-1 px-3 py-4">
-        {navItems.map(({ href, label, icon: Icon }) => {
-          const active = isActive(href)
-          return (
-            <Link
-              key={href}
-              href={href}
-              onClick={() => setMobileOpen(false)}
-              title={collapsed ? label : undefined}
-              className={`flex items-center gap-3 border-l-2 px-3 py-2.5 text-[10px] uppercase tracking-[0.16em] transition ${
-                collapsed ? 'justify-center px-0' : ''
-              } ${
-                active
-                  ? 'border-[#1E5336] bg-[#1E5336]/10 font-bold text-[#1E5336]'
-                  : 'border-transparent text-[#6B756B] hover:border-[#1E5336]/40 hover:text-[#1E5336]'
-              }`}
-            >
-              <Icon size={15} />
-              {!collapsed && label}
-            </Link>
-          )
-        })}
+      <nav className="flex-1 overflow-y-auto px-3 py-4">
+        <Link
+          href="/admin/dashboard"
+          onClick={() => setMobileOpen(false)}
+          title={collapsed ? 'Dashboard' : undefined}
+          className={`mb-1 flex items-center gap-3 border-l-2 px-3 py-2.5 text-[10px] uppercase tracking-[0.16em] transition ${
+            collapsed ? 'justify-center px-0' : ''
+          } ${
+            dashboardActive
+              ? 'border-[#1E5336] bg-[#1E5336]/10 font-bold text-[#1E5336]'
+              : 'border-transparent text-[#6B756B] hover:border-[#1E5336]/40 hover:text-[#1E5336]'
+          }`}
+        >
+          <LayoutDashboard size={15} />
+          {!collapsed && 'Dashboard'}
+        </Link>
+
+        <div className="mt-2 space-y-0.5">
+          {navGroups.map((group) => {
+            const groupActive = group.items.some(
+              (item) => !item.comingSoon && isItemActive(pathname, item.href)
+            )
+            const open = !collapsed && !!openGroups[group.key]
+            return (
+              <div key={group.key}>
+                <button
+                  type="button"
+                  onClick={() => handleGroupClick(group.key)}
+                  title={collapsed ? group.label : undefined}
+                  aria-expanded={open}
+                  className={`flex w-full items-center gap-3 border-l-2 px-3 py-2.5 text-[10px] uppercase tracking-[0.16em] transition ${
+                    collapsed ? 'justify-center px-0' : ''
+                  } ${
+                    groupActive
+                      ? 'border-[#1E5336] bg-[#1E5336]/5 font-bold text-[#1E5336]'
+                      : 'border-transparent text-[#6B756B] hover:border-[#1E5336]/40 hover:text-[#1E5336]'
+                  }`}
+                >
+                  <group.icon size={15} />
+                  {!collapsed && (
+                    <>
+                      <span className="flex-1 text-left">{group.label}</span>
+                      <ChevronDown
+                        size={13}
+                        className={`transition-transform duration-200 ${open ? 'rotate-180' : ''}`}
+                      />
+                    </>
+                  )}
+                </button>
+
+                {open && (
+                  <div className="ml-4 space-y-0.5 border-l border-[#222222]/10 pl-2 py-1">
+                    {group.items.map((item) =>
+                      item.comingSoon ? (
+                        <div
+                          key={item.label}
+                          className="flex items-center gap-2 px-3 py-1.5 text-[10px] uppercase tracking-[0.14em] text-[#6B756B]/50"
+                        >
+                          {item.label}
+                          <span className="ml-auto border border-[#E1A728]/50 px-1 py-0.5 text-[8px] leading-none text-[#E1A728]">
+                            Soon
+                          </span>
+                        </div>
+                      ) : (
+                        <Link
+                          key={item.href}
+                          href={item.href}
+                          onClick={() => setMobileOpen(false)}
+                          className={`block px-3 py-1.5 text-[10px] uppercase tracking-[0.14em] transition ${
+                            isItemActive(pathname, item.href)
+                              ? 'font-bold text-[#1E5336]'
+                              : 'text-[#6B756B] hover:text-[#1E5336]'
+                          }`}
+                        >
+                          {item.label}
+                        </Link>
+                      )
+                    )}
+                  </div>
+                )}
+              </div>
+            )
+          })}
+        </div>
       </nav>
 
       <div className="border-t border-[#222222]/10 p-3">
