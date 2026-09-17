@@ -3,6 +3,7 @@ import type { Metadata, Viewport } from 'next'
 import { Inter, Playfair_Display } from 'next/font/google'
 import { PickleballProvider } from '@/context/PickleballContext'
 import { CottageProvider } from '@/context/CottageContext'
+import { SiteContentProvider } from '@/context/SiteContentContext'
 import CookieConsent from '@/components/CookieConsent'
 import './globals.css'
 
@@ -46,7 +47,7 @@ export default function RootLayout({
       <body className="antialiased">
         <PickleballProvider>
           <CottageProvider>
-            {children}
+            <SiteContentProvider>{children}</SiteContentProvider>
           </CottageProvider>
         </PickleballProvider>
         <CookieConsent />

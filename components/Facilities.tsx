@@ -3,7 +3,8 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { ArrowUpRight } from 'lucide-react'
-import { facilities, facilityFilters, type Facility } from '@/lib/data'
+import { facilities as defaultFacilities, facilityFilters, type Facility } from '@/lib/data'
+import { useSiteContent } from '@/context/SiteContentContext'
 
 const shortName: Record<Facility['establishment'], string> = {
   'ROL-EMS Resort': 'Resort',
@@ -11,6 +12,8 @@ const shortName: Record<Facility['establishment'], string> = {
 }
 
 export default function Facilities() {
+  const { content } = useSiteContent()
+  const facilities = content.facilities.length > 0 ? content.facilities : defaultFacilities
   const [filter, setFilter] = useState<string>('All')
   const visible = filter === 'All' ? facilities : facilities.filter((item: Facility) => item.establishment === filter)
 

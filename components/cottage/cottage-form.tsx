@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { ArrowLeft, ArrowRight, CalendarDays, Check, ChevronLeft, ChevronRight, Clock, Loader2, Wallet } from 'lucide-react'
 import { useCottageCatalog } from '@/context/CottageContext'
 import { peso, ratePrice, type CatalogOption } from '@/lib/cottage-catalog'
@@ -61,6 +61,12 @@ export default function CottageBookingForm({ onDone }: { onDone: () => void }) {
   const [consent, setConsent] = useState(false)
   const [calendarOpen, setCalendarOpen] = useState(false)
   const [timeOpen, setTimeOpen] = useState(false)
+
+  const mountedRef = useRef(false)
+  useEffect(() => {
+    if (mountedRef.current) window.scrollTo({ top: 0, behavior: 'smooth' })
+    mountedRef.current = true
+  }, [step])
   const [viewMonth, setViewMonth] = useState(() => {
     const d = new Date()
     return new Date(d.getFullYear(), d.getMonth(), 1)
@@ -368,7 +374,7 @@ export default function CottageBookingForm({ onDone }: { onDone: () => void }) {
                     {cottageOptions.map((c) => (
                       <button
                         key={c.name}
-                        onClick={() => { setCottage(c); setGuests((g) => Math.min(g, c.capacity ?? 8)) }}
+                        onClick={() => { setCottage(c); setGuests((g) => Math.min(g, c.capacity ?? 8)); setStep('schedule') }}
                         className={`p-4 text-left transition ${cottage.name === c.name ? 'border-2 border-[#1E5336] bg-[#F3F0EC]' : 'border border-[#222222]/15 hover:border-[#1E5336]/40'}`}
                       >
                         <p className="font-serif text-lg text-[#1E5336]">{c.name}</p>
@@ -389,7 +395,7 @@ export default function CottageBookingForm({ onDone }: { onDone: () => void }) {
                   {eventVenues.map((v) => (
                     <button
                       key={v.name}
-                      onClick={() => { setVenue(v); setGuests((g) => Math.min(g, v.capacity ?? 50)) }}
+                      onClick={() => { setVenue(v); setGuests((g) => Math.min(g, v.capacity ?? 50)); setStep('schedule') }}
                       className={`p-5 text-left transition ${venue.name === v.name ? 'border-2 border-[#1E5336] bg-[#F3F0EC]' : 'border border-[#222222]/15 hover:border-[#1E5336]/40'}`}
                     >
                       <p className="font-serif text-lg text-[#1E5336]">{v.name}</p>

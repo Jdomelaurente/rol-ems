@@ -5,13 +5,11 @@ import { defaultCatalog, sanitizeCatalog, type CottageCatalog } from '@/lib/cott
 const STATE_KEY = 'cottage-catalog'
 
 export async function GET() {
-  let row = await prisma.pickleballState.findUnique({ where: { key: STATE_KEY } })
-
-  if (!row) {
-    row = await prisma.pickleballState.create({
-      data: { key: STATE_KEY, data: defaultCatalog as object },
-    })
-  }
+  const row = await prisma.pickleballState.upsert({
+    where: { key: STATE_KEY },
+    update: {},
+    create: { key: STATE_KEY, data: defaultCatalog as object },
+  })
 
   const catalog = sanitizeCatalog(row.data as Partial<CottageCatalog>)
   return NextResponse.json(catalog)
@@ -24,15 +22,11 @@ export async function PUT(request: Request) {
   }
 
   const catalog = sanitizeCatalog(body as Partial<CottageCatalog>)
-  const existing = await prisma.pickleballState.findUnique({ where: { key: STATE_KEY } })
-  const row = existing
-    ? await prisma.pickleballState.update({
-        where: { key: STATE_KEY },
-        data: { data: catalog as object },
-      })
-    : await prisma.pickleballState.create({
-        data: { key: STATE_KEY, data: catalog as object },
-      })
+  const row = await prisma.pickleballState.upsert({
+    where: { key: STATE_KEY },
+    update: { data: catalog as object },
+    create: { key: STATE_KEY, data: catalog as object },
+  })
 
   return NextResponse.json(row.data)
 }

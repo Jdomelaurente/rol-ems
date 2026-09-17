@@ -40,13 +40,7 @@ const navGroups: NavGroup[] = [
     key: 'cottage',
     label: 'Cottage & Event',
     icon: Home,
-    items: [
-      { href: '/admin/catalog', label: 'Booking Catalog' },
-      { href: '/admin/catalog?tab=cottages', label: 'Cottage Options' },
-      { href: '/admin/catalog?tab=venues', label: 'Event Venues' },
-      { href: '/admin/catalog?tab=cottageAddOns', label: 'Cottage Add-ons' },
-      { href: '/admin/catalog?tab=eventAddOns', label: 'Event Add-ons' },
-    ],
+    items: [{ href: '/admin/catalog', label: 'Booking Catalog' }],
   },
   {
     key: 'pickleball',
@@ -74,7 +68,7 @@ const navGroups: NavGroup[] = [
     key: 'other',
     label: 'Other',
     icon: LayoutGrid,
-    items: [{ href: '/', label: 'View Public Site' }],
+    items: [{ href: '/admin/site', label: 'Site Content' }],
   },
 ]
 

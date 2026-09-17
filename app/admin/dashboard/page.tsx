@@ -2,7 +2,8 @@
 
 import Link from 'next/link'
 import { usePickleball } from '@/context/PickleballContext'
-import { CalendarCheck, Users, Trophy, Volleyball, Disc, Dices, Home, Feather, ExternalLink } from 'lucide-react'
+import DashboardCharts from '@/components/admin/DashboardCharts'
+import { CalendarCheck, Users, Trophy, Volleyball, Disc, Dices, Home, Feather, LayoutGrid } from 'lucide-react'
 
 interface DashItem {
   label: string
@@ -29,7 +30,7 @@ export default function AdminDashboardPage() {
     { label: 'Paddle Management', href: '/admin/paddles', icon: Disc, count: `${paddles.length} Paddles` },
     { label: 'Tournaments & Bracket', href: '/admin/tournaments', icon: Trophy, count: `${tournaments.length} Events` },
     { label: 'Badminton', href: '#', icon: Feather, count: 'Coming soon', soon: true },
-    { label: 'View Public Site', href: '/', icon: ExternalLink, count: 'Open website' },
+    { label: 'Site Content', href: '/admin/site', icon: LayoutGrid, count: 'Images & messages' },
   ]
 
   return (
@@ -109,6 +110,11 @@ export default function AdminDashboardPage() {
               <span>1 Available</span> · <span>1 Reserved</span> · <span>1 Open Play</span>
             </div>
           </div>
+        </div>
+
+        {/* Charts */}
+        <div className="mb-8">
+          <DashboardCharts reservations={reservations} paddles={paddles} />
         </div>
 
         {/* Reservations Table */}
