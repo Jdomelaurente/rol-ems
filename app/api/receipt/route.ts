@@ -61,7 +61,9 @@ export async function GET(req: NextRequest) {
     }
 
     const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'
-    const receiptUrl = `${siteUrl}/booking/receipt?ref=${encodeURIComponent(reference)}`
+    const isPickleball = String(metadata?.facility || '').startsWith('pickleball:')
+    const receiptPath = isPickleball ? '/pickleball/booking/receipt' : '/booking/receipt'
+    const receiptUrl = `${siteUrl}${receiptPath}?ref=${encodeURIComponent(reference)}`
 
     await sendReceiptEmail(billingEmail, {
       reference,

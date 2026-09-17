@@ -122,7 +122,7 @@ interface PickleballContextType {
 
   // Court Reservations
   reservations: Reservation[]
-  addReservation: (reservation: Omit<Reservation, 'id' | 'bookingId'>) => Reservation
+  addReservation: (reservation: Omit<Reservation, 'id' | 'bookingId'> & { bookingId?: string }) => Reservation
 
   // Coaching Sessions
   coaches: Coach[]
@@ -859,8 +859,8 @@ export const PickleballProvider: React.FC<{ children: React.ReactNode }> = ({ ch
 
   // ─── RESERVATIONS ACTIONS ──────────────────────────────────────────────────
 
-  const addReservation = (resData: Omit<Reservation, 'id' | 'bookingId'>) => {
-    const bookingId = `PB-${Math.floor(100000 + Math.random() * 900000)}`
+  const addReservation = (resData: Omit<Reservation, 'id' | 'bookingId'> & { bookingId?: string }) => {
+    const bookingId = resData.bookingId || `PB-${Math.floor(100000 + Math.random() * 900000)}`
     const newReservation: Reservation = {
       ...resData,
       id: Date.now().toString(),

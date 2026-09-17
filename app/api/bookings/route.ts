@@ -50,7 +50,9 @@ export async function POST(req: NextRequest) {
     if (isCash && booking.email) {
       const formatPeso = (val: number) => `₱${val.toLocaleString('en-PH', { minimumFractionDigits: 2 })}`
       const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'
-      const receiptUrl = `${siteUrl}/booking/receipt?ref=${encodeURIComponent(booking.reference)}`
+      const isPickleball = booking.facility.startsWith('pickleball:')
+      const receiptPath = isPickleball ? '/pickleball/booking/receipt' : '/booking/receipt'
+      const receiptUrl = `${siteUrl}${receiptPath}?ref=${encodeURIComponent(booking.reference)}`
       sendReceiptEmail(booking.email, {
         reference: booking.reference,
         description: booking.itemName,

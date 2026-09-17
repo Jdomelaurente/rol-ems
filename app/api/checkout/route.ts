@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 
 export async function POST(req: NextRequest) {
   const body = await req.json()
-  const { name, contact, email, amount, description, metadata } = body
+  const { name, contact, email, amount, description, metadata, cancelUrl, successUrl } = body
 
   if (!amount || amount <= 0) {
     return NextResponse.json({ error: 'Invalid amount' }, { status: 400 })
@@ -23,6 +23,9 @@ export async function POST(req: NextRequest) {
     ...(email ? { email } : {}),
   }
 
+  const cancelPath = typeof cancelUrl === 'string' && cancelUrl.startsWith('/') ? cancelUrl : '/#facilities'
+  const successPath = typeof successUrl === 'string' && successUrl.startsWith('/') ? successUrl : '/payment/success'
+
   const payload = {
     data: {
       attributes: {
@@ -41,8 +44,8 @@ export async function POST(req: NextRequest) {
           },
         ],
         payment_method_types: ['gcash', 'card', 'paymaya', 'grab_pay'],
-        success_url: `${siteUrl}/payment/success`,
-        cancel_url: `${siteUrl}/#facilities`,
+        success_url: `${siteUrl}${successPath}`,
+        cancel_url: `${siteUrl}${cancelPath}`,
         metadata: mergedMetadata,
       },
     },
