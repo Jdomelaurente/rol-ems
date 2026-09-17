@@ -3,7 +3,7 @@
 import { useEffect } from 'react'
 import Header from '@/components/Header'
 import Hero from '@/components/Hero'
-import Story from '@/components/Story'
+import CheckBooking from '@/components/CheckBooking'
 import Facilities from '@/components/Facilities'
 import PoolHouse from '@/components/PoolHouse'
 import Queue from '@/components/Queue'
@@ -62,7 +62,7 @@ export default function Page() {
     <main className="min-h-screen overflow-hidden bg-[#FDFBF7] pt-[72px] text-[#222222]">
       <Header />
       <Hero />
-      <Story />
+      <CheckBooking />
       <Facilities />
       <PoolHouse />
       <Queue />
