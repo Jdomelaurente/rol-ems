@@ -60,8 +60,8 @@ const navGroups: NavGroup[] = [
     label: 'Badminton',
     icon: Feather,
     items: [
-      { href: '/admin/catalog', label: 'Court & Game Catalog', comingSoon: true },
-      { href: '/admin/catalog', label: 'Reservations', comingSoon: true },
+      { href: '/admin/badminton/catalog', label: 'Court & Game Catalog' },
+      { href: '/admin/badminton/reservations', label: 'Reservations' },
     ],
   },
   {
