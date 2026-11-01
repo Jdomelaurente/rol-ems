@@ -22,17 +22,19 @@
     "url": "https://rol-ems.vercel.app/api/health",
     "icon": "https://icons.duckduckgo.com/ip3/rol-ems.vercel.app.ico",
     "slug": "rol-ems-api-and-database",
-    "status": "down",
-    "uptime": "100.00%",
-    "uptimeDay": "100.00%",
-    "uptimeWeek": "100.00%",
-    "uptimeMonth": "100.00%",
-    "uptimeYear": "100.00%",
+    "status": "up",
+    "uptime": "5.39%",
+    "uptimeDay": "5.39%",
+    "uptimeWeek": "5.39%",
+    "uptimeMonth": "5.39%",
+    "uptimeYear": "5.39%",
     "time": 735,
     "timeDay": 735,
     "timeWeek": 735,
     "timeMonth": 735,
     "timeYear": 735,
-    "dailyMinutesDown": {}
+    "dailyMinutesDown": {
+      "2026-11-01": 98
+    }
   }
 ]
