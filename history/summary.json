@@ -1,0 +1,38 @@
+[
+  {
+    "name": "ROL-EMS Website",
+    "url": "https://rol-ems.vercel.app",
+    "icon": "https://icons.duckduckgo.com/ip3/rol-ems.vercel.app.ico",
+    "slug": "rol-ems-website",
+    "status": "up",
+    "uptime": "100.00%",
+    "uptimeDay": "100.00%",
+    "uptimeWeek": "100.00%",
+    "uptimeMonth": "100.00%",
+    "uptimeYear": "100.00%",
+    "time": 492,
+    "timeDay": 492,
+    "timeWeek": 492,
+    "timeMonth": 492,
+    "timeYear": 492,
+    "dailyMinutesDown": {}
+  },
+  {
+    "name": "ROL-EMS API & Database",
+    "url": "https://rol-ems.vercel.app/api/health",
+    "icon": "https://icons.duckduckgo.com/ip3/rol-ems.vercel.app.ico",
+    "slug": "rol-ems-api-and-database",
+    "status": "up",
+    "uptime": "100.00%",
+    "uptimeDay": "100.00%",
+    "uptimeWeek": "100.00%",
+    "uptimeMonth": "100.00%",
+    "uptimeYear": "100.00%",
+    "time": 745,
+    "timeDay": 745,
+    "timeWeek": 745,
+    "timeMonth": 745,
+    "timeYear": 745,
+    "dailyMinutesDown": {}
+  }
+]
