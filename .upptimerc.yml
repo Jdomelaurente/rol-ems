@@ -1,0 +1,51 @@
+# Upptime configuration for ROL-EMS
+# Docs: https://upptime.js.org/docs/configuration
+# Keep this file in sync with the GitHub repository that runs the monitor.
+
+owner: Jdomelaurente
+repo: rol-ems
+user-agent: Jdomelaurente
+
+sites:
+  - name: ROL-EMS Website
+    url: https://rol-ems.vercel.app
+    maxResponseTime: 15000
+  - name: ROL-EMS API & Database
+    url: https://rol-ems.vercel.app/api/health
+    maxResponseTime: 10000
+    __dangerous__body_down_if_regex_missing: '"status":\s*"ok"'
+
+# Leave a small gap between the two checks.
+delay: 2000
+
+# This is the main app repository, so don't let Upptime rewrite its metadata.
+skipDescriptionUpdate: true
+skipTopicsUpdate: true
+skipHomepageUpdate: true
+
+status-website:
+  baseUrl: /rol-ems
+  publish: true
+  logoUrl: https://rol-ems.vercel.app/logo.png
+  name: ROL-EMS Status
+  introTitle: "**ROL-EMS** uptime monitor and status page."
+  introMessage: This status page is powered entirely by GitHub Actions, Issues, and Pages. It also keeps the Vercel deployment and Supabase database warm so the booking system stays awake.
+  navbar:
+    - title: Status
+      href: /
+    - title: ROL-EMS
+      href: https://rol-ems.vercel.app
+    - title: GitHub
+      href: https://github.com/$OWNER/$REPO
+
+# A private repo gets 2,000 free Actions minutes per month. Every 15 minutes
+# keeps the app + database awake without exhausting the quota. Lower this to
+# "*/5 * * * *" if the repository is made public (public repos have free minutes).
+workflowSchedule:
+  graphs: "0 0 * * *"
+  responseTime: "0 23 * * *"
+  staticSite: "0 1 * * *"
+  summary: "0 0 * * *"
+  updateTemplate: "0 0 * * *"
+  updates: "0 3 * * *"
+  uptime: "*/15 * * * *"

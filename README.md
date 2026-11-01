@@ -51,3 +51,21 @@ These files contain live credentials and must never be committed. Keep this repo
 | `SESSION_SECRET` | Any random string used for session signing |
 
 > The real values live only in `.env.local` (gitignored). Never paste live secrets into any committed file — GitHub will block the push.
+
+## Uptime & Keep-Awake
+
+This repository also runs [Upptime](https://upptime.js.org) to monitor the live site and keep Vercel + Supabase warm.
+
+- Checks: the website (`/`) and `/api/health` (which runs a real database query).
+- Schedule: every 15 minutes, plus a daily summary.
+- Status page: <https://jdomelaurente.github.io/rol-ems/>
+- Downtime opens a GitHub issue automatically and closes it when the service recovers.
+
+Setup requirements (one-time, in GitHub settings):
+
+1. Add a fine-grained or classic personal access token with `repo` + `workflow` scopes as the `GH_PAT` secret.
+2. Under **Settings → Pages**, set the source to the `gh-pages` branch.
+3. Run the **Setup CI** workflow once, then the **Uptime CI** workflow.
+
+<!--start: status pages-->
+<!--end: status pages-->

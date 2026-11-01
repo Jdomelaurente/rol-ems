@@ -22,3 +22,7 @@ tsconfig.tsbuildinfo
 # Local debug / temp files — do not push (see README)
 check-user.js
 devlog2.txt
+.vercel
+
+# Upptime build output (the status page is deployed to gh-pages)
+site/
