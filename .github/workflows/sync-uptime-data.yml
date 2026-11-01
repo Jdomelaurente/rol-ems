@@ -1,0 +1,49 @@
+name: Sync Uptime Data
+
+# Upptime's status page hardcodes the "master" branch when reading
+# history/api/graphs from raw.githubusercontent.com. This repo keeps its
+# default branch on "main", so mirror the generated data to "master" after
+# every successful Uptime CI run.
+
+on:
+  workflow_run:
+    workflows: ["Uptime CI"]
+    types: [completed]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: sync-uptime-data
+  cancel-in-progress: true
+
+jobs:
+  sync:
+    if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout main
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+          token: ${{ secrets.GH_PAT || github.token }}
+
+      - name: Mirror uptime data to master
+        run: |
+          set -e
+          git config user.name "Upptime Bot"
+          git config user.email "73812536+upptime-bot@users.noreply.github.com"
+          git fetch origin master
+
+          git checkout -B master origin/master
+          git checkout origin/main -- history api graphs
+
+          if git diff --cached --quiet; then
+            echo "No uptime data changes to sync"
+            exit 0
+          fi
+
+          git commit -m ":card_file_box: Mirror uptime data from main [skip ci] [upptime]"
+          git push origin master
