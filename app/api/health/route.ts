@@ -5,11 +5,29 @@ export const dynamic = 'force-dynamic'
 
 const NO_STORE = { 'Cache-Control': 'no-store' }
 
+async function checkDatabase(attempts = 2) {
+  let lastError: unknown
+
+  for (let attempt = 0; attempt < attempts; attempt++) {
+    try {
+      await prisma.$queryRaw`SELECT 1`
+      return
+    } catch (error) {
+      lastError = error
+      if (attempt < attempts - 1) {
+        await new Promise((resolve) => setTimeout(resolve, 500))
+      }
+    }
+  }
+
+  throw lastError
+}
+
 export async function GET() {
   const startedAt = Date.now()
 
   try {
-    await prisma.$queryRaw`SELECT 1`
+    await checkDatabase()
 
     return NextResponse.json(
       {
