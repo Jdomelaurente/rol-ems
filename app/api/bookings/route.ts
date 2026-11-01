@@ -53,17 +53,21 @@ export async function POST(req: NextRequest) {
       const isPickleball = booking.facility.startsWith('pickleball:')
       const receiptPath = isPickleball ? '/pickleball/booking/receipt' : '/booking/receipt'
       const receiptUrl = `${siteUrl}${receiptPath}?ref=${encodeURIComponent(booking.reference)}`
-      sendReceiptEmail(booking.email, {
-        reference: booking.reference,
-        description: booking.itemName,
-        amount: formatPeso(booking.amount),
-        name: booking.name || 'Guest',
-        date: booking.date,
-        time: booking.time,
-        guests: String(booking.guests),
-        receiptUrl,
-        isCash: true,
-      }).catch((err) => console.error('Failed to send cash receipt email:', err))
+      try {
+        await sendReceiptEmail(booking.email, {
+          reference: booking.reference,
+          description: booking.itemName,
+          amount: formatPeso(booking.amount),
+          name: booking.name || 'Guest',
+          date: booking.date,
+          time: booking.time,
+          guests: String(booking.guests),
+          receiptUrl,
+          isCash: true,
+        })
+      } catch (err) {
+        console.error('Failed to send cash receipt email:', err)
+      }
     }
 
     return NextResponse.json(booking, { status: 201 })

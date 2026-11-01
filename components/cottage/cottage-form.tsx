@@ -730,7 +730,10 @@ export default function CottageBookingForm({ onDone }: { onDone: () => void }) {
             </span>
             <h2 className="mt-5 font-serif text-3xl tracking-[-0.04em] text-[#1E5336]">Reservation confirmed</h2>
             <p className="mt-3 max-w-sm text-sm leading-6 text-[#6B756B]">
-              Your {kind === 'event' ? 'event venue' : 'cottage rental'} is on hold for {date} at {time}. A confirmation and receipt have been sent.
+              Your {kind === 'event' ? 'event venue' : 'cottage rental'} is on hold for {date} at {time}.{' '}
+              {email.trim()
+                ? 'A confirmation and receipt have been sent to your email.'
+                : 'Save your reference below — no email receipt was requested.'}
             </p>
             <div className="mt-6 w-full max-w-sm border border-[#222222]/15 p-4 text-left text-sm">
               <div className="flex justify-between py-1"><span className="text-[#6B756B]">Reference</span><span className="font-bold text-[#1E5336]">{confirmedRef}</span></div>
