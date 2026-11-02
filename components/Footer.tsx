@@ -57,7 +57,7 @@ export default function Footer() {
           <a href="/refund-policy" className="hover:text-[#1E5336]">Refunds</a>
           <a href="/cookies-policy" className="hover:text-[#1E5336]">Cookies</a>
           <span className="hidden h-3 w-px bg-[#222222]/15 sm:block" />
-          <a href="/pickleball/booking/lookup" className="hover:text-[#1E5336]">Check a booking</a>
+          <a href="/booking/lookup" className="hover:text-[#1E5336]">Check a booking</a>
           <a href="/admin/login" className="hover:text-[#1E5336]">Staff Login</a>
         </span>
       </div>

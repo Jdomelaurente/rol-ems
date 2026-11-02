@@ -122,7 +122,7 @@ export default function CheckBooking() {
                     <span className="font-bold text-[#1E5336]">₱{booking.amount.toLocaleString()}</span>
                   </div>
                   <a
-                    href={`/pickleball/booking/receipt?ref=${encodeURIComponent(booking.reference)}`}
+                    href={`/booking/receipt?ref=${encodeURIComponent(booking.reference)}`}
                     className="mt-4 inline-flex items-center gap-1.5 text-[10px] uppercase tracking-[0.16em] text-[#1E5336] hover:text-[#E1A728]"
                   >
                     View full details <ArrowUpRight size={13} />
