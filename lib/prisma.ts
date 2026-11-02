@@ -9,7 +9,7 @@ function createClient(): PrismaClient {
     connectionString: process.env.DATABASE_URL,
     ssl: { rejectUnauthorized: false },
   })
-  const adapter = new PrismaPg(pool, { statementCacheSize: 0 })
+  const adapter = new PrismaPg(pool)
   return new PrismaClient({ adapter })
 }
 

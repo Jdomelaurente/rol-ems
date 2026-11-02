@@ -130,7 +130,7 @@ export const queueOrder = Object.keys(queues)
 
 // ─── Court Types ─────────────────────────────────────────────────────────────
 
-export type CourtStatus = 'available' | 'reserved' | 'occupied' | 'open-play'
+export type CourtStatus = 'available' | 'reserved' | 'occupied' | 'open-play' | 'maintenance'
 
 export type Court = {
   id: string
@@ -946,7 +946,7 @@ export type AIQueuePlayer = {
   paymentMethod?: 'Pay at Counter' | 'GCash' | 'Maya'
   pairNumber?: number
   partnerName?: string
-  status: 'waiting' | 'in-match' | 'resting'
+  status: 'waiting' | 'in-match' | 'playing' | 'completed' | 'resting'
 }
 
 export type MiniMatch = {
@@ -963,8 +963,158 @@ export type MiniMatch = {
   time: string
 }
 
-export const initialAIQueuePlayers: AIQueuePlayer[] = []
-export const initialMiniMatches: MiniMatch[] = []
+export const initialAIQueuePlayers: AIQueuePlayer[] = [
+  {
+    id: 'q-pb-001',
+    name: 'Carlos Mendoza',
+    sport: 'Pickleball',
+    wins: 6,
+    losses: 1,
+    points: 84,
+    gamesPlayed: 7,
+    waitTimeMinutes: 4,
+    sitOutCount: 0,
+    pairNumber: 1,
+    partnerName: 'Ana Lopez',
+    status: 'playing',
+  },
+  {
+    id: 'q-pb-002',
+    name: 'Ana Lopez',
+    sport: 'Pickleball',
+    wins: 6,
+    losses: 1,
+    points: 84,
+    gamesPlayed: 7,
+    waitTimeMinutes: 4,
+    sitOutCount: 0,
+    pairNumber: 1,
+    partnerName: 'Carlos Mendoza',
+    status: 'playing',
+  },
+  {
+    id: 'q-pb-003',
+    name: 'Mark Rivera',
+    sport: 'Pickleball',
+    wins: 5,
+    losses: 2,
+    points: 72,
+    gamesPlayed: 7,
+    waitTimeMinutes: 10,
+    sitOutCount: 1,
+    pairNumber: 2,
+    partnerName: 'Sofia Reyes',
+    status: 'waiting',
+  },
+  {
+    id: 'q-pb-004',
+    name: 'Sofia Reyes',
+    sport: 'Pickleball',
+    wins: 5,
+    losses: 2,
+    points: 72,
+    gamesPlayed: 7,
+    waitTimeMinutes: 10,
+    sitOutCount: 1,
+    pairNumber: 2,
+    partnerName: 'Mark Rivera',
+    status: 'waiting',
+  },
+  {
+    id: 'q-pb-005',
+    name: 'Juan Rivera',
+    sport: 'Pickleball',
+    wins: 4,
+    losses: 3,
+    points: 65,
+    gamesPlayed: 7,
+    waitTimeMinutes: 15,
+    sitOutCount: 1,
+    pairNumber: 3,
+    partnerName: 'Maria Santos',
+    status: 'waiting',
+  },
+  {
+    id: 'q-pb-006',
+    name: 'Maria Santos',
+    sport: 'Pickleball',
+    wins: 4,
+    losses: 3,
+    points: 65,
+    gamesPlayed: 7,
+    waitTimeMinutes: 15,
+    sitOutCount: 1,
+    pairNumber: 3,
+    partnerName: 'Juan Rivera',
+    status: 'waiting',
+  },
+  {
+    id: 'q-pb-007',
+    name: 'Pedro Cruz',
+    sport: 'Pickleball',
+    wins: 3,
+    losses: 4,
+    points: 48,
+    gamesPlayed: 7,
+    waitTimeMinutes: 20,
+    sitOutCount: 2,
+    status: 'completed',
+  },
+  {
+    id: 'q-pb-008',
+    name: 'Jenny Aquino',
+    sport: 'Pickleball',
+    wins: 2,
+    losses: 4,
+    points: 40,
+    gamesPlayed: 6,
+    waitTimeMinutes: 22,
+    sitOutCount: 2,
+    status: 'completed',
+  },
+]
+
+export const initialMiniMatches: MiniMatch[] = [
+  {
+    id: 'mm-101',
+    sport: 'Pickleball',
+    court: 'Court 1',
+    player1: 'Carlos Mendoza',
+    player2: 'Ana Lopez',
+    player3: 'David Kim',
+    player4: 'Rachel Tan',
+    score1: 9,
+    score2: 7,
+    status: 'live',
+    time: '2:15 PM',
+  },
+  {
+    id: 'mm-102',
+    sport: 'Pickleball',
+    court: 'Court 2',
+    player1: 'Mark Rivera',
+    player2: 'Sofia Reyes',
+    player3: 'Juan Rivera',
+    player4: 'Maria Santos',
+    score1: 0,
+    score2: 0,
+    status: 'upcoming',
+    time: '2:45 PM',
+  },
+  {
+    id: 'mm-103',
+    sport: 'Pickleball',
+    court: 'Court 3',
+    player1: 'Pedro Cruz',
+    player2: 'Jenny Aquino',
+    player3: 'Remy Bautista',
+    player4: 'Chris Garcia',
+    score1: 11,
+    score2: 8,
+    status: 'completed',
+    time: '1:30 PM',
+  },
+]
 
 // ─── Open Play Stats & Leaderboard Types ───────────────────────────────────────
 
@@ -982,7 +1132,12 @@ export type PlayerStat = {
   recentMatches: { opponent: string; score: string; result: 'W' | 'L' }[]
 }
 
-export const initialPlayerStats: PlayerStat[] = []
+export const initialPlayerStats: PlayerStat[] = [
+  { id: 'ps-1', name: 'Carlos Mendoza', sport: 'Pickleball', wins: 6, losses: 1, winRate: 85.7, pointDiff: 24, streak: 4, rating: 4.8, rank: 1, recentMatches: [{ opponent: 'David Kim', score: '11-6', result: 'W' }] },
+  { id: 'ps-2', name: 'Ana Lopez', sport: 'Pickleball', wins: 6, losses: 1, winRate: 85.7, pointDiff: 24, streak: 4, rating: 4.8, rank: 2, recentMatches: [{ opponent: 'Rachel Tan', score: '11-6', result: 'W' }] },
+  { id: 'ps-3', name: 'Mark Rivera', sport: 'Pickleball', wins: 5, losses: 2, winRate: 71.4, pointDiff: 16, streak: 2, rating: 4.5, rank: 3, recentMatches: [{ opponent: 'Juan Rivera', score: '11-8', result: 'W' }] },
+  { id: 'ps-4', name: 'Sofia Reyes', sport: 'Pickleball', wins: 5, losses: 2, winRate: 71.4, pointDiff: 14, streak: 2, rating: 4.4, rank: 4, recentMatches: [{ opponent: 'Maria Santos', score: '11-8', result: 'W' }] },
+]
 
 // ─── Club & Registered Teams ─────────────────────────────────────────────────
 

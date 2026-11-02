@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { usePickleball } from '@/context/PickleballContext'
 import { TrendingUp, Plus } from 'lucide-react'
 import Navbar from '@/components/layout/Navbar'
+import TournamentTabs from '@/components/tournament/TournamentTabs'
 
 export default function TournamentsPage() {
   const { tournaments, clubTeams, registerClubTeam } = usePickleball()
@@ -63,6 +64,8 @@ export default function TournamentsPage() {
           </div>
         </div>
       </section>
+
+      <TournamentTabs currentTab="tournaments" />
 
       <div className="mx-auto max-w-7xl px-6 py-8 space-y-12">
         <div>

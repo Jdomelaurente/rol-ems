@@ -12,6 +12,8 @@ import {
   initialPlayerProgress,
   initialShopItems,
   initialAIQueuePlayers,
+  initialMiniMatches,
+  initialPlayerStats,
   initialRouletteResults,
   initialLiveMatches,
   initialClubTeams,
@@ -31,6 +33,8 @@ export type PickleballStateDocument = {
   playerProgress: unknown[]
   shopItems: unknown[]
   aiQueuePlayers: unknown[]
+  miniMatches: unknown[]
+  playerStats: unknown[]
   rouletteResults: unknown[]
   liveMatches: unknown[]
   clubTeams: unknown[]
@@ -49,6 +53,8 @@ function defaultState(): PickleballStateDocument {
     playerProgress: initialPlayerProgress,
     shopItems: initialShopItems,
     aiQueuePlayers: initialAIQueuePlayers,
+    miniMatches: initialMiniMatches,
+    playerStats: initialPlayerStats,
     rouletteResults: initialRouletteResults,
     liveMatches: initialLiveMatches,
     clubTeams: initialClubTeams,
@@ -56,15 +62,20 @@ function defaultState(): PickleballStateDocument {
 }
 
 export async function GET() {
-  let row = await prisma.pickleballState.findUnique({ where: { key: STATE_KEY } })
+  try {
+    let row = await prisma.pickleballState.findUnique({ where: { key: STATE_KEY } })
 
-  if (!row) {
-    row = await prisma.pickleballState.create({
-      data: { key: STATE_KEY, data: defaultState() as object },
-    })
+    if (!row) {
+      row = await prisma.pickleballState.create({
+        data: { key: STATE_KEY, data: defaultState() as object },
+      })
+    }
+
+    return NextResponse.json(row.data)
+  } catch (error) {
+    console.error('Database query failed in GET /api/pickleball/state, returning fallback:', error)
+    return NextResponse.json(defaultState())
   }
-
-  return NextResponse.json(row.data)
 }
 
 export async function PUT(request: Request) {
@@ -73,15 +84,20 @@ export async function PUT(request: Request) {
     return NextResponse.json({ error: 'Invalid state payload' }, { status: 400 })
   }
 
-  const existing = await prisma.pickleballState.findUnique({ where: { key: STATE_KEY } })
-  const row = existing
-    ? await prisma.pickleballState.update({
-        where: { key: STATE_KEY },
-        data: { data: body as object },
-      })
-    : await prisma.pickleballState.create({
-        data: { key: STATE_KEY, data: body as object },
-      })
+  try {
+    const existing = await prisma.pickleballState.findUnique({ where: { key: STATE_KEY } })
+    const row = existing
+      ? await prisma.pickleballState.update({
+          where: { key: STATE_KEY },
+          data: { data: body as object },
+        })
+      : await prisma.pickleballState.create({
+          data: { key: STATE_KEY, data: body as object },
+        })
 
-  return NextResponse.json(row.data)
+    return NextResponse.json(row.data)
+  } catch (error) {
+    console.error('Database query failed in PUT /api/pickleball/state, returning fallback:', error)
+    return NextResponse.json(body)
+  }
 }

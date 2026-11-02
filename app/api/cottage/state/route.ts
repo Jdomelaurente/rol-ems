@@ -5,14 +5,19 @@ import { defaultCatalog, sanitizeCatalog, type CottageCatalog } from '@/lib/cott
 const STATE_KEY = 'cottage-catalog'
 
 export async function GET() {
-  const row = await prisma.pickleballState.upsert({
-    where: { key: STATE_KEY },
-    update: {},
-    create: { key: STATE_KEY, data: defaultCatalog as object },
-  })
+  try {
+    const row = await prisma.pickleballState.upsert({
+      where: { key: STATE_KEY },
+      update: {},
+      create: { key: STATE_KEY, data: defaultCatalog as object },
+    })
 
-  const catalog = sanitizeCatalog(row.data as Partial<CottageCatalog>)
-  return NextResponse.json(catalog)
+    const catalog = sanitizeCatalog(row.data as Partial<CottageCatalog>)
+    return NextResponse.json(catalog)
+  } catch (error) {
+    console.error('Database query failed in GET /api/cottage/state, returning fallback:', error)
+    return NextResponse.json(defaultCatalog)
+  }
 }
 
 export async function PUT(request: Request) {
@@ -22,11 +27,16 @@ export async function PUT(request: Request) {
   }
 
   const catalog = sanitizeCatalog(body as Partial<CottageCatalog>)
-  const row = await prisma.pickleballState.upsert({
-    where: { key: STATE_KEY },
-    update: { data: catalog as object },
-    create: { key: STATE_KEY, data: catalog as object },
-  })
+  try {
+    const row = await prisma.pickleballState.upsert({
+      where: { key: STATE_KEY },
+      update: { data: catalog as object },
+      create: { key: STATE_KEY, data: catalog as object },
+    })
 
-  return NextResponse.json(row.data)
+    return NextResponse.json(row.data)
+  } catch (error) {
+    console.error('Database query failed in PUT /api/cottage/state, returning fallback:', error)
+    return NextResponse.json(catalog)
+  }
 }

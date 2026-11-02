@@ -5,14 +5,19 @@ import { defaultSiteContent, sanitizeSiteContent, type SiteContent } from '@/lib
 const STATE_KEY = 'site-content'
 
 export async function GET() {
-  const row = await prisma.pickleballState.upsert({
-    where: { key: STATE_KEY },
-    update: {},
-    create: { key: STATE_KEY, data: defaultSiteContent as object },
-  })
+  try {
+    const row = await prisma.pickleballState.upsert({
+      where: { key: STATE_KEY },
+      update: {},
+      create: { key: STATE_KEY, data: defaultSiteContent as object },
+    })
 
-  const content = sanitizeSiteContent(row.data as Partial<SiteContent>)
-  return NextResponse.json(content)
+    const content = sanitizeSiteContent(row.data as Partial<SiteContent>)
+    return NextResponse.json(content)
+  } catch (error) {
+    console.error('Database query failed in GET /api/site/state, returning fallback:', error)
+    return NextResponse.json(defaultSiteContent)
+  }
 }
 
 export async function PUT(request: Request) {
@@ -22,11 +27,16 @@ export async function PUT(request: Request) {
   }
 
   const content = sanitizeSiteContent(body as Partial<SiteContent>)
-  const row = await prisma.pickleballState.upsert({
-    where: { key: STATE_KEY },
-    update: { data: content as object },
-    create: { key: STATE_KEY, data: content as object },
-  })
+  try {
+    const row = await prisma.pickleballState.upsert({
+      where: { key: STATE_KEY },
+      update: { data: content as object },
+      create: { key: STATE_KEY, data: content as object },
+    })
 
-  return NextResponse.json(row.data)
+    return NextResponse.json(row.data)
+  } catch (error) {
+    console.error('Database query failed in PUT /api/site/state, returning fallback:', error)
+    return NextResponse.json(content)
+  }
 }
