@@ -87,7 +87,7 @@ export const defaultSiteContent: SiteContent = {
     email: 'hello@rolems.ph',
     social: 'Instagram · Facebook',
     directionsLabel: 'Get directions',
-    directionsHref: 'https://maps.google.com/?q=2GQC%2BQMF+Magallanes+Agusan+del+Norte',
+    directionsHref: 'https://maps.app.goo.gl/GzR3W2YNsgWKYuKJ9',
     copyright: '© 2026 ROL-EMS x REBAR',
   },
   facilities: defaultFacilities,

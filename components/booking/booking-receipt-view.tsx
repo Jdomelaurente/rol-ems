@@ -2,7 +2,7 @@
 
 import { useEffect, useState, Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
-import { Check, Printer } from 'lucide-react'
+import { Check, Download, ExternalLink, Printer } from 'lucide-react'
 import type { BookingRecord } from '@/lib/bookings'
 
 function ReceiptContent() {
@@ -62,15 +62,37 @@ function ReceiptContent() {
 
   return (
     <div className="min-h-screen bg-[#F3F0EC] px-4 py-12 print:bg-white print:p-0">
-      {/* Print button — hidden when printing */}
-      <div className="mx-auto mb-6 flex max-w-lg justify-end print:hidden">
-        <button
-          onClick={() => window.print()}
-          className="flex items-center gap-2 bg-[#1E5336] px-5 py-3 text-[10px] uppercase tracking-[0.16em] text-[#FDFBF7] hover:bg-[#153d27]"
-        >
-          <Printer size={13} />
-          Save as PDF / Print
-        </button>
+      {/* Actions — hidden when printing */}
+      <div className="mx-auto mb-6 max-w-lg print:hidden">
+        <div className="flex flex-wrap justify-end gap-2">
+          <a
+            href={`/api/receipt/pdf?ref=${encodeURIComponent(booking.reference)}&download=1`}
+            download={`ROL-EMS-${booking.reference}.pdf`}
+            className="flex items-center gap-2 bg-[#1E5336] px-5 py-3 text-[10px] uppercase tracking-[0.16em] text-[#FDFBF7] hover:bg-[#153d27]"
+          >
+            <Download size={13} />
+            Download PDF
+          </a>
+          <a
+            href={`/api/receipt/pdf?ref=${encodeURIComponent(booking.reference)}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-2 border border-[#1E5336] px-5 py-3 text-[10px] uppercase tracking-[0.16em] text-[#1E5336] hover:bg-[#1E5336] hover:text-[#FDFBF7]"
+          >
+            <ExternalLink size={13} />
+            Open PDF
+          </a>
+          <button
+            onClick={() => window.print()}
+            className="hidden sm:flex items-center gap-2 border border-[#222222]/20 px-5 py-3 text-[10px] uppercase tracking-[0.16em] text-[#6B756B] hover:border-[#222222]/50 hover:text-[#222222]"
+          >
+            <Printer size={13} />
+            Print
+          </button>
+        </div>
+        <p className="mt-2 text-right text-[10px] text-[#6B756B]">
+          On mobile, tap Download PDF or Open PDF to view and save the official receipt to your phone.
+        </p>
       </div>
 
       {/* Receipt card */}

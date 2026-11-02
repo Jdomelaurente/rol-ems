@@ -1,12 +1,13 @@
 'use client'
 
-import { ArrowLeft, Check } from 'lucide-react'
+import { ArrowLeft, Check, Download, ExternalLink } from 'lucide-react'
 import { Suspense, useEffect, useRef, useState } from 'react'
 import { useSearchParams } from 'next/navigation'
 
 function SuccessContent() {
   const searchParams = useSearchParams()
   const [sessionId, setSessionId] = useState<string | null>(null)
+  const [reference, setReference] = useState<string | null>(null)
   const [receiptStatus, setReceiptStatus] = useState<'sending' | 'sent' | 'skipped'>('sending')
   const attempt = useRef(0)
 
@@ -26,11 +27,17 @@ function SuccessContent() {
     const send = () => {
       attempt.current += 1
       fetch(`/api/receipt?session_id=${encodeURIComponent(sessionId)}`)
-        .then((r) => {
+        .then(async (r) => {
           if (cancelled) return
-          if (r.ok) setReceiptStatus('sent')
-          else if (attempt.current < 3) setTimeout(send, 2000)
-          else setReceiptStatus('skipped')
+          if (r.ok) {
+            const data = await r.json().catch(() => null)
+            setReceiptStatus('sent')
+            if (data?.reference) setReference(data.reference)
+          } else if (attempt.current < 3) {
+            setTimeout(send, 2000)
+          } else {
+            setReceiptStatus('skipped')
+          }
         })
         .catch(() => {
           if (!cancelled && attempt.current < 3) setTimeout(send, 2000)
@@ -56,6 +63,29 @@ function SuccessContent() {
       <span className="mt-3 text-[10px] uppercase tracking-[0.14em] text-[#6B756B]">
         {receiptStatus === 'sending' ? 'Sending your receipt…' : receiptStatus === 'sent' ? 'Receipt sent to your email' : ''}
       </span>
+
+      {reference && (
+        <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
+          <a
+            href={`/api/receipt/pdf?ref=${encodeURIComponent(reference)}&download=1`}
+            download={`ROL-EMS-${reference}.pdf`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-2 bg-[#1E5336] px-5 py-3 text-[10px] uppercase tracking-[0.16em] text-[#FDFBF7] transition hover:bg-[#153d27]"
+          >
+            <Download size={13} /> Download receipt (PDF)
+          </a>
+          <a
+            href={`/booking/receipt?ref=${encodeURIComponent(reference)}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-2 border border-[#1E5336] px-5 py-3 text-[10px] uppercase tracking-[0.16em] text-[#1E5336] transition hover:bg-[#1E5336] hover:text-[#FDFBF7]"
+          >
+            <ExternalLink size={13} /> View receipt online
+          </a>
+        </div>
+      )}
+
       <a
         href="/#facilities"
         className="mt-8 inline-flex items-center gap-2 border border-[#1E5336] px-6 py-3 text-[10px] uppercase tracking-[0.16em] text-[#1E5336] hover:bg-[#1E5336] hover:text-[#FDFBF7]"

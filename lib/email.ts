@@ -1,4 +1,6 @@
 import nodemailer, { type Transporter } from 'nodemailer'
+import { prisma } from '@/lib/prisma'
+import { buildReceiptPdf } from '@/lib/receipt-pdf'
 
 type TemplateData = {
   reference: string
@@ -10,8 +12,12 @@ type TemplateData = {
   guests?: string
   /** If set, shows a 'Download Receipt' button in the email */
   receiptUrl?: string
+  /** Direct PDF download (works on mobile); used for the primary button when set */
+  receiptPdfUrl?: string
   /** If true, wording is for cash / pay-at-venue bookings */
   isCash?: boolean
+  /** Optional PDF binary data to attach directly to the email */
+  pdfAttachment?: Uint8Array | Buffer
 }
 
 let cached: Transporter | null = null
@@ -30,7 +36,7 @@ function transporter(): Transporter {
   return cached
 }
 
-function html({ reference, description, amount, name, date, time, guests, receiptUrl, isCash }: TemplateData): string {
+function html({ reference, description, amount, name, date, time, guests, receiptUrl, receiptPdfUrl, isCash }: TemplateData): string {
   const rows = [
     ['Reference', reference],
     ['Booking', description],
@@ -60,9 +66,23 @@ function html({ reference, description, amount, name, date, time, guests, receip
       <p style="margin:0;color:#6B756B;font-size:12px;line-height:1.5">${paymentNote}</p>
     </div>`
 
-  const downloadBtn = receiptUrl
+  const downloadHref = receiptPdfUrl || receiptUrl
+  const downloadLabel = receiptPdfUrl ? 'Download / View receipt (PDF)' : 'View receipt'
+  const viewReceiptLink =
+    receiptPdfUrl && receiptUrl
+      ? `<div style="margin-top:10px"><a href="${receiptUrl}" style="color:#6B756B;font-size:11px;text-decoration:underline;font-family:Arial,sans-serif">View receipt online in browser</a></div>`
+      : ''
+  const mobileTip = `
+    <div style="margin-top:14px;padding:10px 12px;background:#F9F8F6;border:1px dashed #d6d0c4;text-align:center">
+      <span style="color:#1E5336;font-size:11px;font-weight:700">📱 Mobile Tip:</span>
+      <span style="color:#6B756B;font-size:11px"> An official PDF receipt is also attached to this email so you can open, save, or share it on your phone without opening a browser.</span>
+    </div>`
+
+  const downloadBtn = downloadHref
     ? `<div style="margin-top:20px;text-align:center">
-        <a href="${receiptUrl}" style="display:inline-block;background:#1E5336;color:#FDFBF7;padding:12px 28px;font-size:11px;letter-spacing:2px;text-transform:uppercase;text-decoration:none;font-family:Arial,sans-serif">Download receipt</a>
+        <a href="${downloadHref}" style="display:inline-block;background:#1E5336;color:#FDFBF7;padding:12px 28px;font-size:11px;letter-spacing:2px;text-transform:uppercase;text-decoration:none;font-family:Arial,sans-serif;font-weight:bold">${downloadLabel}</a>
+        ${viewReceiptLink}
+        ${mobileTip}
       </div>`
     : ''
 
@@ -94,10 +114,36 @@ export async function sendReceiptEmail(to: string, data: TemplateData): Promise<
   const fromEnv = process.env.SMTP_FROM || ''
   const from = fromEnv.includes('<') ? fromEnv : fromEnv ? `ROL-EMS <${fromEnv}>` : `ROL-EMS <${process.env.SMTP_USER}>`
 
+  let attachments: Array<{ filename: string; content: Buffer; contentType: string }> | undefined
+  let pdfBuffer: Buffer | Uint8Array | undefined = data.pdfAttachment
+
+  // Auto-generate PDF receipt attachment from DB if reference is available and attachment not explicitly provided
+  if (!pdfBuffer && data.reference) {
+    try {
+      const booking = await prisma.booking.findUnique({ where: { reference: data.reference } })
+      if (booking) {
+        pdfBuffer = await buildReceiptPdf(booking)
+      }
+    } catch (err) {
+      console.warn('Could not auto-generate PDF receipt attachment for email:', err)
+    }
+  }
+
+  if (pdfBuffer) {
+    attachments = [
+      {
+        filename: `ROL-EMS-${data.reference}.pdf`,
+        content: Buffer.isBuffer(pdfBuffer) ? pdfBuffer : Buffer.from(pdfBuffer),
+        contentType: 'application/pdf',
+      },
+    ]
+  }
+
   await transporter().sendMail({
     from,
     to,
     subject: `Your ROL-EMS receipt · ${data.reference}`,
     html: html(data),
+    attachments,
   })
 }

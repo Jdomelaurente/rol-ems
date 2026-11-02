@@ -95,6 +95,12 @@ export async function POST(req: NextRequest) {
   const time = metadata?.time
   const guests = metadata?.guests
 
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'
+  const isPickleball = String(metadata?.facility || '').startsWith('pickleball:')
+  const receiptPath = isPickleball ? '/pickleball/booking/receipt' : '/booking/receipt'
+  const receiptUrl = `${siteUrl}${receiptPath}?ref=${encodeURIComponent(reference)}`
+  const receiptPdfUrl = `${siteUrl}/api/receipt/pdf?ref=${encodeURIComponent(reference)}`
+
   try {
     await prisma.booking.updateMany({
       where: { reference },
@@ -113,6 +119,8 @@ export async function POST(req: NextRequest) {
       date,
       time,
       guests: guests ? String(guests) : undefined,
+      receiptUrl,
+      receiptPdfUrl,
     })
   } catch (err) {
     console.error('Webhook: failed to send receipt email', err)

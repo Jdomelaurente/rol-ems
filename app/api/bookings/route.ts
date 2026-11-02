@@ -53,6 +53,7 @@ export async function POST(req: NextRequest) {
       const isPickleball = booking.facility.startsWith('pickleball:')
       const receiptPath = isPickleball ? '/pickleball/booking/receipt' : '/booking/receipt'
       const receiptUrl = `${siteUrl}${receiptPath}?ref=${encodeURIComponent(booking.reference)}`
+      const receiptPdfUrl = `${siteUrl}/api/receipt/pdf?ref=${encodeURIComponent(booking.reference)}`
       try {
         await sendReceiptEmail(booking.email, {
           reference: booking.reference,
@@ -63,6 +64,7 @@ export async function POST(req: NextRequest) {
           time: booking.time,
           guests: String(booking.guests),
           receiptUrl,
+          receiptPdfUrl,
           isCash: true,
         })
       } catch (err) {

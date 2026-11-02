@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
-import { ArrowLeft, ArrowRight, CalendarDays, Check, ChevronLeft, ChevronRight, Clock, Loader2, Wallet } from 'lucide-react'
+import { ArrowLeft, ArrowRight, CalendarDays, Check, ChevronLeft, ChevronRight, Clock, Download, ExternalLink, Loader2, Wallet } from 'lucide-react'
 import { useCottageCatalog } from '@/context/CottageContext'
 import { peso, ratePrice, type CatalogOption } from '@/lib/cottage-catalog'
 import { addBooking, getBlockedDates, getBookedTimes, type BookingRecord } from '@/lib/bookings'
@@ -773,19 +773,32 @@ export default function CottageBookingForm({ onDone }: { onDone: () => void }) {
       )}
 
       {step === 'confirm' && (
-        <div className="flex justify-center gap-4 border-t border-[#222222]/10 px-6 py-5">
-          <button
-            onClick={() => window.print()}
-            className="border border-[#1E5336] px-6 py-3 text-[10px] uppercase tracking-[0.16em] text-[#1E5336] hover:bg-[#1E5336] hover:text-[#FDFBF7]"
+        <div className="flex flex-wrap items-center justify-center gap-3 border-t border-[#222222]/10 px-6 py-5">
+          <a
+            href={`/api/receipt/pdf?ref=${encodeURIComponent(confirmedRef)}&download=1`}
+            download={`ROL-EMS-${confirmedRef}.pdf`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-2 bg-[#1E5336] px-5 py-3 text-[10px] uppercase tracking-[0.16em] text-[#FDFBF7] transition hover:bg-[#153d27]"
           >
-            Download receipt
-          </button>
+            <Download size={13} />
+            Download receipt (PDF)
+          </a>
+          <a
+            href={`/booking/receipt?ref=${encodeURIComponent(confirmedRef)}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-2 border border-[#1E5336] px-5 py-3 text-[10px] uppercase tracking-[0.16em] text-[#1E5336] transition hover:bg-[#1E5336] hover:text-[#FDFBF7]"
+          >
+            <ExternalLink size={13} />
+            View receipt
+          </a>
           <button
             onClick={() => {
               reset()
               onDone()
             }}
-            className="bg-[#1E5336] px-6 py-3 text-[10px] uppercase tracking-[0.16em] text-[#FDFBF7] hover:bg-[#153d27]"
+            className="border border-[#222222]/20 px-5 py-3 text-[10px] uppercase tracking-[0.16em] text-[#6B756B] transition hover:border-[#222222]/50 hover:text-[#222222]"
           >
             Done
           </button>

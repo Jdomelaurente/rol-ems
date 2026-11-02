@@ -64,6 +64,7 @@ export async function GET(req: NextRequest) {
     const isPickleball = String(metadata?.facility || '').startsWith('pickleball:')
     const receiptPath = isPickleball ? '/pickleball/booking/receipt' : '/booking/receipt'
     const receiptUrl = `${siteUrl}${receiptPath}?ref=${encodeURIComponent(reference)}`
+    const receiptPdfUrl = `${siteUrl}/api/receipt/pdf?ref=${encodeURIComponent(reference)}`
 
     await sendReceiptEmail(billingEmail, {
       reference,
@@ -74,9 +75,10 @@ export async function GET(req: NextRequest) {
       time: metadata?.time,
       guests: metadata?.guests ? String(metadata?.guests) : undefined,
       receiptUrl,
+      receiptPdfUrl,
     })
 
-    return NextResponse.json({ ok: true, email: billingEmail })
+    return NextResponse.json({ ok: true, email: billingEmail, reference })
   } catch (err) {
     console.error('Receipt route error:', err)
     return NextResponse.json({ error: 'Could not send receipt' }, { status: 500 })
