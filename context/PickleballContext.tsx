@@ -11,6 +11,7 @@ import {
   TournamentFormat,
   BracketMatch,
   Reservation,
+  CourtStatus,
   Coach,
   CoachingBooking,
   PlayerProgress,
@@ -92,10 +93,18 @@ interface PickleballContextType {
   adjustPlayerLosses: (playerId: string, delta: number) => void
   generateRandomPairs: (sport: SportType) => void
   removePlayerFromAIQueue: (playerId: string) => void
+  updateQueuePlayerStatus: (playerId: string, status: 'waiting' | 'in-match' | 'playing' | 'completed' | 'resting') => void
+  moveQueuePlayer: (playerId: string, direction: 'up' | 'down') => void
+  assignPairToPlayers: (player1Id: string, player2Id: string, pairNumber?: number) => void
+  unassignPair: (playerId: string) => void
 
   // Open Play Mini Matches & Leaderboard
   miniMatches: MiniMatch[]
   playerStats: PlayerStat[]
+  createMiniMatch: (match: Omit<MiniMatch, 'id'>) => MiniMatch
+  updateMiniMatch: (id: string, updates: Partial<MiniMatch>) => void
+  deleteMiniMatch: (id: string) => void
+  completeMiniMatch: (matchId: string, score1: number, score2: number) => void
   recordMatchResult: (
     winnerName: string,
     loserName: string,
@@ -120,9 +129,14 @@ interface PickleballContextType {
   clubTeams: ClubTeam[]
   registerClubTeam: (team: Omit<ClubTeam, 'id' | 'wins' | 'losses' | 'status'>) => ClubTeam
 
-  // Court Reservations
+  // Court Reservations & Statuses
   reservations: Reservation[]
+  courtOverrides: Record<string, CourtStatus>
   addReservation: (reservation: Omit<Reservation, 'id' | 'bookingId'> & { bookingId?: string }) => Reservation
+  updateReservation: (id: string, updates: Partial<Reservation>) => void
+  cancelReservation: (id: string) => void
+  deleteReservation: (id: string) => void
+  updateCourtOverrideStatus: (courtId: string, status: CourtStatus | null) => void
 
   // Coaching Sessions
   coaches: Coach[]
@@ -161,6 +175,7 @@ export const PickleballProvider: React.FC<{ children: React.ReactNode }> = ({ ch
   const [tournaments, setTournaments] = useState<Tournament[]>(initialTournaments)
   const [bracketMatches, setBracketMatches] = useState<BracketMatch[]>(initialBracketMatches)
   const [reservations, setReservations] = useState<Reservation[]>(initialReservations)
+  const [courtOverrides, setCourtOverrides] = useState<Record<string, CourtStatus>>({})
   const [isLoaded, setIsLoaded] = useState(false)
 
   // New Features State
@@ -870,6 +885,34 @@ export const PickleballProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     return newReservation
   }
 
+  const updateReservation = (id: string, updates: Partial<Reservation>) => {
+    setReservations((prev) =>
+      prev.map((r) => (r.id === id ? { ...r, ...updates } : r))
+    )
+  }
+
+  const cancelReservation = (id: string) => {
+    setReservations((prev) =>
+      prev.map((r) => (r.id === id ? { ...r, bookingStatus: 'cancelled', paymentStatus: 'cancelled' } : r))
+    )
+  }
+
+  const deleteReservation = (id: string) => {
+    setReservations((prev) => prev.filter((r) => r.id !== id))
+  }
+
+  const updateCourtOverrideStatus = (courtId: string, status: CourtStatus | null) => {
+    setCourtOverrides((prev) => {
+      const next = { ...prev }
+      if (!status) {
+        delete next[courtId]
+      } else {
+        next[courtId] = status
+      }
+      return next
+    })
+  }
+
   // ─── COACHING ACTIONS ───────────────────────────────────────────────────────
 
   const bookCoachingSession = (booking: Omit<CoachingBooking, 'id' | 'status'>) => {
@@ -1042,6 +1085,122 @@ export const PickleballProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     setAiQueuePlayers((prev) => prev.filter((p) => p.id !== playerId))
   }
 
+  const updateQueuePlayerStatus = (playerId: string, status: 'waiting' | 'in-match' | 'playing' | 'completed' | 'resting') => {
+    setAiQueuePlayers((prev) =>
+      prev.map((p) => (p.id === playerId ? { ...p, status } : p))
+    )
+  }
+
+  const moveQueuePlayer = (playerId: string, direction: 'up' | 'down') => {
+    setAiQueuePlayers((prev) => {
+      const idx = prev.findIndex((p) => p.id === playerId)
+      if (idx === -1) return prev
+      const targetIdx = direction === 'up' ? idx - 1 : idx + 1
+      if (targetIdx < 0 || targetIdx >= prev.length) return prev
+      const updated = [...prev]
+      const [item] = updated.splice(idx, 1)
+      updated.splice(targetIdx, 0, item)
+      return updated
+    })
+  }
+
+  const assignPairToPlayers = (player1Id: string, player2Id: string, pairNumber?: number) => {
+    setAiQueuePlayers((prev) => {
+      const p1 = prev.find((p) => p.id === player1Id)
+      const p2 = prev.find((p) => p.id === player2Id)
+      if (!p1 || !p2) return prev
+      let num = pairNumber
+      if (!num) {
+        const existingNums = prev.map((p) => p.pairNumber || 0)
+        num = (Math.max(0, ...existingNums) || 0) + 1
+      }
+      return prev.map((p) => {
+        if (p.id === player1Id) {
+          return { ...p, pairNumber: num, partnerName: p2.name }
+        }
+        if (p.id === player2Id) {
+          return { ...p, pairNumber: num, partnerName: p1.name }
+        }
+        return p
+      })
+    })
+  }
+
+  const unassignPair = (playerId: string) => {
+    setAiQueuePlayers((prev) => {
+      const target = prev.find((p) => p.id === playerId)
+      if (!target) return prev
+      const partnerName = target.partnerName
+      const pairNum = target.pairNumber
+      return prev.map((p) => {
+        if (p.id === playerId || (partnerName && p.name === partnerName) || (pairNum && p.pairNumber === pairNum)) {
+          return { ...p, pairNumber: undefined, partnerName: undefined }
+        }
+        return p
+      })
+    })
+  }
+
+  const createMiniMatch = (matchData: Omit<MiniMatch, 'id'>) => {
+    const newMatch: MiniMatch = {
+      ...matchData,
+      id: `mm-${Date.now().toString().slice(-5)}`,
+    }
+    setMiniMatches((prev) => [newMatch, ...prev])
+    if (newMatch.status === 'live' || newMatch.status === 'upcoming') {
+      const matchPlayers = [newMatch.player1, newMatch.player2, newMatch.player3, newMatch.player4].filter(Boolean) as string[]
+      setAiQueuePlayers((prev) =>
+        prev.map((p) => (matchPlayers.includes(p.name) ? { ...p, status: newMatch.status === 'live' ? 'playing' : 'waiting' } : p))
+      )
+    }
+    return newMatch
+  }
+
+  const updateMiniMatch = (id: string, updates: Partial<MiniMatch>) => {
+    setMiniMatches((prev) =>
+      prev.map((m) => (m.id === id ? { ...m, ...updates } : m))
+    )
+  }
+
+  const deleteMiniMatch = (id: string) => {
+    setMiniMatches((prev) => prev.filter((m) => m.id !== id))
+  }
+
+  const completeMiniMatch = (matchId: string, score1: number, score2: number) => {
+    setMiniMatches((prev) =>
+      prev.map((m) => {
+        if (m.id !== matchId) return m
+        const team1Won = score1 > score2
+        const team1Label = m.player2 ? `${m.player1} & ${m.player2}` : m.player1
+        const team2Label = m.player3 ? (m.player4 ? `${m.player3} & ${m.player4}` : m.player3) : 'Opponent'
+        const winner = team1Won ? team1Label : team2Label
+        const loser = team1Won ? team2Label : team1Label
+        const scoreStr = `${Math.max(score1, score2)} - ${Math.min(score1, score2)}`
+        recordMatchResult(winner, loser, scoreStr, m.sport || 'Pickleball')
+
+        // Update player wins / losses and set queue status to completed
+        const team1Players = [m.player1, m.player2].filter(Boolean) as string[]
+        const team2Players = [m.player3, m.player4].filter(Boolean) as string[]
+        const winners = team1Won ? team1Players : team2Players
+        const losers = team1Won ? team2Players : team1Players
+
+        setAiQueuePlayers((players) =>
+          players.map((p) => {
+            if (winners.includes(p.name)) {
+              return { ...p, wins: p.wins + 1, gamesPlayed: p.gamesPlayed + 1, points: (p.points || 0) + 12, status: 'completed' as const }
+            }
+            if (losers.includes(p.name)) {
+              return { ...p, losses: p.losses + 1, gamesPlayed: p.gamesPlayed + 1, points: (p.points || 0) + 4, status: 'completed' as const }
+            }
+            return p
+          })
+        )
+
+        return { ...m, score1, score2, status: 'completed' as const }
+      })
+    )
+  }
+
   // ─── OPEN PLAY STATS & LEADERBOARD ACTIONS ──────────────────────────────────
 
   const recordMatchResult = (
@@ -1212,7 +1371,12 @@ export const PickleballProvider: React.FC<{ children: React.ReactNode }> = ({ ch
         generateBracketFromPairs,
         declareChampion,
         reservations,
+        courtOverrides,
         addReservation,
+        updateReservation,
+        cancelReservation,
+        deleteReservation,
+        updateCourtOverrideStatus,
         coaches,
         coachingBookings,
         playerProgress,
@@ -1229,7 +1393,15 @@ export const PickleballProvider: React.FC<{ children: React.ReactNode }> = ({ ch
         adjustPlayerLosses,
         generateRandomPairs,
         removePlayerFromAIQueue,
+        updateQueuePlayerStatus,
+        moveQueuePlayer,
+        assignPairToPlayers,
+        unassignPair,
         miniMatches,
+        createMiniMatch,
+        updateMiniMatch,
+        deleteMiniMatch,
+        completeMiniMatch,
         playerStats,
         recordMatchResult,
         rouletteResults,

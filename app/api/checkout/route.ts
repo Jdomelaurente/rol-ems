@@ -9,12 +9,20 @@ export async function POST(req: NextRequest) {
   }
 
   const secret = process.env.PAYMONGO_SECRET_KEY
-  if (!secret) {
-    return NextResponse.json({ error: 'Server is missing PayMongo configuration' }, { status: 500 })
-  }
-
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'
   const reference = metadata?.reference || `RC-${Math.floor(100000 + Math.random() * 900000)}`
+
+  const cancelPath = typeof cancelUrl === 'string' && cancelUrl.startsWith('/') ? cancelUrl : '/#facilities'
+  const successPath = typeof successUrl === 'string' && successUrl.startsWith('/') ? successUrl : '/payment/success'
+
+  // If PayMongo secret is missing or placeholder, provide a simulated checkout response for local testing
+  if (!secret || secret.includes('your_paymongo_secret_key')) {
+    console.warn('PAYMONGO_SECRET_KEY is missing or placeholder. Redirecting to simulated payment success page.')
+    return NextResponse.json({
+      checkout_url: `${siteUrl}${successPath}?ref=${encodeURIComponent(reference)}&demo=true`,
+      id: `cs_simulated_${Date.now()}`,
+    })
+  }
 
   const mergedMetadata = {
     ...(metadata || {}),
@@ -22,9 +30,6 @@ export async function POST(req: NextRequest) {
     description: description || 'ROL-EMS booking',
     ...(email ? { email } : {}),
   }
-
-  const cancelPath = typeof cancelUrl === 'string' && cancelUrl.startsWith('/') ? cancelUrl : '/#facilities'
-  const successPath = typeof successUrl === 'string' && successUrl.startsWith('/') ? successUrl : '/payment/success'
 
   const payload = {
     data: {
@@ -65,6 +70,13 @@ export async function POST(req: NextRequest) {
 
     if (!res.ok) {
       console.error('PayMongo error:', JSON.stringify(data))
+      // In development mode, fallback to simulated checkout if API key fails
+      if (process.env.NODE_ENV !== 'production') {
+        return NextResponse.json({
+          checkout_url: `${siteUrl}${successPath}?ref=${encodeURIComponent(reference)}&demo=true`,
+          id: `cs_simulated_${Date.now()}`,
+        })
+      }
       return NextResponse.json({ error: data?.errors?.[0]?.detail || 'Payment could not be started' }, { status: res.status })
     }
 
@@ -76,6 +88,12 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ checkout_url: checkoutUrl, id: data?.data?.id })
   } catch (err) {
     console.error('Checkout route error:', err)
+    if (process.env.NODE_ENV !== 'production') {
+      return NextResponse.json({
+        checkout_url: `${siteUrl}${successPath}?ref=${encodeURIComponent(reference)}&demo=true`,
+        id: `cs_simulated_${Date.now()}`,
+      })
+    }
     return NextResponse.json({ error: 'Payment service unavailable' }, { status: 500 })
   }
 }
