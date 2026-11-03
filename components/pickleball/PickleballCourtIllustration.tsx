@@ -40,7 +40,7 @@ export default function PickleballCourtIllustration({
       : []
 
   return (
-    <div className="relative w-full aspect-[200/320] max-h-[300px] overflow-hidden rounded-lg shadow-inner select-none transition-all duration-300 group">
+    <div className="relative w-full aspect-[200/320] max-h-[300px] overflow-hidden rounded-none shadow-inner select-none transition-all duration-300 group">
       <svg
         viewBox="0 0 200 440"
         className="w-full h-full"
@@ -275,32 +275,32 @@ export default function PickleballCourtIllustration({
 
       {/* Floating Status Glass Badge Over Court */}
       <div className="absolute top-2.5 inset-x-2.5 flex items-center justify-between pointer-events-none">
-        <span className="text-[10px] font-black uppercase tracking-[0.14em] text-white drop-shadow-md bg-black/40 backdrop-blur-xs px-2 py-0.5 rounded">
+        <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-white drop-shadow-md bg-black/40 backdrop-blur-xs px-2 py-0.5 rounded-none">
           {courtName}
         </span>
 
         {isAvailable && (
-          <span className="flex items-center gap-1 text-[9px] uppercase tracking-wider font-extrabold text-[#A7F3D0] bg-[#064E3B]/80 backdrop-blur-xs px-2 py-0.5 rounded border border-[#10B981]/40 shadow-xs">
+          <span className="flex items-center gap-1 text-[9px] uppercase tracking-[0.12em] font-bold text-[#A7F3D0] bg-[#064E3B]/80 backdrop-blur-xs px-2 py-0.5 rounded-none border border-[#10B981]/40 shadow-xs">
             <span className="h-1.5 w-1.5 rounded-full bg-[#10B981] animate-ping" />
             Open Now
           </span>
         )}
 
         {isOccupied && (
-          <span className="flex items-center gap-1 text-[9px] uppercase tracking-wider font-extrabold text-[#FECDD3] bg-[#881337]/90 backdrop-blur-xs px-2 py-0.5 rounded border border-[#F43F5E]/40 shadow-xs">
+          <span className="flex items-center gap-1 text-[9px] uppercase tracking-[0.12em] font-bold text-[#FECDD3] bg-[#881337]/90 backdrop-blur-xs px-2 py-0.5 rounded-none border border-[#F43F5E]/40 shadow-xs">
             <span className="h-1.5 w-1.5 rounded-full bg-[#F43F5E] animate-pulse" />
             Live In Play
           </span>
         )}
 
         {isReserved && (
-          <span className="flex items-center gap-1 text-[9px] uppercase tracking-wider font-extrabold text-[#FEF08A] bg-[#713F12]/85 backdrop-blur-xs px-2 py-0.5 rounded border border-[#EAB308]/40 shadow-xs">
+          <span className="flex items-center gap-1 text-[9px] uppercase tracking-[0.12em] font-bold text-[#FEF08A] bg-[#713F12]/85 backdrop-blur-xs px-2 py-0.5 rounded-none border border-[#EAB308]/40 shadow-xs">
             Reserved
           </span>
         )}
 
         {isOpenPlay && (
-          <span className="flex items-center gap-1 text-[9px] uppercase tracking-wider font-extrabold text-[#BFDBFE] bg-[#1E3A8A]/85 backdrop-blur-xs px-2 py-0.5 rounded border border-[#3B82F6]/40 shadow-xs">
+          <span className="flex items-center gap-1 text-[9px] uppercase tracking-[0.12em] font-bold text-[#BFDBFE] bg-[#1E3A8A]/85 backdrop-blur-xs px-2 py-0.5 rounded-none border border-[#3B82F6]/40 shadow-xs">
             Open Play
           </span>
         )}
@@ -309,17 +309,17 @@ export default function PickleballCourtIllustration({
       {/* Bottom Court Center Info Overlay */}
       <div className="absolute bottom-2 inset-x-2 pointer-events-none">
         {isAvailable ? (
-          <div className="text-center bg-black/40 backdrop-blur-xs py-1 px-2 rounded border border-white/10">
-            <p className="text-[10px] font-bold text-white tracking-wide">Ready for Play</p>
+          <div className="text-center bg-black/40 backdrop-blur-xs py-1 px-2 rounded-none border border-white/10">
+            <p className="text-[10px] font-bold text-white tracking-[0.1em]">Ready for Play</p>
             <p className="text-[8px] text-[#A7F3D0]">₱350 / hour · Instant Booking</p>
           </div>
         ) : (
-          <div className="text-center bg-black/60 backdrop-blur-xs py-1 px-2 rounded border border-white/10">
+          <div className="text-center bg-black/60 backdrop-blur-xs py-1 px-2 rounded-none border border-white/10">
             <p className="text-[10px] font-bold text-white truncate">
               {currentBookingName || 'Active Session'}
             </p>
             {scheduledTime && (
-              <p className="text-[8px] text-[#FEF08A] font-mono">{scheduledTime}</p>
+              <p className="text-[8px] text-[#FEF08A]">{scheduledTime}</p>
             )}
           </div>
         )}

@@ -210,6 +210,13 @@ export default function Navbar() {
           <span className="mx-2 h-6 w-px bg-[#222222]/15" aria-hidden="true" />
 
           <Link
+            href="/pickleball/booking?manage=1"
+            className="border-b border-[#1E5336] px-3 py-2 text-[11px] font-bold uppercase tracking-[0.14em] text-[#222222] transition hover:text-[#1E5336]"
+          >
+            Manage booking
+          </Link>
+
+          <Link
             href="/"
             className={`border-b border-[#1E5336] px-3 py-2 text-[11px] font-bold uppercase tracking-[0.14em] transition ${
               isActive('/') ? 'text-[#1E5336]' : 'text-[#222222] hover:text-[#1E5336]'
@@ -338,6 +345,14 @@ export default function Navbar() {
             </Link>
 
             <span className="my-2 h-px bg-[#222222]/10" aria-hidden="true" />
+
+            <Link
+              href="/pickleball/booking?manage=1"
+              onClick={() => setMobileOpen(false)}
+              className="border-b border-[#1E5336] py-2 text-xs font-bold uppercase tracking-[0.14em] text-[#222222]"
+            >
+              Manage booking
+            </Link>
 
             <Link
               href="/"

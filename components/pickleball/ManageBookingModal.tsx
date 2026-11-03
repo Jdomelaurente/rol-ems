@@ -131,15 +131,15 @@ export default function ManageBookingModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs p-4">
-      <div className="w-full max-w-lg rounded-xl border border-[#222222]/15 bg-[#FDFBF7] p-6 shadow-2xl animate-in fade-in zoom-in-95 duration-150">
+      <div className="w-full max-w-lg rounded-none border border-[#222222]/15 bg-[#FDFBF7] p-6 shadow-2xl animate-in fade-in zoom-in-95 duration-150">
         <div className="flex items-center justify-between border-b border-[#222222]/10 pb-3">
           <div>
-            <span className="text-[10px] uppercase tracking-[0.16em] font-bold text-[#E1A728]">Reservation Management</span>
-            <h3 className="font-serif text-2xl text-[#1E5336]">Manage Your Court Booking</h3>
+            <span className="text-[10px] uppercase tracking-[0.18em] text-[#E1A728]">Reservation Management</span>
+            <h3 className="font-serif text-2xl tracking-[-0.03em] text-[#1E5336]">Manage Your Court Booking</h3>
           </div>
           <button
             onClick={onClose}
-            className="rounded p-1 text-[#6B756B] hover:bg-[#222222]/10 hover:text-black transition"
+            className="rounded-none p-1 text-[#6B756B] hover:bg-[#222222]/10 hover:text-black transition"
             aria-label="Close"
           >
             <X size={20} />
@@ -154,12 +154,12 @@ export default function ManageBookingModal({
             value={reference}
             onChange={(e) => setReference(e.target.value.toUpperCase())}
             placeholder="Enter reference (e.g. ROL-123456 or PB-123456)"
-            className="flex-1 rounded-md border border-[#222222]/20 bg-white px-3.5 py-2.5 text-xs font-semibold uppercase outline-none focus:border-[#1E5336]"
+            className="flex-1 rounded-none border border-[#222222]/20 bg-white px-3.5 py-2.5 text-xs font-semibold uppercase outline-none focus:border-[#1E5336]"
           />
           <button
             type="submit"
             disabled={loading || !reference.trim()}
-            className="flex items-center gap-1.5 rounded-md bg-[#1E5336] px-4 py-2.5 text-[11px] font-bold uppercase tracking-wider text-[#FDFBF7] hover:bg-[#153d27] disabled:opacity-50 transition"
+            className="flex items-center gap-1.5 rounded-none bg-[#1E5336] px-4 py-2.5 text-[10px] uppercase tracking-[0.16em] text-[#FDFBF7] hover:bg-[#153d27] disabled:opacity-50 transition"
           >
             {loading ? <Loader2 size={14} className="animate-spin" /> : <Search size={14} />}
             <span>Lookup</span>
@@ -169,7 +169,7 @@ export default function ManageBookingModal({
         {/* Feedback Alert */}
         {feedback && (
           <div
-            className={`mt-4 rounded-md border p-3 text-xs flex items-start gap-2.5 ${
+            className={`mt-4 rounded-none border p-3 text-xs flex items-start gap-2.5 ${
               feedback.type === 'success'
                 ? 'border-emerald-500/30 bg-emerald-50 text-emerald-800'
                 : 'border-rose-500/30 bg-rose-50 text-rose-800'
@@ -186,14 +186,14 @@ export default function ManageBookingModal({
 
         {/* Booking Details Card */}
         {booking && (
-          <div className="mt-5 rounded-lg border border-[#222222]/15 bg-white p-5 space-y-3.5 shadow-sm text-xs">
+          <div className="mt-5 rounded-none border border-[#222222]/15 bg-white p-5 space-y-3.5 shadow-sm text-xs">
             <div className="flex items-center justify-between border-b border-[#222222]/10 pb-2.5">
               <div>
-                <span className="text-[10px] uppercase font-bold text-[#6B756B]">Reference</span>
-                <p className="font-mono text-sm font-black text-[#1E5336]">{booking.reference}</p>
+                <span className="text-[10px] uppercase tracking-[0.14em] text-[#6B756B]">Reference</span>
+                <p className="text-sm font-bold text-[#1E5336]">{booking.reference}</p>
               </div>
               <span
-                className={`px-2.5 py-0.5 rounded text-[10px] uppercase font-bold tracking-wider ${
+                className={`px-2.5 py-0.5 rounded-none text-[10px] uppercase tracking-[0.12em] ${
                   booking.status === 'confirmed'
                     ? 'bg-emerald-100 text-emerald-800 border border-emerald-300'
                     : booking.status === 'cancelled'
@@ -207,11 +207,11 @@ export default function ManageBookingModal({
 
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <span className="text-[#6B756B] text-[10px] uppercase font-semibold">Reserved Item</span>
+                <span className="text-[#6B756B] text-[10px] uppercase tracking-[0.14em]">Reserved Item</span>
                 <p className="font-bold text-[#222222]">{booking.itemName}</p>
               </div>
               <div>
-                <span className="text-[#6B756B] text-[10px] uppercase font-semibold">Booked For</span>
+                <span className="text-[#6B756B] text-[10px] uppercase tracking-[0.14em]">Booked For</span>
                 <p className="font-bold text-[#222222]">{booking.name || 'Guest'}</p>
               </div>
               <div className="flex items-center gap-1.5">
@@ -226,7 +226,7 @@ export default function ManageBookingModal({
 
             <div className="flex items-center justify-between border-t border-[#222222]/10 pt-2.5">
               <span className="text-[#6B756B] font-semibold">Total Price</span>
-              <span className="font-mono text-base font-bold text-[#1E5336]">₱{booking.amount?.toLocaleString()}</span>
+              <span className="text-base font-bold text-[#1E5336]">₱{booking.amount?.toLocaleString()}</span>
             </div>
 
             {/* Actions */}
@@ -236,12 +236,12 @@ export default function ManageBookingModal({
                   <button
                     type="button"
                     onClick={() => setConfirmCancel(true)}
-                    className="w-full rounded border border-rose-300 bg-rose-50 py-2 text-[11px] font-bold uppercase tracking-wider text-rose-700 hover:bg-rose-100 transition"
+                    className="w-full rounded-none border border-rose-300 bg-rose-50 py-2 text-[10px] uppercase tracking-[0.16em] text-rose-700 hover:bg-rose-100 transition"
                   >
                     Cancel Booking
                   </button>
                 ) : (
-                  <div className="rounded border border-rose-300 bg-rose-50 p-3 text-center space-y-2">
+                  <div className="rounded-none border border-rose-300 bg-rose-50 p-3 text-center space-y-2">
                     <p className="text-xs font-bold text-rose-900">
                       Are you sure you want to cancel this court reservation?
                     </p>
@@ -252,7 +252,7 @@ export default function ManageBookingModal({
                       <button
                         type="button"
                         onClick={() => setConfirmCancel(false)}
-                        className="rounded border border-[#222222]/20 bg-white px-3 py-1.5 text-xs font-semibold text-[#222222]"
+                        className="rounded-none border border-[#222222]/20 bg-white px-3 py-1.5 text-[10px] uppercase tracking-[0.14em] text-[#222222]"
                       >
                         Keep Booking
                       </button>
@@ -260,7 +260,7 @@ export default function ManageBookingModal({
                         type="button"
                         onClick={handleCancelBooking}
                         disabled={cancelling}
-                        className="rounded bg-rose-700 px-3 py-1.5 text-xs font-bold text-white hover:bg-rose-800 disabled:opacity-50"
+                        className="rounded-none bg-rose-700 px-3 py-1.5 text-[10px] uppercase tracking-[0.14em] text-white hover:bg-rose-800 disabled:opacity-50"
                       >
                         {cancelling ? 'Cancelling...' : 'Confirm Cancellation'}
                       </button>

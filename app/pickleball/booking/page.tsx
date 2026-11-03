@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useMemo, useEffect, Suspense } from 'react'
-import { useSearchParams } from 'next/navigation'
+import { useSearchParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { courts, courtSchedule } from '@/lib/data'
 import type { Court } from '@/lib/data'
@@ -15,7 +15,7 @@ import ManageBookingModal from '@/components/pickleball/ManageBookingModal'
 import {
   CalendarDays, Clock, ChevronLeft, ChevronRight, Check, ArrowRight, ArrowLeft,
   Loader2, Sparkles, CheckCircle2, AlertCircle, Calendar, Users, Layers,
-  ShieldCheck, HelpCircle, Eye, Wrench
+  ShieldCheck, HelpCircle, Eye
 } from 'lucide-react'
 
 import {
@@ -92,6 +92,7 @@ function BookingContent() {
 
   const searchParams = useSearchParams()
   const courtParam = searchParams.get('court')
+  const router = useRouter()
 
   const now = new Date()
   const today = new Date()
@@ -116,6 +117,14 @@ function BookingContent() {
       }
     }
   }, [courtParam])
+
+  // Open the manage-booking modal when linked from the navbar (?manage=1)
+  useEffect(() => {
+    if (searchParams.get('manage') === '1') {
+      setIsManageModalOpen(true)
+      router.replace('/pickleball/booking', { scroll: false })
+    }
+  }, [searchParams, router])
 
   // Booking Form State
   const [date, setDate] = useState(() => todayIso)
@@ -373,29 +382,16 @@ function BookingContent() {
       {/* Page Header Banner */}
       <section className="bg-[#FDFBF7] border-b border-[#222222]/10 px-6 py-10">
         <div className="mx-auto max-w-7xl">
-          <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
-            <div>
-              <p className="text-xs uppercase tracking-[0.2em] font-bold text-[#E1A728]">
-                Professional Court Reservations
-              </p>
-              <h1 className="mt-2 font-serif text-4xl text-[#1E5336] sm:text-5xl">
-                Court Booking & Schedules
-              </h1>
-              <p className="mt-2 text-sm text-[#6B756B] max-w-2xl">
-                Reserve Court 1, Court 2, or Court 3 with full schedule flexibility. Select your exact start and end times, preview real-time court availability, and manage active reservations.
-              </p>
-            </div>
-
-            <div className="flex flex-wrap items-center gap-3">
-              <button
-                type="button"
-                onClick={() => setIsManageModalOpen(true)}
-                className="flex items-center gap-2 rounded-md border border-[#1E5336] bg-white px-4 py-2.5 text-[11px] font-bold uppercase tracking-wider text-[#1E5336] hover:bg-[#1E5336] hover:text-white transition shadow-xs"
-              >
-                <Wrench size={14} />
-                Manage Existing Booking
-              </button>
-            </div>
+          <div>
+            <p className="text-xs uppercase tracking-[0.18em] text-[#E1A728]">
+              Professional Court Reservations
+            </p>
+            <h1 className="mt-2 font-serif text-4xl leading-[0.95] tracking-[-0.05em] text-[#1E5336] sm:text-5xl">
+              Court Booking & Schedules
+            </h1>
+            <p className="mt-2 text-sm text-[#6B756B] max-w-2xl">
+              Reserve Court 1, Court 2, or Court 3 with full schedule flexibility. Select your exact start and end times, preview real-time court availability, and manage active reservations.
+            </p>
           </div>
         </div>
       </section>
@@ -403,7 +399,7 @@ function BookingContent() {
       <div className="mx-auto max-w-7xl px-6 py-8">
         {/* Step Indicator */}
         {step !== 'confirm' && (
-          <div className="mb-8 rounded-lg border border-[#222222]/10 bg-[#FDFBF7] p-4 sm:p-5 shadow-xs">
+          <div className="mb-8 rounded-none border border-[#222222]/10 bg-[#FDFBF7] p-4 sm:p-5 shadow-xs">
             <div className="flex items-center justify-between gap-2 sm:gap-4 overflow-x-auto">
               {steps.map((s, i) => {
                 const isDone = i < currentIndex
@@ -420,9 +416,9 @@ function BookingContent() {
                       {isDone ? <Check size={14} /> : i + 1}
                     </span>
                     <span
-                      className={`text-xs uppercase tracking-wider ${
+                      className={`text-[10px] uppercase tracking-[0.12em] ${
                         isActive
-                          ? 'font-black text-[#1E5336]'
+                          ? 'font-bold text-[#1E5336]'
                           : isDone
                           ? 'font-bold text-[#6B756B]'
                           : 'text-[#6B756B]/60 font-medium'
@@ -455,18 +451,18 @@ function BookingContent() {
             STEP 2: COURT BOOKING SCHEDULE (Start Time, End Time & Auto-Calculation)
             ========================================================================= */}
         {step === 'schedule' && selectedCourt && (
-          <div className="rounded-xl border border-[#222222]/15 bg-[#FDFBF7] p-6 sm:p-8 shadow-sm">
+          <div className="rounded-none border border-[#222222]/15 bg-[#FDFBF7] p-6 sm:p-8 shadow-sm">
             <div className="flex flex-wrap items-center justify-between border-b border-[#222222]/10 pb-4 gap-4">
               <div>
-                <p className="text-xs uppercase tracking-[0.18em] font-bold text-[#E1A728]">Selected Facility</p>
-                <h2 className="font-serif text-3xl text-[#1E5336] mt-0.5">{selectedCourt.name}</h2>
+                <p className="text-xs uppercase tracking-[0.18em] text-[#E1A728]">Selected Facility</p>
+                <h2 className="font-serif text-3xl tracking-[-0.04em] text-[#1E5336] mt-0.5">{selectedCourt.name}</h2>
                 <p className="text-xs text-[#6B756B]">Standard rate: ₱350.00 / hour</p>
               </div>
 
               <button
                 type="button"
                 onClick={() => go('courts')}
-                className="flex items-center gap-1.5 rounded border border-[#222222]/20 bg-white px-3 py-1.5 text-xs font-semibold text-[#6B756B] hover:text-[#1E5336]"
+                className="flex items-center gap-1.5 rounded-none border border-[#222222]/20 bg-white px-3 py-1.5 text-xs font-semibold text-[#6B756B] hover:text-[#1E5336]"
               >
                 Change Court
               </button>
@@ -475,7 +471,7 @@ function BookingContent() {
             <div className="mt-6 space-y-6">
               {/* Date Selection */}
               <div>
-                <label className="block text-[11px] uppercase tracking-wider font-bold text-[#6B756B] mb-2">
+                <label className="block text-[10px] uppercase tracking-[0.14em] text-[#6B756B] mb-2">
                   1. Select Booking Date *
                 </label>
                 <div className="flex flex-wrap gap-2 items-center">
@@ -483,7 +479,7 @@ function BookingContent() {
                     <button
                       type="button"
                       onClick={() => setCalendarOpen((v) => !v)}
-                      className="flex w-full items-center justify-between rounded-lg border border-[#222222]/20 bg-white px-4 py-3 text-sm font-semibold outline-none focus:border-[#1E5336]"
+                      className="flex w-full items-center justify-between rounded-none border border-[#222222]/20 bg-white px-4 py-3 text-sm font-semibold outline-none focus:border-[#1E5336]"
                     >
                       <span>{date || 'Select a date'}</span>
                       <CalendarDays size={18} className="text-[#1E5336]" />
@@ -491,12 +487,12 @@ function BookingContent() {
 
                     {/* Interactive Calendar Dropdown */}
                     {calendarOpen && (
-                      <div className="absolute left-0 top-full z-30 mt-2 w-72 rounded-lg border border-[#222222]/15 bg-white p-4 shadow-xl">
+                      <div className="absolute left-0 top-full z-30 mt-2 w-72 rounded-none border border-[#222222]/15 bg-white p-4 shadow-xl">
                         <div className="flex items-center justify-between mb-3">
                           <button
                             type="button"
                             onClick={() => setViewMonth((m) => new Date(m.getFullYear(), m.getMonth() - 1, 1))}
-                            className="p-1 text-[#6B756B] hover:text-black rounded"
+                            className="p-1 text-[#6B756B] hover:text-black rounded-none"
                           >
                             <ChevronLeft size={16} />
                           </button>
@@ -504,7 +500,7 @@ function BookingContent() {
                           <button
                             type="button"
                             onClick={() => setViewMonth((m) => new Date(m.getFullYear(), m.getMonth() + 1, 1))}
-                            className="p-1 text-[#6B756B] hover:text-black rounded"
+                            className="p-1 text-[#6B756B] hover:text-black rounded-none"
                           >
                             <ChevronRight size={16} />
                           </button>
@@ -512,7 +508,7 @@ function BookingContent() {
 
                         <div className="grid grid-cols-7 gap-1 text-center">
                           {['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'].map((d, i) => (
-                            <span key={i} className="pb-1 text-[10px] font-bold uppercase text-[#6B756B]">
+                            <span key={i} className="pb-1 text-[10px] uppercase text-[#6B756B]">
                               {d}
                             </span>
                           ))}
@@ -530,7 +526,7 @@ function BookingContent() {
                                   setDate(iso)
                                   setCalendarOpen(false)
                                 }}
-                                className={`h-8 rounded text-xs transition ${
+                                className={`h-8 rounded-none text-xs transition ${
                                   selected
                                     ? 'bg-[#1E5336] text-[#FDFBF7] font-bold'
                                     : disabled
@@ -552,7 +548,7 @@ function BookingContent() {
                     <button
                       type="button"
                       onClick={() => setDate(todayIso)}
-                      className={`rounded-lg px-3 py-2.5 text-xs font-bold transition border ${
+                      className={`rounded-none px-3 py-2.5 text-xs font-bold transition border ${
                         date === todayIso
                           ? 'bg-[#1E5336] text-white border-[#1E5336]'
                           : 'bg-white text-[#6B756B] border-[#222222]/20 hover:border-[#1E5336]'
@@ -567,7 +563,7 @@ function BookingContent() {
                         tmrw.setDate(tmrw.getDate() + 1)
                         setDate(toIso(tmrw))
                       }}
-                      className={`rounded-lg px-3 py-2.5 text-xs font-bold transition border ${
+                      className={`rounded-none px-3 py-2.5 text-xs font-bold transition border ${
                         date !== todayIso
                           ? 'bg-[#1E5336] text-white border-[#1E5336]'
                           : 'bg-white text-[#6B756B] border-[#222222]/20 hover:border-[#1E5336]'
@@ -582,13 +578,13 @@ function BookingContent() {
               {/* Start Time and End Time Fields */}
               <div className="grid gap-6 sm:grid-cols-2">
                 <div>
-                  <label className="block text-[11px] uppercase tracking-wider font-bold text-[#6B756B] mb-2">
+                  <label className="block text-[10px] uppercase tracking-[0.14em] text-[#6B756B] mb-2">
                     2. Start Time *
                   </label>
                   <select
                     value={startTime}
                     onChange={(e) => setStartTime(e.target.value)}
-                    className="w-full rounded-lg border border-[#222222]/20 bg-white px-4 py-3 text-sm font-semibold outline-none focus:border-[#1E5336]"
+                    className="w-full rounded-none border border-[#222222]/20 bg-white px-4 py-3 text-sm font-semibold outline-none focus:border-[#1E5336]"
                   >
                     {startOptions.map((opt) => (
                       <option key={opt} value={opt}>
@@ -599,13 +595,13 @@ function BookingContent() {
                 </div>
 
                 <div>
-                  <label className="block text-[11px] uppercase tracking-wider font-bold text-[#6B756B] mb-2">
+                  <label className="block text-[10px] uppercase tracking-[0.14em] text-[#6B756B] mb-2">
                     3. End Time *
                   </label>
                   <select
                     value={endTime}
                     onChange={(e) => setEndTime(e.target.value)}
-                    className="w-full rounded-lg border border-[#222222]/20 bg-white px-4 py-3 text-sm font-semibold outline-none focus:border-[#1E5336]"
+                    className="w-full rounded-none border border-[#222222]/20 bg-white px-4 py-3 text-sm font-semibold outline-none focus:border-[#1E5336]"
                   >
                     {endOptions.map((opt) => (
                       <option key={opt} value={opt}>
@@ -617,16 +613,16 @@ function BookingContent() {
               </div>
 
               {/* Time Validation & Duration Indicator */}
-              <div className="rounded-lg border border-[#222222]/15 bg-white p-4 space-y-2">
+              <div className="rounded-none border border-[#222222]/15 bg-white p-4 space-y-2">
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <div className="flex items-center gap-2">
                     <Clock size={16} className="text-[#1E5336]" />
-                    <span className="text-xs text-[#6B756B] uppercase font-bold tracking-wider">
+                    <span className="text-[10px] uppercase tracking-[0.14em] text-[#6B756B]">
                       Calculated Duration:
                     </span>
                   </div>
                   <span
-                    className={`font-mono text-sm font-black ${
+                    className={`text-sm font-bold ${
                       isTimeOrderValid ? 'text-[#1E5336]' : 'text-rose-600'
                     }`}
                   >
@@ -638,7 +634,7 @@ function BookingContent() {
 
                 {/* Validation Warnings */}
                 {!isTimeOrderValid && (
-                  <div className="rounded bg-rose-50 border border-rose-200 p-2.5 text-xs text-rose-800 flex items-center gap-2">
+                  <div className="rounded-none bg-rose-50 border border-rose-200 p-2.5 text-xs text-rose-800 flex items-center gap-2">
                     <AlertCircle size={15} className="shrink-0 text-rose-600" />
                     <span>
                       <strong>Time Error:</strong> The End Time must be later than the Start Time.
@@ -647,7 +643,7 @@ function BookingContent() {
                 )}
 
                 {overlapConflict && (
-                  <div className="rounded bg-rose-50 border border-rose-200 p-2.5 text-xs text-rose-800 flex items-center gap-2">
+                  <div className="rounded-none bg-rose-50 border border-rose-200 p-2.5 text-xs text-rose-800 flex items-center gap-2">
                     <AlertCircle size={15} className="shrink-0 text-rose-600" />
                     <span>
                       <strong>Slot Overlap Conflict:</strong> {overlapConflict}
@@ -656,7 +652,7 @@ function BookingContent() {
                 )}
 
                 {isTimeOrderValid && !overlapConflict && (
-                  <div className="flex items-center justify-between text-xs text-emerald-800 bg-emerald-50 border border-emerald-200 p-2 rounded">
+                  <div className="flex items-center justify-between text-xs text-emerald-800 bg-emerald-50 border border-emerald-200 p-2 rounded-none">
                     <span className="flex items-center gap-1.5 font-medium">
                       <CheckCircle2 size={14} className="text-emerald-600" />
                       Court is completely available for this schedule!
@@ -670,7 +666,7 @@ function BookingContent() {
 
               {/* Court Day Slots Timeline Matrix */}
               <div>
-                <label className="block text-[11px] uppercase tracking-wider font-bold text-[#6B756B] mb-2">
+                <label className="block text-[10px] uppercase tracking-[0.14em] text-[#6B756B] mb-2">
                   4. Available Hourly Slots for {selectedCourt.name} on {date}
                 </label>
                 <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 gap-2">
@@ -701,7 +697,7 @@ function BookingContent() {
                           setStartTime(slot)
                           setEndTime(calculateEndTime(slot, 2))
                         }}
-                        className={`rounded-md p-2 text-center text-xs transition border ${
+                        className={`rounded-none p-2 text-center text-xs transition border ${
                           isTaken
                             ? 'bg-rose-50 border-rose-200 text-rose-500 cursor-not-allowed line-through'
                             : isCurrentSelection
@@ -710,7 +706,7 @@ function BookingContent() {
                         }`}
                       >
                         <p className="font-semibold">{slot}</p>
-                        <p className="text-[9px] uppercase tracking-tight mt-0.5">
+                        <p className="text-[9px] uppercase tracking-[0.12em] mt-0.5">
                           {isTaken ? 'Booked' : isCurrentSelection ? 'Selected' : 'Open'}
                         </p>
                       </button>
@@ -725,7 +721,7 @@ function BookingContent() {
               <button
                 type="button"
                 onClick={goBack}
-                className="flex items-center gap-1.5 rounded-md border border-[#222222]/20 px-4 py-2.5 text-xs font-bold uppercase tracking-wider text-[#6B756B] hover:text-black bg-white"
+                className="flex items-center gap-1.5 rounded-none border border-[#222222]/20 px-4 py-2.5 text-[10px] uppercase tracking-[0.16em] text-[#6B756B] hover:text-black bg-white"
               >
                 <ArrowLeft size={14} /> Back to Courts
               </button>
@@ -734,7 +730,7 @@ function BookingContent() {
                 type="button"
                 disabled={!canProceedSchedule}
                 onClick={goNext}
-                className="flex items-center gap-1.5 rounded-md bg-[#1E5336] px-6 py-2.5 text-xs font-bold uppercase tracking-wider text-[#FDFBF7] hover:bg-[#153d27] disabled:opacity-40 transition shadow-xs"
+                className="flex items-center gap-1.5 rounded-none bg-[#1E5336] px-6 py-2.5 text-[10px] uppercase tracking-[0.16em] text-[#FDFBF7] hover:bg-[#153d27] disabled:opacity-40 transition shadow-xs"
               >
                 <span>Continue to Details</span>
                 <ArrowRight size={14} />
@@ -747,8 +743,8 @@ function BookingContent() {
             STEP 3: DETAILS & PADDLE RENTAL ADD-ONS
             ========================================================================= */}
         {step === 'details' && selectedCourt && (
-          <div className="rounded-xl border border-[#222222]/15 bg-[#FDFBF7] p-6 sm:p-8 shadow-sm">
-            <h2 className="font-serif text-3xl text-[#1E5336]">Guest Details & Equipment</h2>
+          <div className="rounded-none border border-[#222222]/15 bg-[#FDFBF7] p-6 sm:p-8 shadow-sm">
+            <h2 className="font-serif text-3xl tracking-[-0.04em] text-[#1E5336]">Guest Details & Equipment</h2>
             <p className="text-xs text-[#6B756B] mt-1 mb-6">
               Please enter your contact information to receive your confirmation receipt.
             </p>
@@ -756,7 +752,7 @@ function BookingContent() {
             <div className="space-y-6">
               <div className="grid gap-4 sm:grid-cols-2">
                 <div>
-                  <label className="block text-[11px] uppercase tracking-wider font-bold text-[#6B756B] mb-1">
+                  <label className="block text-[10px] uppercase tracking-[0.14em] text-[#6B756B] mb-1">
                     Full Name *
                   </label>
                   <input
@@ -765,12 +761,12 @@ function BookingContent() {
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     placeholder="e.g. Maria Santos"
-                    className="w-full rounded-md border border-[#222222]/20 bg-white p-3 text-xs font-medium outline-none focus:border-[#1E5336]"
+                    className="w-full rounded-none border border-[#222222]/20 bg-white p-3 text-xs font-medium outline-none focus:border-[#1E5336]"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-[11px] uppercase tracking-wider font-bold text-[#6B756B] mb-1">
+                  <label className="block text-[10px] uppercase tracking-[0.14em] text-[#6B756B] mb-1">
                     Contact Phone Number *
                   </label>
                   <input
@@ -779,13 +775,13 @@ function BookingContent() {
                     value={contact}
                     onChange={(e) => setContact(e.target.value)}
                     placeholder="e.g. 0917 123 4567"
-                    className="w-full rounded-md border border-[#222222]/20 bg-white p-3 text-xs font-medium outline-none focus:border-[#1E5336]"
+                    className="w-full rounded-none border border-[#222222]/20 bg-white p-3 text-xs font-medium outline-none focus:border-[#1E5336]"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-[11px] uppercase tracking-wider font-bold text-[#6B756B] mb-1">
+                <label className="block text-[10px] uppercase tracking-[0.14em] text-[#6B756B] mb-1">
                   Email Address * (For official receipt)
                 </label>
                 <input
@@ -794,13 +790,13 @@ function BookingContent() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="e.g. maria.santos@gmail.com"
-                  className="w-full rounded-md border border-[#222222]/20 bg-white p-3 text-xs font-medium outline-none focus:border-[#1E5336]"
+                  className="w-full rounded-none border border-[#222222]/20 bg-white p-3 text-xs font-medium outline-none focus:border-[#1E5336]"
                 />
               </div>
 
               {/* Number of Players */}
               <div>
-                <label className="block text-[11px] uppercase tracking-wider font-bold text-[#6B756B] mb-1">
+                <label className="block text-[10px] uppercase tracking-[0.14em] text-[#6B756B] mb-1">
                   Estimated Number of Players
                 </label>
                 <div className="flex gap-2">
@@ -809,7 +805,7 @@ function BookingContent() {
                       key={num}
                       type="button"
                       onClick={() => setPlayers(num)}
-                      className={`flex-1 rounded-md py-2 text-xs font-bold transition border ${
+                      className={`flex-1 rounded-none py-2 text-xs font-bold transition border ${
                         players === num
                           ? 'bg-[#1E5336] text-white border-[#1E5336]'
                           : 'bg-white text-[#6B756B] border-[#222222]/20 hover:border-[#1E5336]'
@@ -822,7 +818,7 @@ function BookingContent() {
               </div>
 
               {/* Paddle Rental Add-on */}
-              <div className="rounded-lg border border-[#222222]/15 bg-white p-5 space-y-4">
+              <div className="rounded-none border border-[#222222]/15 bg-white p-5 space-y-4">
                 <div className="flex items-center justify-between">
                   <div>
                     <h3 className="font-serif text-lg text-[#1E5336]">Pro Paddle Rental Add-on</h3>
@@ -848,7 +844,7 @@ function BookingContent() {
                         <div
                           key={paddle.id}
                           onClick={() => setSelectedPaddleId(paddle.id)}
-                          className={`cursor-pointer rounded-lg border p-3 transition ${
+                          className={`cursor-pointer rounded-none border p-3 transition ${
                             selectedPaddleId === paddle.id
                               ? 'border-[#1E5336] bg-[#1E5336]/5 ring-1 ring-[#1E5336]'
                               : 'border-[#222222]/15 hover:border-[#1E5336]'
@@ -859,7 +855,7 @@ function BookingContent() {
                               <p className="font-bold text-xs text-[#222222]">{paddle.name}</p>
                               <p className="text-[10px] text-[#6B756B]">{paddle.brand} · {paddle.type}</p>
                             </div>
-                            <span className="font-mono text-xs font-bold text-[#1E5336]">
+                            <span className="text-xs font-bold text-[#1E5336]">
                               +₱{paddle.price}
                             </span>
                           </div>
@@ -875,7 +871,7 @@ function BookingContent() {
               <button
                 type="button"
                 onClick={goBack}
-                className="flex items-center gap-1.5 rounded-md border border-[#222222]/20 px-4 py-2.5 text-xs font-bold uppercase tracking-wider text-[#6B756B] hover:text-black bg-white"
+                className="flex items-center gap-1.5 rounded-none border border-[#222222]/20 px-4 py-2.5 text-[10px] uppercase tracking-[0.16em] text-[#6B756B] hover:text-black bg-white"
               >
                 <ArrowLeft size={14} /> Back to Schedule
               </button>
@@ -884,7 +880,7 @@ function BookingContent() {
                 type="button"
                 disabled={!canProceedDetails}
                 onClick={goNext}
-                className="flex items-center gap-1.5 rounded-md bg-[#1E5336] px-6 py-2.5 text-xs font-bold uppercase tracking-wider text-[#FDFBF7] hover:bg-[#153d27] disabled:opacity-40 transition shadow-xs"
+                className="flex items-center gap-1.5 rounded-none bg-[#1E5336] px-6 py-2.5 text-[10px] uppercase tracking-[0.16em] text-[#FDFBF7] hover:bg-[#153d27] disabled:opacity-40 transition shadow-xs"
               >
                 <span>Review Booking</span>
                 <ArrowRight size={14} />
@@ -897,63 +893,63 @@ function BookingContent() {
             STEP 4: REVIEW & CONFIRM (Comprehensive Booking Summary)
             ========================================================================= */}
         {step === 'review' && selectedCourt && (
-          <div className="rounded-xl border border-[#222222]/15 bg-[#FDFBF7] p-6 sm:p-8 shadow-sm max-w-2xl mx-auto">
-            <h2 className="font-serif text-3xl text-[#1E5336]">Booking Summary</h2>
+          <div className="rounded-none border border-[#222222]/15 bg-[#FDFBF7] p-6 sm:p-8 shadow-sm max-w-2xl mx-auto">
+            <h2 className="font-serif text-3xl tracking-[-0.04em] text-[#1E5336]">Booking Summary</h2>
             <p className="text-xs text-[#6B756B] mt-1 mb-6">
               Please double check all booking details before final confirmation.
             </p>
 
             {/* Structured Summary Card */}
-            <div className="rounded-xl border border-[#1E5336]/20 bg-white p-6 space-y-4 shadow-sm text-xs">
+            <div className="rounded-none border border-[#1E5336]/20 bg-white p-6 space-y-4 shadow-sm text-xs">
               <div className="flex items-center justify-between border-b border-[#222222]/10 pb-3">
-                <span className="text-[#6B756B] uppercase font-bold text-[10px]">Facility</span>
+                <span className="text-[10px] uppercase tracking-[0.14em] text-[#6B756B]">Facility</span>
                 <span className="font-bold text-sm text-[#1E5336]">{selectedCourt.name}</span>
               </div>
 
               <div className="flex items-center justify-between border-b border-[#222222]/10 pb-3">
-                <span className="text-[#6B756B] uppercase font-bold text-[10px]">Booking Date</span>
+                <span className="text-[10px] uppercase tracking-[0.14em] text-[#6B756B]">Booking Date</span>
                 <span className="font-bold text-[#222222]">{date}</span>
               </div>
 
               <div className="flex items-center justify-between border-b border-[#222222]/10 pb-3">
-                <span className="text-[#6B756B] uppercase font-bold text-[10px]">Reserved Time Slot</span>
+                <span className="text-[10px] uppercase tracking-[0.14em] text-[#6B756B]">Reserved Time Slot</span>
                 <span className="font-bold text-[#1E5336]">
                   {startTime} – {endTime}
                 </span>
               </div>
 
               <div className="flex items-center justify-between border-b border-[#222222]/10 pb-3">
-                <span className="text-[#6B756B] uppercase font-bold text-[10px]">Total Duration</span>
-                <span className="font-mono font-bold text-[#222222]">
+                <span className="text-[10px] uppercase tracking-[0.14em] text-[#6B756B]">Total Duration</span>
+                <span className="font-bold text-[#222222]">
                   {durationHours} Hour{durationHours > 1 ? 's' : ''} ({durationMinutes} mins)
                 </span>
               </div>
 
               <div className="flex items-center justify-between border-b border-[#222222]/10 pb-3">
-                <span className="text-[#6B756B] uppercase font-bold text-[10px]">Court Fee (₱350/hr)</span>
-                <span className="font-mono font-bold text-[#222222]">₱{courtTotal.toLocaleString()}</span>
+                <span className="text-[10px] uppercase tracking-[0.14em] text-[#6B756B]">Court Fee (₱350/hr)</span>
+                <span className="font-bold text-[#222222]">₱{courtTotal.toLocaleString()}</span>
               </div>
 
               {addPaddle && selectedPaddle && (
                 <div className="flex items-center justify-between border-b border-[#222222]/10 pb-3">
-                  <span className="text-[#6B756B] uppercase font-bold text-[10px]">
+                  <span className="text-[10px] uppercase tracking-[0.14em] text-[#6B756B]">
                     Paddle Rental ({selectedPaddle.name})
                   </span>
-                  <span className="font-mono font-bold text-[#222222]">₱{paddleCost.toLocaleString()}</span>
+                  <span className="font-bold text-[#222222]">₱{paddleCost.toLocaleString()}</span>
                 </div>
               )}
 
               <div className="flex items-center justify-between border-b border-[#222222]/10 pb-3">
-                <span className="text-[#6B756B] uppercase font-bold text-[10px]">Guest Name</span>
+                <span className="text-[10px] uppercase tracking-[0.14em] text-[#6B756B]">Guest Name</span>
                 <span className="font-bold text-[#222222]">{name}</span>
               </div>
 
               {/* Total Price Highlight */}
               <div className="flex items-center justify-between pt-2">
-                <span className="text-sm font-bold text-[#222222] uppercase tracking-wider">
+                <span className="text-[10px] uppercase tracking-[0.14em] text-[#6B756B]">
                   Total Payable:
                 </span>
-                <span className="font-mono text-2xl font-black text-[#1E5336]">
+                <span className="text-2xl font-bold text-[#1E5336]">
                   ₱{total.toLocaleString()}
                 </span>
               </div>
@@ -961,14 +957,14 @@ function BookingContent() {
 
             {/* Payment Method Selector */}
             <div className="mt-6 space-y-3">
-              <label className="block text-[11px] uppercase tracking-wider font-bold text-[#6B756B]">
+              <label className="block text-[10px] uppercase tracking-[0.14em] text-[#6B756B]">
                 Select Payment Method
               </label>
               <div className="grid grid-cols-2 gap-3">
                 <button
                   type="button"
                   onClick={() => setPayment('Online Payment')}
-                  className={`rounded-lg border p-3.5 text-left transition ${
+                  className={`rounded-none border p-3.5 text-left transition ${
                     payment === 'Online Payment'
                       ? 'border-[#1E5336] bg-[#1E5336]/10 ring-1 ring-[#1E5336]'
                       : 'border-[#222222]/15 bg-white hover:border-[#1E5336]'
@@ -981,7 +977,7 @@ function BookingContent() {
                 <button
                   type="button"
                   onClick={() => setPayment('Pay at Counter')}
-                  className={`rounded-lg border p-3.5 text-left transition ${
+                  className={`rounded-none border p-3.5 text-left transition ${
                     payment === 'Pay at Counter'
                       ? 'border-[#1E5336] bg-[#1E5336]/10 ring-1 ring-[#1E5336]'
                       : 'border-[#222222]/15 bg-white hover:border-[#1E5336]'
@@ -1003,7 +999,7 @@ function BookingContent() {
               <button
                 type="button"
                 onClick={goBack}
-                className="flex items-center gap-1.5 rounded-md border border-[#222222]/20 px-4 py-2.5 text-xs font-bold uppercase tracking-wider text-[#6B756B] hover:text-black bg-white"
+                className="flex items-center gap-1.5 rounded-none border border-[#222222]/20 px-4 py-2.5 text-[10px] uppercase tracking-[0.16em] text-[#6B756B] hover:text-black bg-white"
               >
                 <ArrowLeft size={14} /> Back
               </button>
@@ -1012,7 +1008,7 @@ function BookingContent() {
                 type="button"
                 disabled={!consent || paying}
                 onClick={confirm}
-                className="flex items-center gap-2 rounded-md bg-[#1E5336] px-8 py-3 text-xs font-bold uppercase tracking-wider text-[#FDFBF7] hover:bg-[#153d27] disabled:opacity-40 transition shadow-md"
+                className="flex items-center gap-2 rounded-none bg-[#1E5336] px-8 py-3 text-[10px] uppercase tracking-[0.16em] text-[#FDFBF7] hover:bg-[#153d27] disabled:opacity-40 transition shadow-md"
               >
                 {paying ? (
                   <>
@@ -1034,25 +1030,25 @@ function BookingContent() {
             STEP 5: CONFIRMATION RECEIPT
             ========================================================================= */}
         {step === 'confirm' && (
-          <div className="rounded-xl border border-[#222222]/15 bg-white p-8 max-w-lg mx-auto text-center space-y-4 shadow-xl">
+          <div className="rounded-none border border-[#222222]/15 bg-white p-8 max-w-lg mx-auto text-center space-y-4 shadow-xl">
             <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-emerald-100 text-emerald-700">
               <Check size={28} />
             </div>
 
             <div>
-              <p className="text-xs uppercase tracking-widest font-bold text-[#E1A728]">
+              <p className="text-xs uppercase tracking-[0.18em] text-[#E1A728]">
                 Reservation Confirmed
               </p>
-              <h2 className="font-serif text-3xl text-[#1E5336] mt-1">We Look Forward to Seeing You!</h2>
+              <h2 className="font-serif text-3xl tracking-[-0.04em] text-[#1E5336] mt-1">We Look Forward to Seeing You!</h2>
               <p className="text-xs text-[#6B756B] mt-2">
                 Your pickleball court reservation has been booked. A confirmation email has been dispatched.
               </p>
             </div>
 
-            <div className="rounded-lg border border-[#222222]/10 bg-[#FDFBF7] p-4 text-xs space-y-2 text-left">
+            <div className="rounded-none border border-[#222222]/10 bg-[#FDFBF7] p-4 text-xs space-y-2 text-left">
               <div className="flex justify-between border-b border-[#222222]/10 pb-1.5">
                 <span className="text-[#6B756B]">Booking Reference:</span>
-                <span className="font-mono font-bold text-[#1E5336]">{confirmedRef}</span>
+                <span className="font-bold text-[#1E5336]">{confirmedRef}</span>
               </div>
               <div className="flex justify-between border-b border-[#222222]/10 pb-1.5">
                 <span className="text-[#6B756B]">Court:</span>
@@ -1064,21 +1060,21 @@ function BookingContent() {
               </div>
               <div className="flex justify-between">
                 <span className="text-[#6B756B]">Total Amount:</span>
-                <span className="font-mono font-bold text-[#1E5336]">₱{total.toLocaleString()}</span>
+                <span className="font-bold text-[#1E5336]">₱{total.toLocaleString()}</span>
               </div>
             </div>
 
             <div className="pt-2 flex flex-col gap-2">
               <Link
                 href={`/pickleball/booking/receipt?ref=${encodeURIComponent(confirmedRef)}`}
-                className="w-full rounded-md bg-[#1E5336] py-3 text-xs font-bold uppercase tracking-wider text-white hover:bg-[#153d27] transition shadow-xs"
+                className="w-full rounded-none bg-[#1E5336] py-3 text-[10px] uppercase tracking-[0.16em] text-white hover:bg-[#153d27] transition shadow-xs"
               >
                 View Printable Receipt
               </Link>
               <button
                 type="button"
                 onClick={reset}
-                className="w-full rounded-md border border-[#222222]/20 py-2.5 text-xs font-semibold text-[#6B756B] hover:text-[#222222] transition"
+                className="w-full rounded-none border border-[#222222]/20 py-2.5 text-xs font-semibold text-[#6B756B] hover:text-[#222222] transition"
               >
                 Book Another Session
               </button>

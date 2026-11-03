@@ -127,29 +127,20 @@ export default function CourtsSection({
       {/* Header bar */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#222222]/10 pb-4">
         <div>
-          <h2 className="font-serif text-3xl text-[#1E5336]">{title}</h2>
+          <h2 className="font-serif text-3xl tracking-[-0.04em] text-[#1E5336]">{title}</h2>
           <p className="text-xs text-[#6B756B] mt-1 max-w-xl">{subtitle}</p>
         </div>
 
         <div className="flex flex-wrap items-center gap-3">
-          <div className="flex items-center gap-2 text-xs font-semibold text-[#6B756B] bg-white px-3 py-1.5 rounded-md border border-[#222222]/10 shadow-xs">
+          <div className="flex items-center gap-2 text-xs font-semibold text-[#6B756B] bg-white px-3 py-1.5 rounded-none border border-[#222222]/10 shadow-xs">
             <span className="flex h-2.5 w-2.5 rounded-full bg-emerald-500 animate-pulse" />
             Live Status ({todayIso})
           </div>
 
-          <button
-            type="button"
-            onClick={() => handleOpenManageModal('')}
-            className="flex items-center gap-1.5 rounded-md border border-[#1E5336] bg-white px-3.5 py-1.5 text-[11px] font-bold uppercase tracking-wider text-[#1E5336] hover:bg-[#1E5336] hover:text-white transition shadow-xs"
-          >
-            <Wrench size={13} />
-            Manage Booking
-          </button>
-
           {isAdmin && (
             <Link
               href="/admin/courts"
-              className="flex items-center gap-1.5 rounded-md bg-[#1E5336] px-3.5 py-1.5 text-[11px] font-bold uppercase tracking-wider text-[#FDFBF7] hover:bg-[#153d27] transition shadow-xs"
+              className="flex items-center gap-1.5 rounded-none bg-[#1E5336] px-3.5 py-1.5 text-[11px] font-bold uppercase tracking-[0.14em] text-[#FDFBF7] hover:bg-[#153d27] transition shadow-xs"
             >
               <ShieldCheck size={13} className="text-[#E1A728]" />
               Admin Portal
@@ -160,14 +151,14 @@ export default function CourtsSection({
 
       {/* Staff banner if admin is authenticated */}
       {isAdmin && (
-        <div className="rounded-lg border border-[#1E5336]/30 bg-[#1E5336]/10 px-4 py-2.5 flex items-center justify-between text-xs text-[#1E5336]">
+        <div className="rounded-none border border-[#1E5336]/30 bg-[#1E5336]/10 px-4 py-2.5 flex items-center justify-between text-xs text-[#1E5336]">
           <span className="flex items-center gap-2 font-bold">
             <ShieldCheck size={16} className="text-[#1E5336]" />
             Staff / Admin Mode Active (Logged in as {adminUsername}). You can apply real-time status overrides below.
           </span>
           <Link
             href="/admin/courts"
-            className="font-bold underline hover:text-[#153d27] uppercase text-[10px] tracking-wider"
+            className="underline hover:text-[#153d27] uppercase text-[10px] tracking-[0.14em]"
           >
             Open Full Admin Panel →
           </Link>
@@ -243,7 +234,7 @@ export default function CourtsSection({
           return (
             <div
               key={court.id}
-              className={`flex flex-col justify-between rounded-xl border bg-[#FDFBF7] p-5 shadow-sm transition-all duration-300 hover:shadow-md ${
+              className={`flex flex-col justify-between rounded-none border bg-[#FDFBF7] p-5 shadow-sm transition-all duration-300 hover:shadow-md ${
                 cfg.border
               } ${isSelected ? 'ring-2 ring-[#1E5336]' : ''}`}
             >
@@ -251,13 +242,13 @@ export default function CourtsSection({
                 {/* Court Header */}
                 <div className="flex items-center justify-between mb-2">
                   <div>
-                    <h3 className="font-serif text-2xl font-bold text-[#1E5336]">{court.name}</h3>
-                    <p className="text-[10px] text-[#6B756B] uppercase tracking-wider font-semibold">
+                    <h3 className="font-serif text-2xl tracking-[-0.03em] text-[#1E5336]">{court.name}</h3>
+                    <p className="text-[10px] text-[#6B756B] uppercase tracking-[0.14em] font-semibold">
                       Championship Surface · Regulation Net
                     </p>
                   </div>
                   <span
-                    className={`px-2.5 py-1 text-[10px] uppercase tracking-[0.14em] font-black rounded ${cfg.badge}`}
+                    className={`px-2.5 py-1 text-[10px] uppercase tracking-[0.14em] font-bold rounded-none ${cfg.badge}`}
                   >
                     {cfg.label}
                   </span>
@@ -292,10 +283,10 @@ export default function CourtsSection({
 
                 {/* Current Booking Info Block */}
                 {activeOpenPlay ? (
-                  <div className="rounded-lg border border-blue-500/30 bg-blue-50/70 p-3 text-xs space-y-1.5 mb-4">
-                    <div className="flex items-center justify-between text-[10px] font-bold text-blue-900 uppercase border-b border-blue-200 pb-1">
+                  <div className="rounded-none border border-blue-500/30 bg-blue-50/70 p-3 text-xs space-y-1.5 mb-4">
+                    <div className="flex items-center justify-between text-[10px] font-bold uppercase tracking-[0.12em] text-blue-900 border-b border-blue-200 pb-1">
                       <span>Open Play Session Active</span>
-                      <span className="text-blue-700 font-mono">
+                      <span className="text-blue-700">
                         {activeOpenPlay.startTime} – {activeOpenPlay.endTime}
                       </span>
                     </div>
@@ -311,8 +302,8 @@ export default function CourtsSection({
                     </div>
                   </div>
                 ) : displayRes ? (
-                  <div className="rounded-lg border border-[#1E5336]/20 bg-[#F3F0EC] p-3 text-xs space-y-1.5 mb-4">
-                    <div className="flex items-center justify-between text-[10px] font-bold text-[#1E5336] uppercase border-b border-[#222222]/10 pb-1">
+                  <div className="rounded-none border border-[#1E5336]/20 bg-[#F3F0EC] p-3 text-xs space-y-1.5 mb-4">
+                    <div className="flex items-center justify-between text-[10px] font-bold uppercase tracking-[0.12em] text-[#1E5336] border-b border-[#222222]/10 pb-1">
                       <span>{activeRes ? 'Active Match in Progress' : 'Next Scheduled Booking'}</span>
                       {countdownInfo?.statusText && (
                         <span className="text-[10px] text-[#E1A728] font-bold">
@@ -342,7 +333,7 @@ export default function CourtsSection({
                     </div>
                   </div>
                 ) : (
-                  <div className="rounded-lg border border-dashed border-emerald-600/30 bg-emerald-50/50 p-3.5 text-center text-xs text-emerald-800 mb-4 flex items-center justify-center gap-2">
+                  <div className="rounded-none border border-dashed border-emerald-600/30 bg-emerald-50/50 p-3.5 text-center text-xs text-emerald-800 mb-4 flex items-center justify-center gap-2">
                     <Sparkles size={16} className="text-[#E1A728]" />
                     <span className="font-semibold">Court is currently open for instant booking.</span>
                   </div>
@@ -356,7 +347,7 @@ export default function CourtsSection({
                   <button
                     type="button"
                     onClick={() => handleBookCourt(court)}
-                    className={`w-full rounded-md py-2.5 text-[11px] uppercase tracking-wider font-bold transition shadow-xs flex items-center justify-center gap-2 ${
+                    className={`w-full rounded-none py-2.5 text-[10px] uppercase tracking-[0.16em] transition shadow-xs flex items-center justify-center gap-2 ${
                       isAvailable
                         ? 'bg-[#1E5336] text-white hover:bg-[#153d27]'
                         : 'bg-[#E1A728] text-[#1E5336] hover:bg-[#c9921b]'
@@ -371,7 +362,7 @@ export default function CourtsSection({
                     <button
                       type="button"
                       onClick={() => setViewScheduleId(viewScheduleId === court.id ? null : court.id)}
-                      className="rounded-md border border-[#222222]/20 py-2 px-2 text-[10px] uppercase tracking-wider font-bold text-[#6B756B] hover:border-[#1E5336] hover:text-[#1E5336] transition bg-white flex items-center justify-center gap-1 shadow-2xs"
+                      className="rounded-none border border-[#222222]/20 py-2 px-2 text-[10px] uppercase tracking-[0.14em] text-[#6B756B] hover:border-[#1E5336] hover:text-[#1E5336] transition bg-white flex items-center justify-center gap-1 shadow-2xs"
                     >
                       <Clock size={12} />
                       <span>{viewScheduleId === court.id ? 'Hide Schedule' : 'View Schedule'}</span>
@@ -379,7 +370,7 @@ export default function CourtsSection({
                     <button
                       type="button"
                       onClick={() => handleOpenManageModal(displayRes?.bookingId || '')}
-                      className="rounded-md border border-[#222222]/20 py-2 px-2 text-[10px] uppercase tracking-wider font-bold text-[#6B756B] hover:border-[#1E5336] hover:text-[#1E5336] transition bg-white flex items-center justify-center gap-1 shadow-2xs"
+                      className="rounded-none border border-[#222222]/20 py-2 px-2 text-[10px] uppercase tracking-[0.14em] text-[#6B756B] hover:border-[#1E5336] hover:text-[#1E5336] transition bg-white flex items-center justify-center gap-1 shadow-2xs"
                     >
                       <Wrench size={12} />
                       <span>Manage Booking</span>
@@ -391,7 +382,7 @@ export default function CourtsSection({
                     <button
                       type="button"
                       onClick={() => onJoinOpenPlaySession(activeOpenPlay)}
-                      className="w-full rounded-md bg-blue-700 py-2 text-[10px] uppercase tracking-wider font-bold text-white hover:bg-blue-800 transition shadow-xs flex items-center justify-center gap-1.5"
+                      className="w-full rounded-none bg-blue-700 py-2 text-[10px] uppercase tracking-[0.14em] text-white hover:bg-blue-800 transition shadow-xs flex items-center justify-center gap-1.5"
                     >
                       <Users size={13} />
                       <span>Join Open Play ({activeOpenPlay.players.length} Players)</span>
@@ -400,7 +391,7 @@ export default function CourtsSection({
 
                   {/* Staff / Administrator Quick Override Controls */}
                   {isAdmin && (
-                    <div className="mt-3 pt-2.5 border-t border-[#222222]/10 flex items-center justify-between text-[10px] bg-[#1E5336]/5 p-2 rounded">
+                    <div className="mt-3 pt-2.5 border-t border-[#222222]/10 flex items-center justify-between text-[10px] bg-[#1E5336]/5 p-2 rounded-none">
                       <span className="font-bold text-[#1E5336] flex items-center gap-1">
                         <ShieldCheck size={12} /> Staff Override:
                       </span>
@@ -409,7 +400,7 @@ export default function CourtsSection({
                         onChange={(e) =>
                           updateCourtOverrideStatus(court.id, (e.target.value as any) || undefined)
                         }
-                        className="border border-[#222222]/20 bg-white rounded px-2 py-0.5 text-[10px] font-bold text-[#1E5336]"
+                        className="border border-[#222222]/20 bg-white rounded-none px-2 py-0.5 text-[10px] font-bold text-[#1E5336]"
                       >
                         <option value="">Auto Status</option>
                         <option value="available">Available</option>
@@ -423,9 +414,9 @@ export default function CourtsSection({
 
                 {/* Expandable Court Schedule Drawer */}
                 {viewScheduleId === court.id && (
-                  <div className="mt-4 rounded-lg border border-[#222222]/15 bg-white p-3.5 text-xs animate-in fade-in duration-200">
+                  <div className="mt-4 rounded-none border border-[#222222]/15 bg-white p-3.5 text-xs animate-in fade-in duration-200">
                     <div className="flex items-center justify-between border-b border-[#222222]/10 pb-2 mb-2">
-                      <span className="font-bold text-[#1E5336] uppercase text-[10px]">
+                      <span className="text-[10px] uppercase tracking-[0.14em] text-[#1E5336]">
                         Schedule for {court.name}
                       </span>
                       <span className="text-[10px] text-[#6B756B]">₱350 / hr</span>
@@ -438,7 +429,7 @@ export default function CourtsSection({
                           return (
                             <div
                               key={r.id}
-                              className="flex items-center justify-between rounded bg-[#F3F0EC] p-2 text-[11px]"
+                              className="flex items-center justify-between rounded-none bg-[#F3F0EC] p-2 text-[11px]"
                             >
                               <div>
                                 <span className="font-bold text-[#1E5336]">{r.date}</span>
@@ -452,7 +443,7 @@ export default function CourtsSection({
                         })}
                       </div>
                     ) : (
-                      <p className="text-[11px] text-[#6B756B] italic py-2 text-center">
+                      <p className="text-xs text-[#6B756B] py-2 text-center">
                         No upcoming bookings on record. All slots are open!
                       </p>
                     )}
