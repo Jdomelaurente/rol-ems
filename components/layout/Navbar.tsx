@@ -113,9 +113,9 @@ export default function Navbar() {
             {/* Dropdown Menu */}
             {tournamentOpen && (
               <div className="absolute left-0 top-full pt-1 z-50 w-72 animate-in fade-in slide-in-from-top-1 duration-150">
-                <div className="rounded-lg border border-[#222222]/15 bg-[#FDFBF7] p-2 shadow-xl ring-1 ring-black/5">
+                <div className="bg-[#FDFBF7] p-2 shadow-xl">
                   <div className="px-3 py-1.5 border-b border-[#222222]/10 mb-1">
-                    <span className="text-[9px] uppercase tracking-[0.18em] font-bold text-[#E1A728]">
+                    <span className="text-[10px] uppercase tracking-[0.18em] text-[#E1A728]">
                       Tournament & Match Central
                     </span>
                   </div>
@@ -129,20 +129,20 @@ export default function Navbar() {
                           key={sub.href}
                           href={sub.href}
                           onClick={() => setTournamentOpen(false)}
-                          className={`flex items-start gap-3 rounded-md px-3 py-2.5 transition ${
+                          className={`flex items-start gap-3 px-3 py-2.5 transition ${
                             active
                               ? 'bg-[#1E5336] text-[#FDFBF7]'
                               : 'text-[#222222] hover:bg-[#1E5336]/10'
                           }`}
                         >
-                          <div className={`mt-0.5 rounded p-1.5 ${active ? 'bg-white/20 text-[#E1A728]' : 'bg-[#1E5336]/10 text-[#1E5336]'}`}>
+                          <div className={`mt-0.5 p-1.5 ${active ? 'bg-white/20 text-[#E1A728]' : 'bg-[#1E5336]/10 text-[#1E5336]'}`}>
                             <Icon size={15} />
                           </div>
                           <div>
-                            <p className={`text-xs font-bold uppercase tracking-[0.08em] ${active ? 'text-[#FDFBF7]' : 'text-[#1E5336]'}`}>
+                            <p className={`text-[11px] font-bold uppercase tracking-[0.14em] ${active ? 'text-[#FDFBF7]' : 'text-[#1E5336]'}`}>
                               {sub.label}
                             </p>
-                            <p className={`text-[10px] leading-tight ${active ? 'text-white/80' : 'text-[#6B756B]'}`}>
+                            <p className={`text-[10px] leading-snug ${active ? 'text-white/80' : 'text-[#6B756B]'}`}>
                               {sub.description}
                             </p>
                           </div>
