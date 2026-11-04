@@ -82,13 +82,6 @@ export async function POST(req: NextRequest) {
     (Array.isArray(lineItems) && lineItems[0]?.name) ||
     'ROL-EMS booking'
 
-  if (!billingEmail) {
-    console.error('Webhook: no billing email found. session attrs:', JSON.stringify(attrs))
-    return NextResponse.json({ received: true })
-  }
-
-  console.log('Webhook: sending receipt email to', billingEmail, 'amount', amountPaid, 'session', sessionId)
-
   const name = billing?.name || 'Guest'
   const reference = metadata?.reference || sessionId || event?.data?.id || '—'
   const date = metadata?.date
@@ -101,14 +94,27 @@ export async function POST(req: NextRequest) {
   const receiptUrl = `${siteUrl}${receiptPath}?ref=${encodeURIComponent(reference)}`
   const receiptPdfUrl = `${siteUrl}/api/receipt/pdf?ref=${encodeURIComponent(reference)}`
 
+  // Mark the booking paid even when the guest did not provide an email.
   try {
     await prisma.booking.updateMany({
       where: { reference },
-      data: { status: 'confirmed' },
+      data: {
+        status: 'confirmed',
+        paymentStatus: 'paid',
+        paidMethod: firstPaid?.attributes?.payment_method || 'gcash',
+        paidAt: new Date(),
+      },
     })
   } catch (err) {
     console.error('Webhook: failed to confirm booking in DB', err)
   }
+
+  if (!billingEmail) {
+    console.warn('Webhook: payment recorded but no billing email for receipt. session:', sessionId)
+    return NextResponse.json({ received: true })
+  }
+
+  console.log('Webhook: sending receipt email to', billingEmail, 'amount', amountPaid, 'session', sessionId)
 
   try {
     await sendReceiptEmail(billingEmail, {
