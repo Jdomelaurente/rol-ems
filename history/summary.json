@@ -23,18 +23,19 @@
     "icon": "https://icons.duckduckgo.com/ip3/rol-ems.vercel.app.ico",
     "slug": "rol-ems-api-and-database",
     "status": "up",
-    "uptime": "98.16%",
-    "uptimeDay": "100.00%",
-    "uptimeWeek": "98.16%",
-    "uptimeMonth": "98.16%",
-    "uptimeYear": "98.16%",
+    "uptime": "98.15%",
+    "uptimeDay": "99.99%",
+    "uptimeWeek": "98.15%",
+    "uptimeMonth": "98.15%",
+    "uptimeYear": "98.15%",
     "time": 871,
     "timeDay": 1768,
     "timeWeek": 871,
     "timeMonth": 871,
     "timeYear": 871,
     "dailyMinutesDown": {
-      "2026-11-01": 98
+      "2026-11-01": 98,
+      "2026-11-05": 0
     }
   }
 ]
