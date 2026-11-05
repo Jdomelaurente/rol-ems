@@ -37,9 +37,6 @@ export async function GET(req: NextRequest) {
     const billing = firstPaid?.attributes?.billing || attrs?.billing || {}
     const metadata = attrs?.metadata || {}
     const billingEmail: string | undefined = billing?.email || metadata?.email
-    if (!billingEmail) {
-      return NextResponse.json({ error: 'No billing email' }, { status: 400 })
-    }
 
     const amountPaid: number = firstPaid?.attributes?.amount || attrs?.amount || 0
     const lineItems = attrs?.line_items || []
@@ -54,10 +51,20 @@ export async function GET(req: NextRequest) {
     try {
       await prisma.booking.updateMany({
         where: { reference },
-        data: { status: 'confirmed' },
+        data: {
+          status: 'confirmed',
+          paymentStatus: 'paid',
+          paidMethod: 'gcash',
+          paidAt: new Date(),
+        },
       })
     } catch (err) {
       console.error('Receipt: failed to confirm booking in DB', err)
+    }
+
+    // A pay-at-venue guest may not have an email; the payment is still recorded.
+    if (!billingEmail) {
+      return NextResponse.json({ ok: true, email: null, reference })
     }
 
     const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'

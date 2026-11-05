@@ -1,11 +1,14 @@
 'use client'
 
-import { ArrowLeft } from 'lucide-react'
-import { useRouter } from 'next/navigation'
+import { Suspense } from 'react'
+import { ArrowLeft, MapPin } from 'lucide-react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import CottageBookingForm from '@/components/cottage/cottage-form'
 
-export default function CottagePage() {
+function CottagePageContent() {
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const onSite = searchParams.get('src') === 'qr'
 
   return (
     <main className="min-h-screen bg-[#F3F0EC] text-[#222222]">
@@ -32,6 +35,22 @@ export default function CottagePage() {
         >
           <ArrowLeft size={14} /> Back to Stay &amp; play
         </button>
+
+        {onSite && (
+          <div className="mb-6 flex items-start gap-3 border border-[#1E5336]/25 bg-[#1E5336]/5 px-4 py-3">
+            <MapPin size={16} className="mt-0.5 shrink-0 text-[#1E5336]" />
+            <div>
+              <p className="text-xs font-bold uppercase tracking-[0.14em] text-[#1E5336]">
+                You&apos;re booking at the venue
+              </p>
+              <p className="mt-1 text-xs leading-5 text-[#6B756B]">
+                Pick a cottage or event venue, choose your date, and settle at the counter. Your
+                reference number is your pass — show it to our staff.
+              </p>
+            </div>
+          </div>
+        )}
+
         <p className="text-xs uppercase tracking-[0.18em] text-[#E1A728]">Cottage &amp; Event</p>
         <h1 className="mt-3 font-serif text-4xl leading-[0.95] tracking-[-0.05em] text-[#1E5336] sm:text-5xl">
           Reserve a cottage or book a venue.
@@ -42,8 +61,22 @@ export default function CottagePage() {
       </section>
 
       <section className="mx-auto max-w-2xl px-6 pb-36">
-        <CottageBookingForm onDone={() => router.push('/#facilities')} />
+        <CottageBookingForm onSite={onSite} onDone={() => router.push('/#facilities')} />
       </section>
     </main>
+  )
+}
+
+export default function CottagePage() {
+  return (
+    <Suspense
+      fallback={
+        <main className="flex min-h-screen items-center justify-center bg-[#F3F0EC] text-xs text-[#6B756B]">
+          Loading booking form…
+        </main>
+      }
+    >
+      <CottagePageContent />
+    </Suspense>
   )
 }

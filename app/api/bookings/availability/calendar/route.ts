@@ -26,7 +26,7 @@ export async function GET(req: NextRequest) {
 
   try {
     const bookings = await prisma.booking.findMany({
-      where: { facility, status: { in: ['pending', 'confirmed'] } },
+      where: { facility, archivedAt: null, status: { in: ['pending', 'confirmed'] } },
       select: { date: true, nights: true, status: true, createdAt: true },
     })
 

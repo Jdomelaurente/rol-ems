@@ -27,7 +27,7 @@ export default function RefundPolicyPage() {
       <LegalSectionBlock heading="Online payments (PayMongo)">
         <LegalList
           items={[
-            <>Refunds for online payments (GCash, Maya, card, GrabPay) are processed back to the original payment method through PayMongo. Processing may take 3–10 business days depending on the bank or e-wallet.</>,
+            <>Refunds for online payments (GCash via PayMongo) are processed back to the original GCash account through PayMongo. Processing may take 3–10 business days.</>,
             <>To request a refund, contact us within the applicable window below with your booking reference number.</>,
             <>We will confirm the refund decision by email at the address used for the booking.</>,
           ]}

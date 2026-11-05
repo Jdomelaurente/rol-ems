@@ -13,6 +13,10 @@ export type BookingRecord = {
   amount: number
   payment: string
   status: string
+  paymentStatus?: string
+  paidMethod?: string | null
+  paymentReference?: string | null
+  paidAt?: string | null
   createdAt: string
 }
 

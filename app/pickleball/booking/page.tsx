@@ -971,7 +971,7 @@ function BookingContent() {
                   }`}
                 >
                   <p className="font-bold text-xs text-[#1E5336]">Online Payment</p>
-                  <p className="text-[10px] text-[#6B756B] mt-0.5">GCash, Maya, Debit/Credit Card</p>
+                  <p className="text-[10px] text-[#6B756B] mt-0.5">GCash</p>
                 </button>
 
                 <button

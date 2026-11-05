@@ -17,7 +17,7 @@ export async function POST(req: NextRequest) {
     let existing: any[] = []
     try {
       existing = await prisma.booking.findMany({
-        where: { facility, status: { in: ['pending', 'confirmed'] } },
+        where: { facility, archivedAt: null, status: { in: ['pending', 'confirmed'] } },
         select: { reference: true, date: true, nights: true, status: true, createdAt: true },
       })
     } catch (dbErr) {
@@ -113,8 +113,20 @@ export async function POST(req: NextRequest) {
 export async function GET(req: NextRequest) {
   try {
     const reference = req.nextUrl.searchParams.get('reference')
+    const archived = req.nextUrl.searchParams.get('archived')
+
+    // A specific reference is always returned (even if archived) so guests can
+    // still open their receipt. The list view hides archived bookings by default.
+    const where = reference
+      ? { reference }
+      : archived === 'all'
+        ? undefined
+        : archived === '1' || archived === 'true'
+          ? { archivedAt: { not: null } }
+          : { archivedAt: null }
+
     const bookings = await prisma.booking.findMany({
-      where: reference ? { reference } : undefined,
+      where,
       orderBy: { createdAt: 'desc' },
     })
     return NextResponse.json(bookings)

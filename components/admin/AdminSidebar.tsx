@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import {
   LayoutDashboard,
   Volleyball,
@@ -40,7 +40,10 @@ const navGroups: NavGroup[] = [
     key: 'cottage',
     label: 'Cottage & Event',
     icon: Home,
-    items: [{ href: '/admin/catalog', label: 'Booking Catalog' }],
+    items: [
+      { href: '/admin/bookings', label: 'Guests & Bookings' },
+      { href: '/admin/catalog', label: 'Booking Catalog' },
+    ],
   },
   {
     key: 'pickleball',
@@ -114,15 +117,6 @@ export default function AdminSidebar({
   const [mobileOpen, setMobileOpen] = useState(false)
   const [signingOut, setSigningOut] = useState(false)
   const [openGroups, setOpenGroups] = useState<Record<string, boolean>>({})
-
-  const activeGroupKey = navGroups.find((g) =>
-    g.items.some((item) => !item.comingSoon && isItemActive(pathname, item.href))
-  )?.key
-
-  useEffect(() => {
-    if (!activeGroupKey) return
-    setOpenGroups((prev) => ({ ...prev, [activeGroupKey]: true }))
-  }, [activeGroupKey])
 
   const toggleGroup = (key: string) =>
     setOpenGroups((prev) => ({ ...prev, [key]: !prev[key] }))

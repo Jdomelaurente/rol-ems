@@ -16,6 +16,10 @@ type TemplateData = {
   receiptPdfUrl?: string
   /** If true, wording is for cash / pay-at-venue bookings */
   isCash?: boolean
+  /** Overrides the payment row, e.g. "Paid · GCash (Ref 1234)" */
+  paymentLabel?: string
+  /** Overrides the payment note shown in the box below the total */
+  paymentNote?: string
   /** Optional PDF binary data to attach directly to the email */
   pdfAttachment?: Uint8Array | Buffer
 }
@@ -36,13 +40,13 @@ function transporter(): Transporter {
   return cached
 }
 
-function html({ reference, description, amount, name, date, time, guests, receiptUrl, receiptPdfUrl, isCash }: TemplateData): string {
+function html({ reference, description, amount, name, date, time, guests, receiptUrl, receiptPdfUrl, isCash, paymentLabel, paymentNote }: TemplateData): string {
   const rows = [
     ['Reference', reference],
     ['Booking', description],
     ...(date ? [['Date', `${date}${time ? ` · ${time}` : ''}`]] : []),
     ...(guests ? [['Guests', guests]] : []),
-    ['Payment', isCash ? 'Pay at the venue' : 'Online (GCash / card)'],
+    ['Payment', paymentLabel || (isCash ? 'Pay at the venue' : 'Online (GCash)')],
   ]
     .map(
       ([k, v]) =>
@@ -56,14 +60,14 @@ function html({ reference, description, amount, name, date, time, guests, receip
     : 'Your payment has been received. Details below.'
   const totalLabel = isCash ? 'Amount due at venue' : 'Total paid'
 
-  const paymentNote = isCash
+  const paymentNoteText = paymentNote || (isCash
     ? 'Pay at the venue: please settle this booking at the front desk when you arrive. We accept cash, GCash, and Maya — no online payment is required.'
-    : 'Online payment: your payment was processed online via GCash, card, or an e-wallet. No payment is due at the venue.'
+    : 'Online payment: your payment was processed online via GCash. No payment is due at the venue.')
 
   const noteBox = `
     <div style="margin-top:20px;border:1px solid #e5e0d6;background:#F3F0EC;padding:14px 16px">
       <div style="color:#1E5336;font-size:11px;letter-spacing:2px;text-transform:uppercase;font-weight:700;margin-bottom:4px">Payment method</div>
-      <p style="margin:0;color:#6B756B;font-size:12px;line-height:1.5">${paymentNote}</p>
+      <p style="margin:0;color:#6B756B;font-size:12px;line-height:1.5">${paymentNoteText}</p>
     </div>`
 
   const downloadHref = receiptPdfUrl || receiptUrl

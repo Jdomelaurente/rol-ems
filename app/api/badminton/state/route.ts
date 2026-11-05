@@ -5,14 +5,22 @@ import { defaultBadmintonCatalog, sanitizeBadmintonCatalog, type BadmintonCatalo
 const STATE_KEY = 'badminton-catalog'
 
 export async function GET() {
-  const row = await prisma.pickleballState.upsert({
-    where: { key: STATE_KEY },
-    update: {},
-    create: { key: STATE_KEY, data: defaultBadmintonCatalog as object },
-  })
+  try {
+    const row = await prisma.pickleballState.upsert({
+      where: { key: STATE_KEY },
+      update: {},
+      create: { key: STATE_KEY, data: defaultBadmintonCatalog as object },
+    })
 
-  const catalog = sanitizeBadmintonCatalog(row.data as Partial<BadmintonCatalog>)
-  return NextResponse.json(catalog)
+    const catalog = sanitizeBadmintonCatalog(row.data as Partial<BadmintonCatalog>)
+    return NextResponse.json(catalog)
+  } catch (error) {
+    console.error(
+      'Database query failed in GET /api/badminton/state, returning fallback:',
+      error,
+    )
+    return NextResponse.json(defaultBadmintonCatalog)
+  }
 }
 
 export async function PUT(request: Request) {
@@ -22,11 +30,19 @@ export async function PUT(request: Request) {
   }
 
   const catalog = sanitizeBadmintonCatalog(body as Partial<BadmintonCatalog>)
-  const row = await prisma.pickleballState.upsert({
-    where: { key: STATE_KEY },
-    update: { data: catalog as object },
-    create: { key: STATE_KEY, data: catalog as object },
-  })
+  try {
+    const row = await prisma.pickleballState.upsert({
+      where: { key: STATE_KEY },
+      update: { data: catalog as object },
+      create: { key: STATE_KEY, data: catalog as object },
+    })
 
-  return NextResponse.json(row.data)
+    return NextResponse.json(row.data)
+  } catch (error) {
+    console.error(
+      'Database query failed in PUT /api/badminton/state, returning fallback:',
+      error,
+    )
+    return NextResponse.json(catalog)
+  }
 }

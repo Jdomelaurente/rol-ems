@@ -12,6 +12,10 @@ export type ReceiptBooking = {
   amount: number
   payment: string
   status: string
+  paymentStatus?: string | null
+  paidMethod?: string | null
+  paymentReference?: string | null
+  paidAt?: Date | string | null
 }
 
 const GREEN = rgb(30 / 255, 83 / 255, 54 / 255)
@@ -110,8 +114,21 @@ export async function buildReceiptPdf(booking: ReceiptBooking): Promise<Uint8Arr
   page.drawText(safe(thankYou), { x: MARGIN, y, size: 11, font, color: GRAY })
   y -= 28
 
+  const methodLabels: Record<string, string> = {
+    cash: 'Cash at venue',
+    gcash: 'GCash',
+    maya: 'Maya',
+    card: 'Card',
+    bank: 'Bank transfer',
+  }
   const isCash = booking.payment === 'cash'
-  const paymentLabel = isCash ? 'Pay at the venue' : 'Online (GCash / card)'
+  const isPaid = booking.paymentStatus === 'paid'
+  const methodLabel = methodLabels[booking.paidMethod || ''] || booking.paidMethod || 'At venue'
+  const paymentLabel = isPaid
+    ? `Paid - ${methodLabel}${booking.paymentReference ? ` (Ref ${booking.paymentReference})` : ''}`
+    : isCash
+    ? 'Pay at the venue'
+    : 'Online (GCash)'
   const statusLabel = booking.status ? booking.status.charAt(0).toUpperCase() + booking.status.slice(1) : '-'
   const amount = `PHP ${Number(booking.amount || 0).toLocaleString('en-PH', { minimumFractionDigits: 2 })}`
 
@@ -159,7 +176,7 @@ export async function buildReceiptPdf(booking: ReceiptBooking): Promise<Uint8Arr
   }
 
   y -= 18
-  const totalLabel = isCash ? 'Amount due at venue' : 'Total paid'
+  const totalLabel = isPaid ? 'Total paid' : isCash ? 'Amount due at venue' : 'Total due'
   page.drawLine({
     start: { x: MARGIN, y: y + 10 },
     end: { x: PAGE_WIDTH - MARGIN, y: y + 10 },
@@ -176,9 +193,11 @@ export async function buildReceiptPdf(booking: ReceiptBooking): Promise<Uint8Arr
   })
 
   y -= 34
-  const note = isCash
+  const note = isPaid
+    ? `Payment received at the venue via ${methodLabel}${booking.paymentReference ? ` (Ref ${booking.paymentReference})` : ''}. No amount is due.`
+    : isCash
     ? 'Pay at the venue: please settle this booking at the front desk when you arrive. We accept cash, GCash, and Maya - no online payment is required.'
-    : 'Online payment: your payment was processed online via GCash, card, or an e-wallet. No payment is due at the venue.'
+    : 'Online payment: your payment was processed online via GCash. No payment is due at the venue.'
   const noteLines = wrapText(note, font, 9, CONTENT_WIDTH - 28)
   const boxHeight = noteLines.length * 12 + 40
 

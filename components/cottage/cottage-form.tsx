@@ -14,11 +14,16 @@ type BookingType = 'day' | 'overnight' | 'event'
 type BookingKind = 'cottage' | 'event'
 
 const paymentMethods = [
-  { id: 'online', label: 'Pay online (GCash, card, e-wallets)' },
+  { id: 'online', label: 'Pay online via GCash' },
   { id: 'cash', label: 'Pay at the venue' },
 ]
 
 const timeSlots = ['10:00 AM', '11:00 AM', '12:00 PM', '1:00 PM', '2:00 PM', '3:00 PM', '4:00 PM', '5:00 PM', '6:00 PM', '7:00 PM', '8:00 PM']
+
+const todayIso = () => {
+  const d = new Date()
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+}
 
 const steps: { key: Step; label: string }[] = [
   { key: 'type', label: 'Booking' },
@@ -27,7 +32,13 @@ const steps: { key: Step; label: string }[] = [
   { key: 'review', label: 'Review & pay' },
 ]
 
-export default function CottageBookingForm({ onDone }: { onDone: () => void }) {
+export default function CottageBookingForm({
+  onDone,
+  onSite = false,
+}: {
+  onDone: () => void
+  onSite?: boolean
+}) {
   const { catalog, loaded } = useCottageCatalog()
   const cottageOptions = catalog.cottages.filter((c) => c.active)
   const eventVenues = catalog.venues.filter((v) => v.active)
@@ -49,7 +60,7 @@ export default function CottageBookingForm({ onDone }: { onDone: () => void }) {
   const [nights, setNights] = useState(1)
   const [eventDetails, setEventDetails] = useState('')
   const [addOns, setAddOns] = useState<Record<string, number>>({})
-  const [date, setDate] = useState('')
+  const [date, setDate] = useState(() => (onSite ? todayIso() : ''))
   const [time, setTime] = useState('')
   const [guests, setGuests] = useState(4)
   const [name, setName] = useState('')
@@ -294,7 +305,7 @@ export default function CottageBookingForm({ onDone }: { onDone: () => void }) {
     setNights(1)
     setEventDetails('')
     setAddOns({})
-    setDate(''); setTime(''); setGuests(4); setName(''); setContact(''); setEmail(''); setPayment('online'); setPaying(false)
+    setDate(onSite ? todayIso() : ''); setTime(''); setGuests(4); setName(''); setContact(''); setEmail(''); setPayment('online'); setPaying(false)
   }
 
   return (
@@ -715,7 +726,12 @@ export default function CottageBookingForm({ onDone }: { onDone: () => void }) {
               </div>
               {payment === 'online' && (
                 <p className="mt-2 text-[10px] text-[#6B756B]">
-                  You&apos;ll be redirected to our payment page to pay by GCash, card, PayPal, or other e-wallets.
+                  You&apos;ll be redirected to PayMongo to pay with GCash.
+                </p>
+              )}
+              {payment === 'cash' && (
+                <p className="mt-2 text-[10px] text-[#6B756B]">
+                  Pay at the front desk when you arrive. We accept cash, GCash, and Maya.
                 </p>
               )}
             </div>
@@ -742,7 +758,7 @@ export default function CottageBookingForm({ onDone }: { onDone: () => void }) {
                 <div className="flex justify-between py-1"><span className="text-[#6B756B]">Add-ons</span><span>{formatAddOns()}</span></div>
               )}
               <div className="flex justify-between py-1"><span className="text-[#6B756B]">Guest</span><span>{name}</span></div>
-              <div className="flex justify-between py-1"><span className="text-[#6B756B]">Payment</span><span>{payment === 'online' ? 'Online (GCash / card)' : 'Pay at the venue'}</span></div>
+              <div className="flex justify-between py-1"><span className="text-[#6B756B]">Payment</span><span>{payment === 'online' ? 'Online (GCash)' : 'Pay at the venue'}</span></div>
               <div className="flex justify-between border-t border-[#222222]/15 pt-2 mt-2"><span className="text-[#6B756B]">Total</span><span className="font-bold text-[#1E5336]">{totalPrice}</span></div>
             </div>
           </div>

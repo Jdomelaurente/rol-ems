@@ -56,7 +56,7 @@ export default function TermsConditionsPage() {
         <LegalList
           items={[
             <>Prices are quoted in Philippine Pesos (PHP) and may include applicable taxes unless stated otherwise.</>,
-            <>Online payments are processed by <strong>PayMongo</strong>, which supports GCash, Maya, credit/debit cards, and GrabPay. Payment terms are also governed by PayMongo&apos;s terms.</>,
+            <>Online payments are processed by <strong>PayMongo</strong> and are accepted via GCash only. Payment terms are also governed by PayMongo&apos;s terms.</>,
             <>&quot;Pay at Counter&quot; bookings are held based on the availability policy described in our Refund Policy and may be released if not honored.</>,
             <>We do not store your card details. You may receive a receipt by email after a completed online payment.</>,
           ]}

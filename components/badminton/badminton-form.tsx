@@ -9,7 +9,7 @@ import ConsentCheckbox from '@/components/legal/ConsentCheckbox'
 type Step = 'schedule' | 'details' | 'review' | 'confirm'
 
 const paymentMethods = [
-  { id: 'online', label: 'Pay online (GCash, card, e-wallets)' },
+  { id: 'online', label: 'Pay online via GCash' },
   { id: 'cash', label: 'Pay at the venue' },
 ]
 
@@ -509,7 +509,7 @@ export default function BadmintonBookingForm({ onDone }: { onDone: () => void })
               </div>
               {payment === 'online' && (
                 <p className="mt-2 text-[10px] text-[#6B756B]">
-                  You&apos;ll be redirected to our payment page to pay by GCash, card, PayPal, or other e-wallets.
+                  You&apos;ll be redirected to PayMongo to pay with GCash.
                 </p>
               )}
             </div>
@@ -534,7 +534,7 @@ export default function BadmintonBookingForm({ onDone }: { onDone: () => void })
               {selectedGames.map((g) => (
                 <div key={g.id} className="flex justify-between py-1"><span className="text-[#6B756B]">{g.name} ×{addOns[g.id]}</span><span>₱{(g.price * (addOns[g.id] || 0)).toLocaleString()}</span></div>
               ))}
-              <div className="flex justify-between py-1"><span className="text-[#6B756B]">Payment</span><span>{payment === 'online' ? 'Online (GCash / card)' : 'Pay at the venue'}</span></div>
+              <div className="flex justify-between py-1"><span className="text-[#6B756B]">Payment</span><span>{payment === 'online' ? 'Online (GCash)' : 'Pay at the venue'}</span></div>
               <div className="flex justify-between border-t border-[#222222]/15 pt-2 mt-2"><span className="text-[#6B756B]">Total</span><span className="font-bold text-[#1E5336]">{totalPrice}</span></div>
             </div>
           </div>

@@ -48,6 +48,20 @@ function ReceiptContent() {
   const formatPeso = (v: number) =>
     `₱${v.toLocaleString('en-PH', { minimumFractionDigits: 2 })}`
 
+  const methodLabels: Record<string, string> = {
+    cash: 'Cash at venue',
+    gcash: 'GCash',
+    maya: 'Maya',
+    card: 'Card',
+    bank: 'Bank transfer',
+  }
+  const isPaid = booking.paymentStatus === 'paid'
+  const paymentText = isPaid
+    ? `Paid · ${methodLabels[booking.paidMethod || ''] || booking.paidMethod || 'At venue'}${booking.paymentReference ? ` (Ref ${booking.paymentReference})` : ''}`
+    : booking.payment === 'cash'
+    ? 'Pay at the venue'
+    : 'Online (GCash)'
+
   const rows: [string, string][] = [
     ['Reference', booking.reference],
     ['Booking', booking.itemName],
@@ -56,7 +70,7 @@ function ReceiptContent() {
     ...(booking.hours ? [['Hours', String(booking.hours)] as [string, string]] : []),
     ['Guests', String(booking.guests)],
     ['Guest name', booking.name || '—'],
-    ['Payment', booking.payment === 'cash' ? 'Pay at the venue' : 'Online (GCash / card)'],
+    ['Payment', paymentText],
     ['Status', booking.status.charAt(0).toUpperCase() + booking.status.slice(1)],
   ]
 
@@ -133,7 +147,7 @@ function ReceiptContent() {
           {/* Total */}
           <div className="mt-4 flex justify-between border-t-2 border-[#1E5336] pt-3">
             <span className="text-sm font-bold text-[#222222]">
-              {booking.payment === 'cash' ? 'Amount due at venue' : 'Total paid'}
+              {isPaid ? 'Total paid' : booking.payment === 'cash' ? 'Amount due at venue' : 'Total due'}
             </span>
             <span className="text-sm font-bold text-[#1E5336]">{formatPeso(booking.amount)}</span>
           </div>
