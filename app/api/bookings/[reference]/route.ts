@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { getSession } from '@/lib/auth/session'
+import { bookingsOverlap, isActiveBooking } from '@/lib/booking-overlap'
 import { sendReceiptEmail } from '@/lib/email'
 
 const validStatuses = ['pending', 'confirmed', 'completed', 'expired', 'cancelled']
@@ -27,14 +28,45 @@ export async function PATCH(
       return NextResponse.json({ error: 'Missing reference' }, { status: 400 })
     }
 
-    const { status, paymentStatus, paidMethod, paymentReference, archive } = body
+    const {
+      status,
+      paymentStatus,
+      paidMethod,
+      paymentReference,
+      archive,
+      name,
+      contact,
+      email,
+      facility,
+      itemName,
+      date,
+      time,
+      guests,
+      nights,
+      hours,
+      amount,
+    } = body
     const updatesPayment =
       'paymentStatus' in body || 'paidMethod' in body || 'paymentReference' in body
     const updatesArchive = 'archive' in body
+    const detailKeys = [
+      'name',
+      'contact',
+      'email',
+      'facility',
+      'itemName',
+      'date',
+      'time',
+      'guests',
+      'nights',
+      'hours',
+      'amount',
+    ] as const
+    const updatesDetails = detailKeys.some((key) => key in body)
 
-    // Guests may cancel their own booking, but only staff can record payments
-    // or archive/unarchive bookings.
-    if (updatesPayment || updatesArchive) {
+    // Guests may cancel their own booking, but only staff can edit booking
+    // details, record payments, or archive/unarchive bookings.
+    if (updatesPayment || updatesArchive || updatesDetails) {
       const session = await getSession()
       if (!session) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
@@ -63,6 +95,39 @@ export async function PATCH(
       return NextResponse.json({ error: 'Choose how the guest paid' }, { status: 400 })
     }
 
+    const isNonEmptyString = (value: unknown): value is string =>
+      typeof value === 'string' && value.trim().length > 0
+    const isOptionalString = (value: unknown) =>
+      value === undefined || value === null || typeof value === 'string'
+
+    if (facility !== undefined && !isNonEmptyString(facility)) {
+      return NextResponse.json({ error: 'Invalid facility' }, { status: 400 })
+    }
+    if (itemName !== undefined && !isNonEmptyString(itemName)) {
+      return NextResponse.json({ error: 'Invalid booking description' }, { status: 400 })
+    }
+    if (date !== undefined && (typeof date !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(date))) {
+      return NextResponse.json({ error: 'Invalid date' }, { status: 400 })
+    }
+    if (time !== undefined && !isNonEmptyString(time)) {
+      return NextResponse.json({ error: 'Invalid time' }, { status: 400 })
+    }
+    if (!isOptionalString(name) || !isOptionalString(contact) || !isOptionalString(email)) {
+      return NextResponse.json({ error: 'Invalid guest details' }, { status: 400 })
+    }
+    if (guests !== undefined && (!Number.isInteger(guests) || guests < 1)) {
+      return NextResponse.json({ error: 'Invalid guest count' }, { status: 400 })
+    }
+    if (nights !== undefined && nights !== null && (!Number.isInteger(nights) || nights < 1)) {
+      return NextResponse.json({ error: 'Invalid number of nights' }, { status: 400 })
+    }
+    if (hours !== undefined && hours !== null && (!Number.isInteger(hours) || hours < 1)) {
+      return NextResponse.json({ error: 'Invalid number of hours' }, { status: 400 })
+    }
+    if (amount !== undefined && (typeof amount !== 'number' || !Number.isFinite(amount) || amount < 0)) {
+      return NextResponse.json({ error: 'Invalid amount' }, { status: 400 })
+    }
+
     const booking = await prisma.booking.findUnique({
       where: { reference },
     })
@@ -77,12 +142,74 @@ export async function PATCH(
       paymentReference?: string | null
       paidAt?: Date | null
       archivedAt?: Date | null
+      name?: string | null
+      contact?: string | null
+      email?: string | null
+      facility?: string
+      itemName?: string
+      date?: string
+      time?: string
+      guests?: number
+      nights?: number | null
+      hours?: number | null
+      amount?: number
     } = {}
 
     if (status !== undefined) data.status = status
 
     if (archive === true) data.archivedAt = new Date()
     if (archive === false) data.archivedAt = null
+
+    if (name !== undefined) data.name = typeof name === 'string' && name.trim() ? name.trim() : null
+    if (contact !== undefined) {
+      data.contact = typeof contact === 'string' && contact.trim() ? contact.trim() : null
+    }
+    if (email !== undefined) {
+      data.email = typeof email === 'string' && email.trim() ? email.trim() : null
+    }
+    if (facility !== undefined) data.facility = facility.trim()
+    if (itemName !== undefined) data.itemName = itemName.trim()
+    if (date !== undefined) data.date = date
+    if (time !== undefined) data.time = time.trim()
+    if (guests !== undefined) data.guests = guests
+    if (nights !== undefined) data.nights = nights === null ? null : Number(nights)
+    if (hours !== undefined) data.hours = hours === null ? null : Number(hours)
+    if (amount !== undefined) data.amount = amount
+
+    // Moving a booking to another cottage, court, date, or duration must not
+    // collide with an existing active booking on the same facility.
+    const nextFacility = data.facility ?? booking.facility
+    const nextDate = data.date ?? booking.date
+    const nextNights = data.nights !== undefined ? data.nights : booking.nights
+    const scheduleChanged =
+      nextFacility !== booking.facility ||
+      nextDate !== booking.date ||
+      nextNights !== booking.nights ||
+      (data.time !== undefined && data.time !== booking.time)
+
+    if (scheduleChanged) {
+      const candidates = await prisma.booking.findMany({
+        where: {
+          facility: nextFacility,
+          archivedAt: null,
+          status: { in: ['pending', 'confirmed'] },
+          NOT: { reference },
+        },
+        select: { reference: true, date: true, nights: true, status: true, createdAt: true },
+      })
+      const conflict = candidates.find(
+        (b) => isActiveBooking(b) && bookingsOverlap({ date: nextDate, nights: nextNights }, b),
+      )
+      if (conflict) {
+        return NextResponse.json(
+          {
+            error: `That slot is already taken by booking ${conflict.reference}.`,
+            conflictReference: conflict.reference,
+          },
+          { status: 409 },
+        )
+      }
+    }
 
     if (paymentStatus === 'paid') {
       const method = String(paidMethod)

@@ -9,9 +9,15 @@ import PoolHouse from '@/components/PoolHouse'
 import Queue from '@/components/Queue'
 import CTA from '@/components/CTA'
 import Footer from '@/components/Footer'
+import HomeSkeleton from '@/components/home/HomeSkeleton'
+import { useSiteContent } from '@/context/SiteContentContext'
 
 export default function Page() {
+  const { loaded } = useSiteContent()
+
   useEffect(() => {
+    if (!loaded) return
+
     const elements = document.querySelectorAll<HTMLElement>('[data-reveal]')
     const observer = new IntersectionObserver((entries) => {
       entries.forEach((entry) => {
@@ -56,18 +62,24 @@ export default function Page() {
       window.removeEventListener('scroll', updateScrollMotion)
       window.removeEventListener('resize', measureParallax)
     }
-  }, [])
+  }, [loaded])
 
   return (
     <main className="min-h-screen overflow-hidden bg-[#FDFBF7] pt-[72px] text-[#222222]">
       <Header />
-      <Hero />
-      <CheckBooking />
-      <Facilities />
-      <PoolHouse />
-      <Queue />
-      <CTA />
-      <Footer />
+      {loaded ? (
+        <>
+          <Hero />
+          <CheckBooking />
+          <Facilities />
+          <PoolHouse />
+          <Queue />
+          <CTA />
+          <Footer />
+        </>
+      ) : (
+        <HomeSkeleton />
+      )}
     </main>
   )
 }

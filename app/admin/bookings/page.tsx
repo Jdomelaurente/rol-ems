@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from 'react'
 import Link from 'next/link'
+import { useCottageCatalog } from '@/context/CottageContext'
 import {
   AlertTriangle,
   Archive,
@@ -13,6 +14,7 @@ import {
   ChevronRight,
   ExternalLink,
   Loader2,
+  Pencil,
   Printer,
   QrCode,
   Receipt,
@@ -52,6 +54,21 @@ type BookingStats = {
   today: number
   pending: number
   unpaidVenue: number
+}
+
+type BookingDraft = {
+  status: string
+  name: string
+  contact: string
+  email: string
+  facility: string
+  itemName: string
+  date: string
+  time: string
+  guests: string
+  nights: string
+  hours: string
+  amount: string
 }
 
 type BookingPagination = {
@@ -132,10 +149,10 @@ function BookingRowSkeleton({ index }: { index: number }) {
       </td>
       <td className="px-4 py-3">
         <SkeletonBlock className="h-4 w-16 bg-[#222222]/10" delay={delay} />
-        <SkeletonBlock className="mt-2 h-6 w-full bg-[#222222]/10" delay={delay} />
       </td>
       <td className="px-4 py-3">
         <div className="flex items-center justify-end gap-1">
+          <SkeletonBlock className="h-7 w-7 bg-[#222222]/10" delay={delay} />
           <SkeletonBlock className="h-7 w-7 bg-[#222222]/10" delay={delay} />
           <SkeletonBlock className="h-7 w-7 bg-[#222222]/10" delay={delay} />
         </div>
@@ -165,6 +182,23 @@ const statusStyles: Record<string, string> = {
   cancelled: 'border-rose-500/30 bg-rose-50 text-rose-700',
 }
 
+const facilityTypes = [
+  { id: 'cottage', label: 'Cottage' },
+  { id: 'event', label: 'Event venue' },
+  { id: 'badminton', label: 'Badminton court' },
+  { id: 'pickleball', label: 'Pickleball court' },
+  { id: 'taekwondo', label: 'Taekwondo floor' },
+] as const
+
+const splitFacility = (facility: string) => {
+  const index = facility.indexOf(':')
+  if (index === -1) return { type: 'other', name: facility }
+  return { type: facility.slice(0, index), name: facility.slice(index + 1) }
+}
+
+const facilityTypeLabel = (type: string) =>
+  facilityTypes.find((item) => item.id === type)?.label || type
+
 const todayIso = () => {
   const d = new Date()
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
@@ -179,6 +213,7 @@ const facilityType = (facility: string) => {
 }
 
 export default function AdminBookingsPage() {
+  const { catalog } = useCottageCatalog()
   const [bookings, setBookings] = useState<Booking[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
@@ -189,7 +224,6 @@ export default function AdminBookingsPage() {
   const [pagination, setPagination] = useState<BookingPagination>(emptyPagination)
   const [stats, setStats] = useState<BookingStats>(emptyStats)
   const [updating, setUpdating] = useState('')
-  const [origin, setOrigin] = useState('')
   const [paymentModal, setPaymentModal] = useState<Booking | null>(null)
   const [payChoice, setPayChoice] = useState<'cash' | 'cashless' | 'manual'>('cash')
   const [manualMethod, setManualMethod] = useState('gcash')
@@ -207,10 +241,8 @@ export default function AdminBookingsPage() {
     type: 'archive' | 'delete'
     bookings: Booking[]
   } | null>(null)
-
-  useEffect(() => {
-    setOrigin(window.location.origin)
-  }, [])
+  const [statusModal, setStatusModal] = useState<Booking | null>(null)
+  const [editDraft, setEditDraft] = useState<BookingDraft | null>(null)
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -267,19 +299,102 @@ export default function AdminBookingsPage() {
     setSelectedRefs([])
   }, [page, filter, debouncedSearch])
 
-  const updateStatus = async (reference: string, status: string) => {
+  const openEditModal = (booking: Booking) => {
+    setStatusModal(booking)
+    setEditDraft({
+      status: booking.status,
+      name: booking.name || '',
+      contact: booking.contact || '',
+      email: booking.email || '',
+      facility: booking.facility,
+      itemName: booking.itemName,
+      date: booking.date,
+      time: booking.time,
+      guests: String(booking.guests ?? 1),
+      nights: booking.nights != null ? String(Math.max(1, booking.nights)) : '',
+      hours: booking.hours != null ? String(Math.max(1, booking.hours)) : '',
+      amount: String(booking.amount ?? 0),
+    })
+    setError('')
+  }
+
+  const updateDraft = (patch: Partial<BookingDraft>) => {
+    setEditDraft((prev) => (prev ? { ...prev, ...patch } : prev))
+  }
+
+  const changeFacility = (nextType: string, nextName: string) => {
+    setEditDraft((prev) => {
+      if (!prev) return prev
+      const current = splitFacility(prev.facility)
+      const facility = nextType === 'other' ? nextName : `${nextType}:${nextName}`
+      const typeLabels: Record<string, string> = {
+        cottage: 'Cottage',
+        event: 'Event',
+        badminton: 'Badminton',
+        pickleball: 'Court',
+        taekwondo: 'Taekwondo',
+      }
+      let itemName = prev.itemName
+      if (current.name && current.name !== nextName && itemName.includes(current.name)) {
+        itemName = itemName.replace(current.name, nextName)
+      }
+      const typeLabel = typeLabels[nextType]
+      if (typeLabel && current.type !== nextType) {
+        itemName = itemName.replace(
+          /^(Cottage|Event|Badminton|Pickleball|Court|Taekwondo) · /,
+          `${typeLabel} · `,
+        )
+      }
+      return { ...prev, facility, itemName }
+    })
+  }
+
+  const changeFacilityType = (nextType: string) => {
+    if (!editDraft) return
+    const currentName = splitFacility(editDraft.facility).name
+    if (nextType === 'cottage') {
+      const name = catalog.cottages[0]?.name || currentName
+      changeFacility(nextType, name)
+    } else if (nextType === 'event') {
+      const name = catalog.venues[0]?.name || currentName
+      changeFacility(nextType, name)
+    } else {
+      changeFacility(nextType, currentName)
+    }
+  }
+
+  const saveBookingEdits = async () => {
+    if (!statusModal || !editDraft) return
+    const reference = statusModal.reference
     setUpdating(reference)
     setError('')
     try {
       const res = await fetch(`/api/bookings/${encodeURIComponent(reference)}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status }),
+        body: JSON.stringify({
+          status: editDraft.status,
+          name: editDraft.name.trim(),
+          contact: editDraft.contact.trim(),
+          email: editDraft.email.trim(),
+          facility: editDraft.facility.trim(),
+          itemName: editDraft.itemName.trim(),
+          date: editDraft.date,
+          time: editDraft.time.trim(),
+          guests: Math.max(1, Number.parseInt(editDraft.guests, 10) || 1),
+          nights: editDraft.nights.trim() ? Number.parseInt(editDraft.nights, 10) : null,
+          hours: editDraft.hours.trim() ? Number.parseInt(editDraft.hours, 10) : null,
+          amount: Number.parseFloat(editDraft.amount) || 0,
+        }),
       })
-      if (!res.ok) throw new Error('Could not update booking')
-      setBookings((prev) =>
-        prev.map((b) => (b.reference === reference ? { ...b, status } : b)),
+      const data = await res.json().catch(() => ({}))
+      if (!res.ok) throw new Error(data.error || 'Could not update booking')
+      setBookings((prev) => prev.map((b) => (b.reference === reference ? { ...b, ...data } : b)))
+      setPaymentModal((prev) =>
+        prev && prev.reference === reference ? { ...prev, ...data } : prev,
       )
+      setStatusModal(null)
+      setEditDraft(null)
       await load(true)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Could not update booking')
@@ -548,6 +663,27 @@ export default function AdminBookingsPage() {
   const confirmBusy =
     bulkWorking || (confirmFirst ? updating === confirmFirst.reference : false)
 
+  const editFacility = editDraft ? splitFacility(editDraft.facility) : { type: 'other', name: '' }
+  const editFacilityOptions =
+    editFacility.type === 'cottage'
+      ? catalog.cottages
+      : editFacility.type === 'event'
+        ? catalog.venues
+        : []
+  const editFacilityKnown = facilityTypes.some((item) => item.id === editFacility.type)
+  const editFacilityLabel =
+    editFacility.type === 'cottage'
+      ? 'Cottage'
+      : editFacility.type === 'event'
+        ? 'Event venue'
+        : 'Court / area'
+  const canSaveEdit =
+    !!editDraft &&
+    !!editDraft.facility.trim() &&
+    !!editDraft.itemName.trim() &&
+    !!editDraft.date &&
+    !!editDraft.time.trim()
+
   const toggleSelected = (reference: string) => {
     setSelectedRefs((prev) =>
       prev.includes(reference) ? prev.filter((ref) => ref !== reference) : [...prev, reference],
@@ -557,8 +693,6 @@ export default function AdminBookingsPage() {
   const toggleSelectAllOnPage = () => {
     setSelectedRefs(allOnPageSelected ? [] : pageRefs)
   }
-
-  const walkInQrUrl = `${origin}/cottage?src=qr`
 
   const printStandee = () => {
     const origin = window.location.origin
@@ -611,9 +745,7 @@ export default function AdminBookingsPage() {
             <p className="text-xs uppercase tracking-[0.18em] text-[#E1A728]">Cottage &amp; Event</p>
             <h1 className="mt-1 font-serif text-4xl text-[#1E5336]">Bookings &amp; walk-ins</h1>
             <p className="mt-2 max-w-xl text-xs leading-5 text-[#6B756B]">
-              Every real reservation from the website and the venue QR lands here. Click a guest&apos;s
-              name to open their details, then record cash or generate a GCash QR for cashless
-              payment.
+              Manage reservations, payments, and guest details.
             </p>
           </div>
           <div className="flex flex-wrap items-center gap-2">
@@ -877,12 +1009,6 @@ export default function AdminBookingsPage() {
                             {paidMethodLabel(booking.paidMethod)}
                             {booking.paymentReference ? ` · ${booking.paymentReference}` : ''}
                           </p>
-                          <button
-                            onClick={() => openPaymentModal(booking)}
-                            className="mt-1 text-[9px] uppercase tracking-[0.1em] text-[#6B756B] underline hover:text-[#1E5336]"
-                          >
-                            Manage
-                          </button>
                         </div>
                       ) : (
                         <div>
@@ -908,18 +1034,6 @@ export default function AdminBookingsPage() {
                       <span className={`inline-block border px-2 py-1 text-[9px] font-bold uppercase tracking-[0.1em] ${statusStyles[booking.status] || statusStyles.pending}`}>
                         {booking.status}
                       </span>
-                      <select
-                        value={booking.status}
-                        disabled={updating === booking.reference}
-                        onChange={(e) => updateStatus(booking.reference, e.target.value)}
-                        className="mt-2 block w-full border border-[#222222]/20 bg-white px-2 py-1 text-[10px] focus:border-[#1E5336] focus:outline-none disabled:opacity-50"
-                      >
-                        {statuses.map((status) => (
-                          <option key={status} value={status}>
-                            {status}
-                          </option>
-                        ))}
-                      </select>
                     </td>
                     <td className="px-4 py-3 text-right">
                       {booking.archivedAt ? (
@@ -963,6 +1077,19 @@ export default function AdminBookingsPage() {
                           >
                             <Receipt size={13} />
                           </Link>
+                          <button
+                            onClick={() => openEditModal(booking)}
+                            disabled={updating === booking.reference}
+                            title="Edit status"
+                            aria-label={`Edit status for ${booking.reference}`}
+                            className="inline-flex h-7 w-7 items-center justify-center border border-[#1E5336]/30 text-[#1E5336] transition hover:bg-[#1E5336] hover:text-[#FDFBF7] disabled:opacity-50"
+                          >
+                            {updating === booking.reference ? (
+                              <Loader2 size={13} className="animate-spin" />
+                            ) : (
+                              <Pencil size={13} />
+                            )}
+                          </button>
                           <button
                             onClick={() => setConfirmAction({ type: 'archive', bookings: [booking] })}
                             disabled={updating === booking.reference}
@@ -1029,7 +1156,6 @@ export default function AdminBookingsPage() {
                 Print this code and place it at the counter and cottage row. Guests scan it, pick a
                 cottage or venue, and the booking appears in this list.
               </p>
-              <p className="mt-2 break-all font-mono text-[10px] text-[#6B756B]">{walkInQrUrl}</p>
             </div>
           </div>
           <div className="flex flex-wrap items-center gap-3">
@@ -1213,6 +1339,288 @@ export default function AdminBookingsPage() {
                         ? `Archive ${confirmBookings.length}`
                         : 'Archive booking'}
                 </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {statusModal && editDraft && (
+        <div
+          className="fixed inset-0 z-[60] flex items-start justify-center overflow-y-auto bg-black/60 p-4 sm:items-center"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="edit-booking-title"
+        >
+          <div className="my-8 w-full max-w-2xl border border-[#222222]/15 bg-[#FDFBF7] shadow-2xl">
+            <div className="flex items-start gap-3 bg-[#1E5336] px-6 py-5 text-[#FDFBF7]">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center border border-white/25 bg-white/10">
+                <Pencil size={18} />
+              </div>
+              <div className="min-w-0">
+                <p className="text-[10px] uppercase tracking-[0.18em] text-[#E1A728]">
+                  Edit booking
+                </p>
+                <h2 id="edit-booking-title" className="mt-1 font-serif text-xl">
+                  Booking details
+                </h2>
+                <p className="mt-1 truncate font-mono text-[11px] text-[#FDFBF7]/70">
+                  {statusModal.reference} · {facilityType(statusModal.facility)}
+                </p>
+              </div>
+              <button
+                onClick={() => setStatusModal(null)}
+                aria-label="Close"
+                className="ml-auto p-1 text-[#FDFBF7]/70 hover:text-[#FDFBF7]"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            <div className="px-6 py-5">
+              <div className="grid gap-5">
+                <section>
+                  <p className="text-[10px] uppercase tracking-[0.14em] text-[#6B756B]">Guest</p>
+                  <div className="mt-2 grid gap-3 sm:grid-cols-2">
+                    <label className="block">
+                      <span className="text-[10px] uppercase tracking-[0.14em] text-[#6B756B]">
+                        Name
+                      </span>
+                      <input
+                        value={editDraft.name}
+                        onChange={(e) => updateDraft({ name: e.target.value })}
+                        className="mt-1.5 w-full border border-[#222222]/20 bg-white px-3 py-2.5 text-sm outline-none focus:border-[#1E5336]"
+                      />
+                    </label>
+                    <label className="block">
+                      <span className="text-[10px] uppercase tracking-[0.14em] text-[#6B756B]">
+                        Contact
+                      </span>
+                      <input
+                        value={editDraft.contact}
+                        onChange={(e) => updateDraft({ contact: e.target.value })}
+                        className="mt-1.5 w-full border border-[#222222]/20 bg-white px-3 py-2.5 text-sm outline-none focus:border-[#1E5336]"
+                      />
+                    </label>
+                  </div>
+                  <label className="mt-3 block">
+                    <span className="text-[10px] uppercase tracking-[0.14em] text-[#6B756B]">
+                      Email
+                    </span>
+                    <input
+                      type="email"
+                      value={editDraft.email}
+                      onChange={(e) => updateDraft({ email: e.target.value })}
+                      className="mt-1.5 w-full border border-[#222222]/20 bg-white px-3 py-2.5 text-sm outline-none focus:border-[#1E5336]"
+                    />
+                  </label>
+                </section>
+
+                <div className="border-t border-[#222222]/10" />
+
+                <section>
+                  <p className="text-[10px] uppercase tracking-[0.14em] text-[#6B756B]">
+                    Booking
+                  </p>
+                  <div className="mt-2 grid gap-3 sm:grid-cols-2">
+                    <label className="block">
+                      <span className="text-[10px] uppercase tracking-[0.14em] text-[#6B756B]">
+                        Facility type
+                      </span>
+                      <select
+                        value={editFacility.type}
+                        onChange={(e) => changeFacilityType(e.target.value)}
+                        className="mt-1.5 w-full border border-[#222222]/20 bg-white px-3 py-2.5 text-sm outline-none focus:border-[#1E5336]"
+                      >
+                        {facilityTypes.map((type) => (
+                          <option key={type.id} value={type.id}>
+                            {type.label}
+                          </option>
+                        ))}
+                        {!editFacilityKnown && (
+                          <option value={editFacility.type}>
+                            {facilityTypeLabel(editFacility.type)}
+                          </option>
+                        )}
+                      </select>
+                    </label>
+                    <label className="block">
+                      <span className="text-[10px] uppercase tracking-[0.14em] text-[#6B756B]">
+                        {editFacilityLabel}
+                      </span>
+                      {editFacilityOptions.length > 0 ? (
+                        <select
+                          value={editFacility.name}
+                          onChange={(e) => changeFacility(editFacility.type, e.target.value)}
+                          className="mt-1.5 w-full border border-[#222222]/20 bg-white px-3 py-2.5 text-sm outline-none focus:border-[#1E5336]"
+                        >
+                          {!editFacilityOptions.some((item) => item.name === editFacility.name) && (
+                            <option value={editFacility.name}>
+                              {editFacility.name} (not in catalog)
+                            </option>
+                          )}
+                          {editFacilityOptions.map((item) => (
+                            <option key={item.id} value={item.name}>
+                              {item.name}
+                            </option>
+                          ))}
+                        </select>
+                      ) : (
+                        <input
+                          value={editFacility.name}
+                          onChange={(e) => changeFacility(editFacility.type, e.target.value)}
+                          className="mt-1.5 w-full border border-[#222222]/20 bg-white px-3 py-2.5 text-sm outline-none focus:border-[#1E5336]"
+                        />
+                      )}
+                    </label>
+                  </div>
+
+                  <label className="mt-3 block">
+                    <span className="text-[10px] uppercase tracking-[0.14em] text-[#6B756B]">
+                      Booking description
+                    </span>
+                    <input
+                      value={editDraft.itemName}
+                      onChange={(e) => updateDraft({ itemName: e.target.value })}
+                      className="mt-1.5 w-full border border-[#222222]/20 bg-white px-3 py-2.5 text-sm outline-none focus:border-[#1E5336]"
+                    />
+                  </label>
+
+                  <div className="mt-3 grid gap-3 sm:grid-cols-2">
+                    <label className="block">
+                      <span className="text-[10px] uppercase tracking-[0.14em] text-[#6B756B]">
+                        Date
+                      </span>
+                      <input
+                        type="date"
+                        value={editDraft.date}
+                        onChange={(e) => updateDraft({ date: e.target.value })}
+                        className="mt-1.5 w-full border border-[#222222]/20 bg-white px-3 py-2.5 text-sm outline-none focus:border-[#1E5336]"
+                      />
+                    </label>
+                    <label className="block">
+                      <span className="text-[10px] uppercase tracking-[0.14em] text-[#6B756B]">
+                        Time
+                      </span>
+                      <input
+                        value={editDraft.time}
+                        onChange={(e) => updateDraft({ time: e.target.value })}
+                        placeholder="e.g. 10:00 AM"
+                        className="mt-1.5 w-full border border-[#222222]/20 bg-white px-3 py-2.5 text-sm outline-none focus:border-[#1E5336]"
+                      />
+                    </label>
+                  </div>
+
+                  <div className="mt-3 grid gap-3 sm:grid-cols-3">
+                    <label className="block">
+                      <span className="text-[10px] uppercase tracking-[0.14em] text-[#6B756B]">
+                        Guests
+                      </span>
+                      <input
+                        type="number"
+                        min={1}
+                        value={editDraft.guests}
+                        onChange={(e) => updateDraft({ guests: e.target.value })}
+                        className="mt-1.5 w-full border border-[#222222]/20 bg-white px-3 py-2.5 text-sm outline-none focus:border-[#1E5336]"
+                      />
+                    </label>
+                    {statusModal.nights != null && (
+                      <label className="block">
+                        <span className="text-[10px] uppercase tracking-[0.14em] text-[#6B756B]">
+                          Nights
+                        </span>
+                        <input
+                          type="number"
+                          min={1}
+                          value={editDraft.nights}
+                          onChange={(e) => updateDraft({ nights: e.target.value })}
+                          className="mt-1.5 w-full border border-[#222222]/20 bg-white px-3 py-2.5 text-sm outline-none focus:border-[#1E5336]"
+                        />
+                      </label>
+                    )}
+                    {statusModal.hours != null && (
+                      <label className="block">
+                        <span className="text-[10px] uppercase tracking-[0.14em] text-[#6B756B]">
+                          Hours
+                        </span>
+                        <input
+                          type="number"
+                          min={1}
+                          value={editDraft.hours}
+                          onChange={(e) => updateDraft({ hours: e.target.value })}
+                          className="mt-1.5 w-full border border-[#222222]/20 bg-white px-3 py-2.5 text-sm outline-none focus:border-[#1E5336]"
+                        />
+                      </label>
+                    )}
+                    <label className="block">
+                      <span className="text-[10px] uppercase tracking-[0.14em] text-[#6B756B]">
+                        Amount (₱)
+                      </span>
+                      <input
+                        type="number"
+                        min={0}
+                        step="0.01"
+                        value={editDraft.amount}
+                        onChange={(e) => updateDraft({ amount: e.target.value })}
+                        className="mt-1.5 w-full border border-[#222222]/20 bg-white px-3 py-2.5 text-sm outline-none focus:border-[#1E5336]"
+                      />
+                    </label>
+                  </div>
+
+                  <p className="mt-3 text-[11px] leading-5 text-[#6B756B]">
+                    Changing the cottage, venue, court, date, or duration checks the schedule for
+                    conflicts before saving.
+                  </p>
+                </section>
+
+                <div className="border-t border-[#222222]/10" />
+
+                <section>
+                  <p className="text-[10px] uppercase tracking-[0.14em] text-[#6B756B]">Status</p>
+                  <div className="mt-2 grid grid-cols-2 gap-2 sm:grid-cols-3">
+                    {statuses.map((status) => (
+                      <button
+                        key={status}
+                        onClick={() => updateDraft({ status })}
+                        className={`border px-3 py-2.5 text-left text-[10px] font-bold uppercase tracking-[0.1em] transition ${
+                          editDraft.status === status
+                            ? 'border-[#1E5336] bg-[#1E5336] text-[#FDFBF7]'
+                            : 'border-[#222222]/20 text-[#6B756B] hover:border-[#1E5336]/50 hover:text-[#1E5336]'
+                        }`}
+                      >
+                        {status}
+                      </button>
+                    ))}
+                  </div>
+                </section>
+
+                {error && (
+                  <p className="border border-rose-500/30 bg-rose-50 px-3 py-2 text-[11px] text-rose-700">
+                    {error}
+                  </p>
+                )}
+
+                <div className="flex flex-wrap items-center justify-end gap-2 border-t border-[#222222]/10 pt-4">
+                  <button
+                    onClick={() => setStatusModal(null)}
+                    disabled={updating === statusModal.reference}
+                    className="border border-[#222222]/20 px-4 py-2.5 text-[10px] font-bold uppercase tracking-[0.14em] text-[#6B756B] hover:border-[#222222]/50 disabled:opacity-50"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={saveBookingEdits}
+                    disabled={updating === statusModal.reference || !canSaveEdit}
+                    className="flex items-center gap-2 bg-[#1E5336] px-4 py-2.5 text-[10px] font-bold uppercase tracking-[0.14em] text-[#FDFBF7] hover:bg-[#153d27] disabled:opacity-60"
+                  >
+                    {updating === statusModal.reference ? (
+                      <Loader2 size={13} className="animate-spin" />
+                    ) : (
+                      <CheckCircle2 size={13} />
+                    )}
+                    Save changes
+                  </button>
+                </div>
               </div>
             </div>
           </div>
