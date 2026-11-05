@@ -1,7 +1,21 @@
 import { NextRequest, NextResponse } from 'next/server'
+import type { Prisma } from '@/lib/generated/prisma/client'
 import { prisma } from '@/lib/prisma'
 import { bookingsOverlap, isActiveBooking } from '@/lib/booking-overlap'
 import { sendReceiptEmail } from '@/lib/email'
+
+const PAGE_SIZE = 5
+const MAX_PAGE_SIZE = 50
+const PAGE_VIEWS = ['all', 'today', 'unpaid', 'pending', 'confirmed', 'completed', 'archived'] as const
+type PageView = (typeof PAGE_VIEWS)[number]
+
+const localTodayIso = () => {
+  const d = new Date()
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+}
+
+const isPageView = (value: string): value is PageView =>
+  (PAGE_VIEWS as readonly string[]).includes(value)
 
 export async function POST(req: NextRequest) {
   try {
@@ -112,8 +126,116 @@ export async function POST(req: NextRequest) {
 
 export async function GET(req: NextRequest) {
   try {
-    const reference = req.nextUrl.searchParams.get('reference')
-    const archived = req.nextUrl.searchParams.get('archived')
+    const params = req.nextUrl.searchParams
+    const reference = params.get('reference')
+    const archived = params.get('archived')
+
+    // Paged list for the admin table. This keeps the payload small (5 rows at a
+    // time) and lets the database do the filtering, sorting, and counting.
+    if (params.get('paginate') === '1' && !reference) {
+      const requestedPage = Math.max(1, Number.parseInt(params.get('page') || '1', 10) || 1)
+      const pageSize = Math.min(
+        MAX_PAGE_SIZE,
+        Math.max(
+          1,
+          Number.parseInt(params.get('pageSize') || String(PAGE_SIZE), 10) || PAGE_SIZE,
+        ),
+      )
+      const viewValue = params.get('view') || 'all'
+      const view: PageView = isPageView(viewValue) ? viewValue : 'all'
+      const search = (params.get('search') || '').trim()
+      const today = params.get('today') || localTodayIso()
+
+      const where: Prisma.BookingWhereInput =
+        view === 'archived' ? { archivedAt: { not: null } } : { archivedAt: null }
+
+      if (view === 'today') where.date = today
+      if (view === 'unpaid') {
+        where.payment = 'cash'
+        where.paymentStatus = { not: 'paid' }
+      }
+      if (view === 'pending' || view === 'confirmed' || view === 'completed') {
+        where.status = view
+      }
+      if (search) {
+        where.OR = [
+          { reference: { contains: search, mode: 'insensitive' } },
+          { name: { contains: search, mode: 'insensitive' } },
+          { contact: { contains: search, mode: 'insensitive' } },
+          { email: { contains: search, mode: 'insensitive' } },
+          { itemName: { contains: search, mode: 'insensitive' } },
+          { facility: { contains: search, mode: 'insensitive' } },
+        ]
+      }
+
+      // A single aggregate query keeps this endpoint to one connection at a
+      // time. Running six Prisma counts in parallel was exhausting Supabase's
+      // session-mode pool (EMAXCONNSESSION).
+      const statsRows = await prisma.$queryRaw<
+        Array<{
+          active: number
+          archived: number
+          today: number
+          pending: number
+          unpaidVenue: number
+        }>
+      >`
+        SELECT
+          COUNT(*) FILTER (WHERE "archivedAt" IS NULL)::int AS "active",
+          COUNT(*) FILTER (WHERE "archivedAt" IS NOT NULL)::int AS "archived",
+          COUNT(*) FILTER (WHERE "archivedAt" IS NULL AND "date" = ${today})::int AS "today",
+          COUNT(*) FILTER (
+            WHERE "archivedAt" IS NULL
+              AND "status" = 'pending'
+              AND "payment" <> 'cash'
+              AND "paymentStatus" <> 'paid'
+          )::int AS "pending",
+          COUNT(*) FILTER (
+            WHERE "archivedAt" IS NULL
+              AND "payment" = 'cash'
+              AND "paymentStatus" <> 'paid'
+          )::int AS "unpaidVenue"
+        FROM "Booking"
+      `
+
+      const row = statsRows[0]
+      const active = Number(row?.active ?? 0)
+      const archivedTotal = Number(row?.archived ?? 0)
+      const todayCount = Number(row?.today ?? 0)
+      const pendingCount = Number(row?.pending ?? 0)
+      const unpaidVenueCount = Number(row?.unpaidVenue ?? 0)
+
+      const total = await prisma.booking.count({ where })
+
+      const totalPages = Math.max(1, Math.ceil(total / pageSize))
+      const page = Math.min(requestedPage, totalPages)
+
+      const bookings = await prisma.booking.findMany({
+        where,
+        orderBy: [{ date: 'desc' }, { createdAt: 'desc' }],
+        skip: (page - 1) * pageSize,
+        take: pageSize,
+      })
+
+      return NextResponse.json({
+        bookings,
+        pagination: {
+          page,
+          pageSize,
+          total,
+          totalPages,
+          hasNextPage: page < totalPages,
+          hasPreviousPage: page > 1,
+        },
+        stats: {
+          active,
+          archived: archivedTotal,
+          today: todayCount,
+          pending: pendingCount,
+          unpaidVenue: unpaidVenueCount,
+        },
+      })
+    }
 
     // A specific reference is always returned (even if archived) so guests can
     // still open their receipt. The list view hides archived bookings by default.
