@@ -183,7 +183,7 @@ export default function BadmintonBookingForm({ onDone }: { onDone: () => void })
       })
       const data = await res.json()
       if (data.checkout_url) {
-        if (data.id) localStorage.setItem('paymongo_session_id', data.id)
+        if (data.id) localStorage.setItem('paymongo_payment_intent_id', data.id)
         window.location.href = data.checkout_url
         return
       }
@@ -509,7 +509,7 @@ export default function BadmintonBookingForm({ onDone }: { onDone: () => void })
               </div>
               {payment === 'online' && (
                 <p className="mt-2 text-[10px] text-[#6B756B]">
-                  You&apos;ll be redirected to PayMongo to pay with GCash.
+                  You&apos;ll be sent to GCash to confirm your payment.
                 </p>
               )}
             </div>

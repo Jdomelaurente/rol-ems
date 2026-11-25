@@ -71,7 +71,7 @@ export default function CookiesPolicyPage() {
         <p>When you use certain parts of the site, your browser may interact with third-party services:</p>
         <LegalList
           items={[
-            <><strong>PayMongo</strong> — the hosted checkout/landing page shown when you pay online. PayMongo&apos;s own cookie and privacy policy applies on their pages.</>,
+            <><strong>PayMongo</strong> — the secure payment page shown when you pay online, and the GCash app you use to confirm the payment. PayMongo&apos;s and GCash&apos;s own cookie and privacy policies apply on their pages.</>,
           ]}
         />
         <p>

@@ -52,6 +52,26 @@ These files contain live credentials and must never be committed. Keep this repo
 
 > The real values live only in `.env.local` (gitignored). Never paste live secrets into any committed file — GitHub will block the push.
 
+## Payments
+
+Online payments use PayMongo's **Payment Intent + e-wallet** flow, not Hosted Checkout.
+
+| Where | Method | How it works |
+| ----- | ------ | ------------ |
+| Guest checkout | GCash (`gcash`) | Server creates a Payment Intent, attaches a GCash Payment Method, and redirects the guest to `next_action.redirect.url`. On mobile this opens the GCash app; on desktop it shows a scannable QR. |
+| Admin / counter | QR Ph (`qrph`) | The admin generates a 15-minute QR Ph code. The guest scans it with GCash, Maya, or a bank app. |
+
+Both paths confirm through `payment.paid`, so the webhook endpoint **must be subscribed to**:
+
+- `payment.paid`
+- `checkout_session.payment.paid` (kept for older checkout sessions)
+
+The booking is flipped to `paid` by `lib/payment-fulfillment.ts`. Whichever lands first — the webhook or the success page calling `/api/receipt` — sends the receipt email; the other request sees the booking is already paid and skips it, so guests never get duplicate receipts.
+
+Limits worth knowing: GCash Payment Intents expire after 4 hours and cap at ₱100,000 per transaction. Fees: GCash 2.23%, QR Ph 1.34% (both + 12% VAT).
+
+To test locally, set `PAYMONGO_SECRET_KEY` to an `sk_test_…` key. If the key is missing or still the placeholder, checkout falls back to a simulated success page so the UI stays clickable.
+
 ## Uptime & Keep-Awake
 
 This repository also runs [Upptime](https://upptime.js.org) to monitor the live site and keep Vercel + Supabase warm.

@@ -1,14 +1,48 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { sendReceiptEmail } from '@/lib/email'
-import { prisma } from '@/lib/prisma'
+import { createHmac, timingSafeEqual } from 'node:crypto'
+import { fulfillBookingPayment } from '@/lib/payment-fulfillment'
+import { normalizePaidMethod, retrievePaymentIntent } from '@/lib/paymongo'
 
-function hexToBytes(hex: string): Uint8Array {
-  const bytes = new Uint8Array(hex.length / 2)
-  for (let i = 0; i < bytes.length; i++) bytes[i] = parseInt(hex.slice(i * 2, i * 2 + 2), 16)
-  return bytes
+export const runtime = 'nodejs'
+
+function safeEqualHex(a: string, b: string): boolean {
+  if (!a || !b) return false
+  try {
+    const left = Buffer.from(a, 'hex')
+    const right = Buffer.from(b, 'hex')
+    return left.length === right.length && timingSafeEqual(left, right)
+  } catch {
+    return false
+  }
 }
 
-const centsToPeso = (cents: number) => `₱${(cents / 100).toLocaleString('en-PH', { minimumFractionDigits: 2 })}`
+/**
+ * PayMongo signs webhook deliveries in one of two shapes:
+ *   - t=<timestamp>,te=<test sig>,li=<live sig>  (HMAC of `${t}.${rawBody}`)
+ *   - a bare hex HMAC of the raw body
+ * Accept either so test and live deliveries both verify.
+ */
+function verifySignature(raw: string, header: string, secret: string): boolean {
+  const value = header.trim()
+  if (!value) return false
+
+  const parts: Record<string, string> = {}
+  for (const part of value.split(',')) {
+    const index = part.indexOf('=')
+    if (index === -1) continue
+    parts[part.slice(0, index).trim()] = part.slice(index + 1).trim()
+  }
+
+  if (parts.t) {
+    const expected = createHmac('sha256', secret).update(`${parts.t}.${raw}`).digest('hex')
+    for (const key of ['te', 'li', 'sig']) {
+      if (parts[key] && safeEqualHex(expected, parts[key])) return true
+    }
+  }
+
+  const plain = createHmac('sha256', secret).update(raw).digest('hex')
+  return safeEqualHex(plain, value)
+}
 
 export async function POST(req: NextRequest) {
   const raw = await req.text()
@@ -16,31 +50,7 @@ export async function POST(req: NextRequest) {
 
   if (secret) {
     const signature = req.headers.get('paymongo-signature') || ''
-    const [tsHeader, sigHeader] = signature
-      .split(',')
-      .map((s) => s.trim())
-      .reduce(
-        (acc, part) => {
-          const [k, v] = part.split('=')
-          if (k === 't') acc[0] = v
-          if (k === 'sig') acc[1] = v
-          return acc
-        },
-        ['', ''],
-      )
-
-    if (!tsHeader || !sigHeader) {
-      return NextResponse.json({ error: 'Missing signature' }, { status: 400 })
-    }
-
-    const signedPayload = `${tsHeader}.${raw}`
-    const expected = hexToBytes(sigHeader)
-    const key = await crypto.subtle.importKey('raw', new TextEncoder().encode(secret), { name: 'HMAC', hash: 'SHA-256' }, false, ['sign'])
-    const actual = new Uint8Array(await crypto.subtle.sign('HMAC', key, new TextEncoder().encode(signedPayload)))
-    const valid =
-      expected.length === actual.length && expected.every((v, i) => v === actual[i])
-
-    if (!valid) {
+    if (!verifySignature(raw, signature, secret)) {
       return NextResponse.json({ error: 'Invalid signature' }, { status: 401 })
     }
   }
@@ -53,84 +63,93 @@ export async function POST(req: NextRequest) {
   }
 
   const eventData = event?.data?.attributes || {}
-  const eventType = eventData?.type || event?.data?.type
+  const eventType: string | undefined = eventData?.type || event?.data?.type
   console.log('Webhook received, type:', eventType)
-  if (eventType !== 'checkout_session.payment.paid') {
-    return NextResponse.json({ received: true })
-  }
 
-  // PayMongo delivers the session object in one of two shapes:
-  //   1) event.data.attributes.data = session   (JSON:API)
-  //   2) event.data.data            = session   (flattened)
-  const session = eventData?.data || event?.data?.data
-  const attrs = session?.attributes || {}
-  const sessionId = session?.id
+  // New flow: GCash Payment Intent / QR Ph payments emit payment.paid.
+  if (eventType === 'payment.paid') {
+    const payment = eventData?.data || event?.data?.data
+    const paymentAttrs = payment?.attributes || {}
+    const intentId: string | undefined =
+      paymentAttrs?.payment_intent_id || paymentAttrs?.payment_intent
 
-  const payments = Array.isArray(attrs?.payments) ? attrs?.payments : []
-  const firstPaid = payments.find(
-    (p: any) => p?.attributes?.status === 'paid',
-  ) || payments[0]
+    let intentAttrs: Record<string, any> = {}
+    if (intentId) {
+      try {
+        const intent = await retrievePaymentIntent(intentId)
+        intentAttrs = intent?.attributes || {}
+      } catch (err) {
+        console.error('Webhook: could not retrieve payment intent', intentId, err)
+      }
+    }
 
-  const billing = firstPaid?.attributes?.billing || attrs?.billing || {}
-  const metadata = attrs?.metadata || {}
-  let billingEmail: string | undefined = billing?.email || metadata?.email
-  let amountPaid: number = firstPaid?.attributes?.amount || attrs?.amount || 0
-  const lineItems = attrs?.line_items || []
-  const description =
-    metadata?.description ||
-    (Array.isArray(lineItems) && lineItems[0]?.description) ||
-    (Array.isArray(lineItems) && lineItems[0]?.name) ||
-    'ROL-EMS booking'
+    const metadata = intentAttrs?.metadata || paymentAttrs?.metadata || {}
+    const reference: string | undefined = metadata?.reference
+    if (!reference) {
+      console.warn('Webhook: payment.paid without a booking reference. Intent:', intentId)
+      return NextResponse.json({ received: true })
+    }
 
-  const name = billing?.name || 'Guest'
-  const reference = metadata?.reference || sessionId || event?.data?.id || '—'
-  const date = metadata?.date
-  const time = metadata?.time
-  const guests = metadata?.guests
-
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'
-  const isPickleball = String(metadata?.facility || '').startsWith('pickleball:')
-  const receiptPath = isPickleball ? '/pickleball/booking/receipt' : '/booking/receipt'
-  const receiptUrl = `${siteUrl}${receiptPath}?ref=${encodeURIComponent(reference)}`
-  const receiptPdfUrl = `${siteUrl}/api/receipt/pdf?ref=${encodeURIComponent(reference)}`
-
-  // Mark the booking paid even when the guest did not provide an email.
-  try {
-    await prisma.booking.updateMany({
-      where: { reference },
-      data: {
-        status: 'confirmed',
-        paymentStatus: 'paid',
-        paidMethod: firstPaid?.attributes?.payment_method || 'gcash',
-        paidAt: new Date(),
-      },
-    })
-  } catch (err) {
-    console.error('Webhook: failed to confirm booking in DB', err)
-  }
-
-  if (!billingEmail) {
-    console.warn('Webhook: payment recorded but no billing email for receipt. session:', sessionId)
-    return NextResponse.json({ received: true })
-  }
-
-  console.log('Webhook: sending receipt email to', billingEmail, 'amount', amountPaid, 'session', sessionId)
-
-  try {
-    await sendReceiptEmail(billingEmail, {
+    const billing = paymentAttrs?.billing || {}
+    const { confirmed } = await fulfillBookingPayment({
       reference,
-      description,
-      amount: amountPaid ? centsToPeso(amountPaid) : '—',
-      name,
-      date,
-      time,
-      guests: guests ? String(guests) : undefined,
-      receiptUrl,
-      receiptPdfUrl,
+      amountCents: paymentAttrs?.amount || intentAttrs?.amount,
+      paidMethod: paymentAttrs?.payment_method || paymentAttrs?.source?.type || 'gcash',
+      paymentReference: payment?.id,
+      billingName: billing?.name,
+      billingEmail: billing?.email || metadata?.email,
+      description: metadata?.description || intentAttrs?.description,
+      date: metadata?.date,
+      time: metadata?.time,
+      guests: metadata?.guests,
     })
-  } catch (err) {
-    console.error('Webhook: failed to send receipt email', err)
-    return NextResponse.json({ error: 'Email failed' }, { status: 500 })
+
+    console.log('Webhook: payment.paid', { reference, confirmed })
+    return NextResponse.json({ received: true })
+  }
+
+  // Legacy flow: any Checkout Sessions created before the switch (e.g. an
+  // older admin payment link) still confirm through this event.
+  if (eventType === 'checkout_session.payment.paid') {
+    const session = eventData?.data || event?.data?.data
+    const attrs = session?.attributes || {}
+    const sessionId = session?.id
+
+    const payments = Array.isArray(attrs?.payments) ? attrs.payments : []
+    const firstPaid =
+      payments.find((p: any) => p?.attributes?.status === 'paid') || payments[0]
+
+    const billing = firstPaid?.attributes?.billing || attrs?.billing || {}
+    const metadata = attrs?.metadata || {}
+    const lineItems = attrs?.line_items || []
+    const description =
+      metadata?.description ||
+      (Array.isArray(lineItems) && lineItems[0]?.description) ||
+      (Array.isArray(lineItems) && lineItems[0]?.name) ||
+      'ROL-EMS booking'
+
+    const reference: string = metadata?.reference || sessionId || event?.data?.id || ''
+
+    if (!reference) {
+      console.warn('Webhook: checkout session paid without a reference:', sessionId)
+      return NextResponse.json({ received: true })
+    }
+
+    const { confirmed } = await fulfillBookingPayment({
+      reference,
+      amountCents: firstPaid?.attributes?.amount || attrs?.amount,
+      paidMethod: firstPaid?.attributes?.payment_method || 'gcash',
+      paymentReference: firstPaid?.id,
+      billingName: billing?.name || 'Guest',
+      billingEmail: billing?.email || metadata?.email,
+      description,
+      date: metadata?.date,
+      time: metadata?.time,
+      guests: metadata?.guests,
+    })
+
+    console.log('Webhook: checkout session paid', { reference, confirmed })
+    return NextResponse.json({ received: true })
   }
 
   return NextResponse.json({ received: true })

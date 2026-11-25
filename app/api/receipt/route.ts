@@ -1,93 +1,101 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { sendReceiptEmail } from '@/lib/email'
-import { prisma } from '@/lib/prisma'
+import { fulfillBookingPayment } from '@/lib/payment-fulfillment'
+import {
+  paymongoConfigured,
+  retrieveCheckoutSession,
+  retrievePaymentIntent,
+} from '@/lib/paymongo'
 
-const centsToPeso = (cents: number) => `₱${(cents / 100).toLocaleString('en-PH', { minimumFractionDigits: 2 })}`
+export const runtime = 'nodejs'
 
+/**
+ * Verifies a payment and makes sure the booking is confirmed.
+ *
+ * The success page calls this immediately after the redirect from GCash,
+ * because the webhook can arrive a moment later. Whichever lands first marks
+ * the booking paid; the other one sees it is already paid and stays quiet.
+ */
 export async function GET(req: NextRequest) {
-  const sessionId = req.nextUrl.searchParams.get('session_id')
-  if (!sessionId) {
-    return NextResponse.json({ error: 'Missing session_id' }, { status: 400 })
+  const search = req.nextUrl.searchParams
+  const id =
+    search.get('payment_intent_id') ||
+    search.get('session_id') ||
+    search.get('id')
+
+  if (!id) {
+    return NextResponse.json({ error: 'Missing payment id' }, { status: 400 })
   }
 
-  const secret = process.env.PAYMONGO_SECRET_KEY
-  if (!secret) {
-    return NextResponse.json({ error: 'Server is missing PayMongo configuration' }, { status: 500 })
+  if (!paymongoConfigured()) {
+    // Simulated/demo checkout — there is nothing to verify against PayMongo.
+    return NextResponse.json({
+      ok: true,
+      paid: true,
+      reference: search.get('ref') || undefined,
+    })
   }
 
   try {
-    const res = await fetch(`https://api.paymongo.com/v1/checkout_sessions/${sessionId}`, {
-      method: 'GET',
-      headers: {
-        Authorization: `Basic ${Buffer.from(`${secret}:`).toString('base64')}`,
-      },
-    })
+    if (id.startsWith('cs_')) {
+      const session = await retrieveCheckoutSession(id)
+      const attrs = session?.attributes || {}
+      const payments = Array.isArray(attrs?.payments) ? attrs.payments : []
+      const paidPayment = payments.find((p: any) => p?.attributes?.status === 'paid')
+      const metadata = attrs?.metadata || {}
+      const reference: string | undefined = metadata?.reference
+      const paid = attrs?.payment_status === 'paid' || !!paidPayment
 
-    if (!res.ok) {
-      console.error('Receipt: failed to fetch session', sessionId, res.status)
-      return NextResponse.json({ error: 'Session not found' }, { status: 404 })
-    }
+      if (!paid || !reference) {
+        return NextResponse.json({ ok: true, paid: false, reference })
+      }
 
-    const data = await res.json()
-    const attrs = data?.data?.attributes || {}
-
-    const payments = Array.isArray(attrs?.payments) ? attrs?.payments : []
-    const firstPaid = payments.find((p: any) => p?.attributes?.status === 'paid') || payments[0]
-
-    const billing = firstPaid?.attributes?.billing || attrs?.billing || {}
-    const metadata = attrs?.metadata || {}
-    const billingEmail: string | undefined = billing?.email || metadata?.email
-
-    const amountPaid: number = firstPaid?.attributes?.amount || attrs?.amount || 0
-    const lineItems = attrs?.line_items || []
-    const description =
-      metadata?.description ||
-      (Array.isArray(lineItems) && lineItems[0]?.description) ||
-      (Array.isArray(lineItems) && lineItems[0]?.name) ||
-      'ROL-EMS booking'
-
-    const reference = metadata?.reference || sessionId || '—'
-
-    try {
-      await prisma.booking.updateMany({
-        where: { reference },
-        data: {
-          status: 'confirmed',
-          paymentStatus: 'paid',
-          paidMethod: 'gcash',
-          paidAt: new Date(),
-        },
+      const billing = paidPayment?.attributes?.billing || attrs?.billing || {}
+      await fulfillBookingPayment({
+        reference,
+        amountCents: paidPayment?.attributes?.amount || attrs?.amount,
+        paidMethod: paidPayment?.attributes?.payment_method || 'gcash',
+        paymentReference: paidPayment?.id,
+        billingName: billing?.name,
+        billingEmail: billing?.email || metadata?.email,
+        description: metadata?.description,
+        date: metadata?.date,
+        time: metadata?.time,
+        guests: metadata?.guests,
       })
-    } catch (err) {
-      console.error('Receipt: failed to confirm booking in DB', err)
+
+      return NextResponse.json({ ok: true, paid: true, reference })
     }
 
-    // A pay-at-venue guest may not have an email; the payment is still recorded.
-    if (!billingEmail) {
-      return NextResponse.json({ ok: true, email: null, reference })
+    const intent = await retrievePaymentIntent(id)
+    const attrs = intent?.attributes || {}
+    const metadata = attrs?.metadata || {}
+    const reference: string | undefined = metadata?.reference
+    const paid = attrs?.status === 'succeeded'
+
+    if (!paid || !reference) {
+      return NextResponse.json({ ok: true, paid: false, reference })
     }
 
-    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'
-    const isPickleball = String(metadata?.facility || '').startsWith('pickleball:')
-    const receiptPath = isPickleball ? '/pickleball/booking/receipt' : '/booking/receipt'
-    const receiptUrl = `${siteUrl}${receiptPath}?ref=${encodeURIComponent(reference)}`
-    const receiptPdfUrl = `${siteUrl}/api/receipt/pdf?ref=${encodeURIComponent(reference)}`
+    const payments = Array.isArray(attrs?.payments) ? attrs.payments : []
+    const paidPayment = payments.find((p: any) => p?.attributes?.status === 'paid') || payments[0]
+    const billing = paidPayment?.attributes?.billing || {}
 
-    await sendReceiptEmail(billingEmail, {
+    await fulfillBookingPayment({
       reference,
-      description,
-      amount: amountPaid ? centsToPeso(amountPaid) : '—',
-      name: billing?.name || 'Guest',
+      amountCents: attrs?.amount,
+      paidMethod: paidPayment?.attributes?.payment_method || 'gcash',
+      paymentReference: paidPayment?.id,
+      billingName: billing?.name,
+      billingEmail: billing?.email || metadata?.email,
+      description: attrs?.description || metadata?.description,
       date: metadata?.date,
       time: metadata?.time,
-      guests: metadata?.guests ? String(metadata?.guests) : undefined,
-      receiptUrl,
-      receiptPdfUrl,
+      guests: metadata?.guests,
     })
 
-    return NextResponse.json({ ok: true, email: billingEmail, reference })
+    return NextResponse.json({ ok: true, paid: true, reference })
   } catch (err) {
     console.error('Receipt route error:', err)
-    return NextResponse.json({ error: 'Could not send receipt' }, { status: 500 })
+    return NextResponse.json({ error: 'Could not verify payment' }, { status: 502 })
   }
 }

@@ -39,7 +39,7 @@ export default function PrivacyPolicyPage() {
         />
         <p>
           We do <strong>not</strong> collect or store your credit card details. Online payments are
-          processed by our payment partner <strong>PayMongo</strong> on their secure hosted checkout page.
+          processed by our payment partner <strong>PayMongo</strong> and completed inside the GCash app.
         </p>
       </LegalSectionBlock>
 
@@ -69,7 +69,7 @@ export default function PrivacyPolicyPage() {
         <LegalList
           items={[
             <>
-              <strong>PayMongo</strong> — for payment processing (name, contact, and email required to create a checkout session). Payment details are handled by PayMongo under their own privacy policy.
+              <strong>PayMongo</strong> — for payment processing (name, contact, and email required to start a payment). Payment details are handled by PayMongo and GCash under their own privacy policies.
             </>,
             <>
               <strong>Email delivery providers</strong> (SMTP) — limited to sending you receipts and booking confirmations.

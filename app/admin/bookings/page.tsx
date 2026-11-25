@@ -233,6 +233,7 @@ export default function AdminBookingsPage() {
   const [paymentQr, setPaymentQr] = useState('')
   const [paymentLink, setPaymentLink] = useState('')
   const [paymentDemo, setPaymentDemo] = useState(false)
+  const [paymentIntentId, setPaymentIntentId] = useState('')
   const [generatingQr, setGeneratingQr] = useState(false)
   const [qrError, setQrError] = useState('')
   const [selectedRefs, setSelectedRefs] = useState<string[]>([])
@@ -522,6 +523,7 @@ export default function AdminBookingsPage() {
     setPaymentQr('')
     setPaymentLink('')
     setPaymentDemo(false)
+    setPaymentIntentId('')
     setGeneratingQr(false)
     setQrError('')
   }
@@ -589,12 +591,13 @@ export default function AdminBookingsPage() {
         { method: 'POST' },
       )
       const data = await res.json().catch(() => ({}))
-      if (!res.ok) throw new Error(data.error || 'Could not create the GCash QR')
+      if (!res.ok) throw new Error(data.error || 'Could not create the QR Ph code')
       setPaymentQr(data.qrDataUrl || '')
       setPaymentLink(data.checkoutUrl || '')
       setPaymentDemo(!!data.demo)
+      setPaymentIntentId(data.paymentIntentId || '')
     } catch (err) {
-      setQrError(err instanceof Error ? err.message : 'Could not create the GCash QR')
+      setQrError(err instanceof Error ? err.message : 'Could not create the QR Ph code')
     } finally {
       setGeneratingQr(false)
     }
@@ -603,6 +606,13 @@ export default function AdminBookingsPage() {
   const checkPaymentNow = async () => {
     if (!paymentModal) return
     try {
+      // Ask PayMongo directly first; the webhook may still be in flight.
+      if (paymentIntentId) {
+        await fetch(
+          `/api/admin/bookings/${encodeURIComponent(paymentModal.reference)}/payment-link?intent=${encodeURIComponent(paymentIntentId)}`,
+          { cache: 'no-store' },
+        ).catch(() => null)
+      }
       const res = await fetch(
         `/api/bookings?reference=${encodeURIComponent(paymentModal.reference)}`,
         { cache: 'no-store' },
@@ -625,13 +635,25 @@ export default function AdminBookingsPage() {
     }
   }
 
-  // While a GCash QR is on screen, poll until PayMongo's webhook marks it paid.
+  // While a QR Ph code is on screen, poll until the payment is confirmed. The
+  // first call asks PayMongo directly, so the counter still updates if the
+  // webhook is slow; the booking read afterwards reflects the result.
   useEffect(() => {
-    if (!paymentModal?.reference || !paymentLink) return
+    if (!paymentModal?.reference || !paymentQr) return
     const reference = paymentModal.reference
     const timer = setInterval(() => {
-      fetch(`/api/bookings?reference=${encodeURIComponent(reference)}`, { cache: 'no-store' })
-        .then((res) => (res.ok ? res.json() : null))
+      const verify = paymentIntentId
+        ? fetch(
+            `/api/admin/bookings/${encodeURIComponent(reference)}/payment-link?intent=${encodeURIComponent(paymentIntentId)}`,
+            { cache: 'no-store' },
+          ).catch(() => null)
+        : Promise.resolve(null)
+
+      verify
+        .then(() =>
+          fetch(`/api/bookings?reference=${encodeURIComponent(reference)}`, { cache: 'no-store' }),
+        )
+        .then((res) => (res && res.ok ? res.json() : null))
         .then((data) => {
           const found = Array.isArray(data) && data.length > 0 ? data[0] : null
           if (!found || found.paymentStatus !== 'paid') return
@@ -646,7 +668,7 @@ export default function AdminBookingsPage() {
         .catch(() => {})
     }, 5000)
     return () => clearInterval(timer)
-  }, [paymentModal?.reference, paymentLink, load])
+  }, [paymentModal?.reference, paymentQr, paymentIntentId, load])
 
   const { active: activeTotal, archived: archivedCount, today: todayCount, pending: pendingCount, unpaidVenue: unpaidVenueCount } = stats
   // Only replace the stat numbers with placeholders on the very first load;
@@ -1784,8 +1806,8 @@ export default function AdminBookingsPage() {
                       {!paymentQr ? (
                         <>
                           <p className="text-[11px] leading-5 text-[#6B756B]">
-                            Generate a PayMongo GCash QR. The guest scans it with their phone and pays
-                            the exact amount. The booking is marked paid automatically.
+                            Generate a QR Ph code. The guest scans it with GCash, Maya, or any bank app
+                            and pays the exact amount. The booking is marked paid automatically.
                           </p>
                           <button
                             onClick={generatePaymentLink}
@@ -1797,18 +1819,18 @@ export default function AdminBookingsPage() {
                             ) : (
                               <QrCode size={13} />
                             )}
-                            Generate GCash QR
+                            Generate QR Ph code
                           </button>
                         </>
                       ) : (
                         <div className="text-center">
                           <img
                             src={paymentQr}
-                            alt="PayMongo GCash QR code"
+                            alt="QR Ph payment code"
                             className="mx-auto h-56 w-56"
                           />
                           <p className="mt-2 text-[11px] leading-5 text-[#6B756B]">
-                            Ask the guest to scan this with their phone camera or GCash app.
+                            Ask the guest to scan this with GCash, Maya, or any bank app.
                           </p>
                           {paymentDemo && (
                             <p className="mt-1 text-[10px] text-[#8a6412]">
@@ -1816,14 +1838,16 @@ export default function AdminBookingsPage() {
                             </p>
                           )}
                           <div className="mt-2 flex flex-wrap items-center justify-center gap-2">
-                            <a
-                              href={paymentLink}
-                              target="_blank"
-                              rel="noreferrer"
-                              className="border border-[#1E5336] px-3 py-2 text-[10px] font-bold uppercase tracking-[0.12em] text-[#1E5336] hover:bg-[#1E5336] hover:text-[#FDFBF7]"
-                            >
-                              Open payment link
-                            </a>
+                            {paymentLink && (
+                              <a
+                                href={paymentLink}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="border border-[#1E5336] px-3 py-2 text-[10px] font-bold uppercase tracking-[0.12em] text-[#1E5336] hover:bg-[#1E5336] hover:text-[#FDFBF7]"
+                              >
+                                Open payment link
+                              </a>
+                            )}
                             <button
                               onClick={checkPaymentNow}
                               className="border border-[#222222]/20 px-3 py-2 text-[10px] font-bold uppercase tracking-[0.12em] text-[#6B756B] hover:border-[#222222]/50"

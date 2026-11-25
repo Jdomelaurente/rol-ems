@@ -350,7 +350,7 @@ function BookingContent() {
       })
       const data = await res.json()
       if (data.checkout_url) {
-        if (data.id) localStorage.setItem('paymongo_session_id', data.id)
+        if (data.id) localStorage.setItem('paymongo_payment_intent_id', data.id)
         window.location.href = data.checkout_url
         return
       }
